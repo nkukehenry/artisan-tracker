@@ -46,13 +46,16 @@ export class DeviceService implements IDeviceService {
       const device = await this.deviceRepository.create({
         deviceId,
         name,
-        model,
-        osVersion,
-        appVersion,
+        model: model || null,
+        osVersion: osVersion || null,
+        appVersion: appVersion || null,
         tenantId,
         userId,
         isOnline: true,
         lastSeenAt: new Date(),
+        batteryLevel: null,
+        location: null,
+        isActive: true,
       });
 
       // Cache device status
@@ -166,6 +169,9 @@ export class DeviceService implements IDeviceService {
         command: command as any,
         payload,
         status: 'PENDING',
+        sentAt: new Date(),
+        executedAt: null,
+        response: null,
       };
 
       const commandRecord = await this.deviceCommandRepository.create(commandData);

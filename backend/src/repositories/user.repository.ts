@@ -129,6 +129,7 @@ export class UserRepositoryImpl extends BaseRepositoryImpl<User> implements User
       ...data,
       role: data.role ?? 'USER',
       isActive: data.isActive ?? true,
+      lastLoginAt: null,
     });
   }
 

@@ -166,6 +166,8 @@ export class DeviceCommandRepositoryImpl extends BaseRepositoryImpl<DeviceComman
       ...data,
       status: data.status ?? 'PENDING',
       sentAt: new Date(),
+      executedAt: null,
+      response: null,
     });
   }
 

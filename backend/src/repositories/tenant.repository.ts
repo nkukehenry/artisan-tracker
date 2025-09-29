@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { BaseRepositoryImpl } from './base.repository';
 import { TenantRepository, Tenant, CreateTenantData, UpdateTenantData } from '../interfaces/tenant.interface';
+import { logger } from '../config/logger';
 
 export class TenantRepositoryImpl extends BaseRepositoryImpl<Tenant> implements TenantRepository {
   constructor(prisma: PrismaClient) {
@@ -61,6 +62,7 @@ export class TenantRepositoryImpl extends BaseRepositoryImpl<Tenant> implements 
   async create(data: CreateTenantData): Promise<Tenant> {
     return super.create({
       ...data,
+      domain: data.domain ?? null,
       isActive: data.isActive ?? true,
     });
   }

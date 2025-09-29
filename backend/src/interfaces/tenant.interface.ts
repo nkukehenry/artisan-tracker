@@ -3,7 +3,7 @@ import { BaseRepository } from './repository.interface';
 export interface Tenant {
   id: string;
   name: string;
-  domain?: string;
+  domain: string | null;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -11,13 +11,13 @@ export interface Tenant {
 
 export interface CreateTenantData {
   name: string;
-  domain?: string;
+  domain?: string | null;
   isActive?: boolean;
 }
 
 export interface UpdateTenantData {
   name?: string;
-  domain?: string;
+  domain?: string | null;
   isActive?: boolean;
 }
 

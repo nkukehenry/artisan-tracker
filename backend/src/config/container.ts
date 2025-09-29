@@ -16,7 +16,8 @@ import { TenantRepository } from '../interfaces/tenant.interface';
 import { UserRepository } from '../interfaces/user.interface';
 import { DeviceRepository } from '../interfaces/device.interface';
 import { DeviceCommandRepository } from '../interfaces/command.interface';
-import { IAuthService, IDeviceService } from '../services/auth.service';
+import { IAuthService } from '../services/auth.service';
+import { IDeviceService } from '../services/device.service';
 
 class Container {
   private static instance: Container;

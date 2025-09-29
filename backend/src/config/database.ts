@@ -7,47 +7,7 @@ class DatabaseService {
 
   private constructor() {
     this.prisma = new PrismaClient({
-      log: [
-        {
-          emit: 'event',
-          level: 'query',
-        },
-        {
-          emit: 'event',
-          level: 'error',
-        },
-        {
-          emit: 'event',
-          level: 'info',
-        },
-        {
-          emit: 'event',
-          level: 'warn',
-        },
-      ],
-    });
-
-    // Log database queries in development
-    if (process.env.NODE_ENV === 'development') {
-      this.prisma.$on('query', (e) => {
-        logger.debug('Database Query', {
-          query: e.query,
-          params: e.params,
-          duration: `${e.duration}ms`,
-        });
-      });
-    }
-
-    this.prisma.$on('error', (e) => {
-      logger.error('Database Error', e);
-    });
-
-    this.prisma.$on('info', (e) => {
-      logger.info('Database Info', e);
-    });
-
-    this.prisma.$on('warn', (e) => {
-      logger.warn('Database Warning', e);
+      log: process.env.NODE_ENV === 'development' ? ['query', 'info', 'warn', 'error'] : ['error'],
     });
   }
 

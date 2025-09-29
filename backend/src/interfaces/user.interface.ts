@@ -8,7 +8,7 @@ export interface User {
   lastName: string;
   role: 'SUPER_ADMIN' | 'TENANT_ADMIN' | 'USER';
   isActive: boolean;
-  lastLoginAt?: Date;
+  lastLoginAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
   tenantId: string;
@@ -31,7 +31,7 @@ export interface UpdateUserData {
   lastName?: string;
   role?: 'SUPER_ADMIN' | 'TENANT_ADMIN' | 'USER';
   isActive?: boolean;
-  lastLoginAt?: Date;
+  lastLoginAt?: Date | null;
 }
 
 export interface UserRepository extends BaseRepository<User> {

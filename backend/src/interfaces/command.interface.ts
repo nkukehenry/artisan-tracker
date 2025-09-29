@@ -6,8 +6,8 @@ export interface DeviceCommand {
   payload?: any;
   status: 'PENDING' | 'SENT' | 'EXECUTED' | 'FAILED' | 'CANCELLED';
   sentAt: Date;
-  executedAt?: Date;
-  response?: any;
+  executedAt: Date | null;
+  response: any;
   createdAt: Date;
   updatedAt: Date;
   deviceId: string;
@@ -16,14 +16,17 @@ export interface DeviceCommand {
 export interface CreateDeviceCommandData {
   command: 'RECORD_AUDIO' | 'RECORD_VIDEO' | 'SCREEN_RECORDING' | 'TAKE_PHOTO' | 'GET_LOCATION' | 'GET_CONTACTS' | 'GET_CALL_LOGS' | 'GET_MESSAGES' | 'ENABLE_APP' | 'DISABLE_APP' | 'RESTART_DEVICE' | 'WIPE_DATA';
   payload?: any;
-  status?: 'PENDING' | 'SENT' | 'EXECUTED' | 'FAILED' | 'CANCELLED';
+  status: 'PENDING' | 'SENT' | 'EXECUTED' | 'FAILED' | 'CANCELLED';
   deviceId: string;
+  sentAt: Date;
+  executedAt: Date | null;
+  response: any;
 }
 
 export interface UpdateDeviceCommandData {
   status?: 'PENDING' | 'SENT' | 'EXECUTED' | 'FAILED' | 'CANCELLED';
   sentAt?: Date;
-  executedAt?: Date;
+  executedAt?: Date | null;
   response?: any;
 }
 

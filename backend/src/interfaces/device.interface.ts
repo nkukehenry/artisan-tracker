@@ -4,13 +4,13 @@ export interface Device {
   id: string;
   deviceId: string;
   name: string;
-  model?: string;
-  osVersion?: string;
-  appVersion?: string;
+  model: string | null;
+  osVersion: string | null;
+  appVersion: string | null;
   isOnline: boolean;
-  lastSeenAt?: Date;
-  batteryLevel?: number;
-  location?: any;
+  lastSeenAt: Date | null;
+  batteryLevel: number | null;
+  location: any;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -21,11 +21,11 @@ export interface Device {
 export interface CreateDeviceData {
   deviceId: string;
   name: string;
-  model?: string;
-  osVersion?: string;
-  appVersion?: string;
+  model?: string | null;
+  osVersion?: string | null;
+  appVersion?: string | null;
   isOnline?: boolean;
-  batteryLevel?: number;
+  batteryLevel?: number | null;
   location?: any;
   isActive?: boolean;
   tenantId: string;
@@ -34,12 +34,12 @@ export interface CreateDeviceData {
 
 export interface UpdateDeviceData {
   name?: string;
-  model?: string;
-  osVersion?: string;
-  appVersion?: string;
+  model?: string | null;
+  osVersion?: string | null;
+  appVersion?: string | null;
   isOnline?: boolean;
-  lastSeenAt?: Date;
-  batteryLevel?: number;
+  lastSeenAt?: Date | null;
+  batteryLevel?: number | null;
   location?: any;
   isActive?: boolean;
 }

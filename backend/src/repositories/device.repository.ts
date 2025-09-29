@@ -170,7 +170,13 @@ export class DeviceRepositoryImpl extends BaseRepositoryImpl<Device> implements 
   async create(data: CreateDeviceData): Promise<Device> {
     return super.create({
       ...data,
+      model: data.model ?? null,
+      osVersion: data.osVersion ?? null,
+      appVersion: data.appVersion ?? null,
       isOnline: data.isOnline ?? false,
+      lastSeenAt: null,
+      batteryLevel: data.batteryLevel ?? null,
+      location: data.location ?? null,
       isActive: data.isActive ?? true,
     });
   }

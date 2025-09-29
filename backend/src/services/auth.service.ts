@@ -78,7 +78,7 @@ export class AuthService implements IAuthService {
       // Generate tokens
       const tokens = await this.generateTokens(user);
 
-      logger.info('User logged in successfully', { userId: user.id, email });
+      logger.info('User logged in successfully', { userId: user.id, email: user.email });
 
       return {
         user: {
@@ -92,7 +92,7 @@ export class AuthService implements IAuthService {
         tokens,
       };
     } catch (error) {
-      logger.error('Login failed', { email, error });
+      logger.error('Login failed', { email: credentials.email, error });
       throw error;
     }
   }
@@ -113,7 +113,8 @@ export class AuthService implements IAuthService {
         // Create new tenant
         const tenant = await this.tenantRepository.create({
           name: tenantName,
-          domain: tenantDomain,
+          domain: tenantDomain || null,
+          isActive: true,
         });
         tenantId = tenant.id;
       } else {
@@ -131,12 +132,14 @@ export class AuthService implements IAuthService {
         lastName,
         role: 'TENANT_ADMIN', // First user in tenant becomes admin
         tenantId,
+        isActive: true,
+        lastLoginAt: null,
       });
 
       // Generate tokens
       const tokens = await this.generateTokens(user);
 
-      logger.info('User registered successfully', { userId: user.id, email, tenantId });
+      logger.info('User registered successfully', { userId: user.id, email: user.email, tenantId });
 
       return {
         user: {
@@ -150,7 +153,7 @@ export class AuthService implements IAuthService {
         tokens,
       };
     } catch (error) {
-      logger.error('Registration failed', { email, error });
+      logger.error('Registration failed', { email: data.email, error });
       throw error;
     }
   }
@@ -176,7 +179,7 @@ export class AuthService implements IAuthService {
       const tokens = await this.generateTokens(user);
 
       // Blacklist old refresh token
-      await redis.setEx(`blacklist:${refreshToken}`, 30 * 24 * 60 * 60, '1'); // 30 days
+      await redis.set(`blacklist:${refreshToken}`, '1', 30 * 24 * 60 * 60); // 30 days
 
       return tokens;
     } catch (error) {
@@ -194,14 +197,14 @@ export class AuthService implements IAuthService {
       if (accessDecoded) {
         const accessExp = accessDecoded.exp - Math.floor(Date.now() / 1000);
         if (accessExp > 0) {
-          await redis.setEx(`blacklist:${accessToken}`, accessExp, '1');
+          await redis.set(`blacklist:${accessToken}`, '1', accessExp);
         }
       }
 
       if (refreshDecoded) {
         const refreshExp = refreshDecoded.exp - Math.floor(Date.now() / 1000);
         if (refreshExp > 0) {
-          await redis.setEx(`blacklist:${refreshToken}`, refreshExp, '1');
+          await redis.set(`blacklist:${refreshToken}`, '1', refreshExp);
         }
       }
 
@@ -283,13 +286,15 @@ export class AuthService implements IAuthService {
       tenantId: user.tenantId,
     };
 
-    const accessToken = jwt.sign(payload, process.env.JWT_SECRET!, {
+    const jwtSecret = process.env.JWT_SECRET || 'fallback-secret';
+    
+    const accessToken = jwt.sign(payload, jwtSecret, {
       expiresIn: process.env.JWT_EXPIRES_IN || '15m',
-    });
+    } as jwt.SignOptions);
 
-    const refreshToken = jwt.sign(payload, process.env.JWT_SECRET!, {
+    const refreshToken = jwt.sign(payload, jwtSecret, {
       expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
-    });
+    } as jwt.SignOptions);
 
     return { accessToken, refreshToken };
   }

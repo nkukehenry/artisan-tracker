@@ -162,7 +162,7 @@ class FirebaseService {
     deviceTokens: string[],
     command: string,
     payload?: any
-  ): Promise<admin.messaging.BatchResponse> {
+  ): Promise<any> {
     try {
       const message: admin.messaging.MulticastMessage = {
         tokens: deviceTokens,
@@ -185,7 +185,7 @@ class FirebaseService {
         },
       };
 
-      const response = await this.getMessaging().sendMulticast(message);
+      const response = await this.getMessaging().sendEachForMulticast(message);
       logger.info('Multicast message sent', {
         deviceCount: deviceTokens.length,
         command,
