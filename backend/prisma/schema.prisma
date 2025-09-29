@@ -1,0 +1,346 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Multi-tenant SaaS Architecture
+model Tenant {
+  id          String   @id @default(cuid())
+  name        String
+  domain      String?  @unique
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  users       User[]
+  devices     Device[]
+  subscriptions Subscription[]
+  
+  @@map("tenants")
+}
+
+// User Management
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  password    String
+  firstName   String
+  lastName    String
+  role        UserRole @default(USER)
+  isActive    Boolean  @default(true)
+  lastLoginAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Tenant relation
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  // Relations
+  devices     Device[]
+  sessions    Session[]
+  
+  @@map("users")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  TENANT_ADMIN
+  USER
+}
+
+// Device Management
+model Device {
+  id              String      @id @default(cuid())
+  deviceId        String      @unique // Unique device identifier
+  name            String
+  model           String?
+  osVersion       String?
+  appVersion      String?
+  isOnline        Boolean     @default(false)
+  lastSeenAt      DateTime?
+  batteryLevel    Int?
+  location        Json?       // GPS coordinates
+  isActive        Boolean     @default(true)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  // Tenant relation
+  tenantId        String
+  tenant          Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  // User relation (device owner)
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Relations
+  mediaFiles      MediaFile[]
+  callLogs        CallLog[]
+  contacts        Contact[]
+  messages        Message[]
+  locations       Location[]
+  appActivities   AppActivity[]
+  commands        DeviceCommand[]
+  
+  @@map("devices")
+}
+
+// Media Files (Photos, Videos, Audio)
+model MediaFile {
+  id          String      @id @default(cuid())
+  fileName    String
+  filePath    String
+  fileSize    BigInt
+  mimeType    String
+  fileType    MediaType
+  metadata    Json?       // EXIF data, duration, etc.
+  isEncrypted Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  
+  // Device relation
+  deviceId    String
+  device      Device      @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  
+  @@map("media_files")
+}
+
+enum MediaType {
+  PHOTO
+  VIDEO
+  AUDIO
+  SCREEN_RECORDING
+}
+
+// Call Logs
+model CallLog {
+  id          String      @id @default(cuid())
+  phoneNumber String
+  contactName String?
+  callType    CallType
+  duration    Int?        // in seconds
+  timestamp   DateTime
+  isIncoming  Boolean
+  createdAt   DateTime    @default(now())
+  
+  // Device relation
+  deviceId    String
+  device      Device      @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  
+  @@map("call_logs")
+}
+
+enum CallType {
+  INCOMING
+  OUTGOING
+  MISSED
+  REJECTED
+}
+
+// Contacts
+model Contact {
+  id          String   @id @default(cuid())
+  name        String
+  phoneNumber String?
+  email       String?
+  avatar      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Device relation
+  deviceId    String
+  device      Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  
+  @@map("contacts")
+}
+
+// Messages (SMS, Social Media)
+model Message {
+  id          String      @id @default(cuid())
+  content     String
+  messageType MessageType
+  sender      String?
+  recipient   String?
+  timestamp   DateTime
+  isRead      Boolean     @default(false)
+  metadata    Json?       // Platform-specific data
+  createdAt   DateTime    @default(now())
+  
+  // Device relation
+  deviceId    String
+  device      Device      @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  
+  @@map("messages")
+}
+
+enum MessageType {
+  SMS
+  WHATSAPP
+  TELEGRAM
+  FACEBOOK
+  INSTAGRAM
+  TWITTER
+  OTHER
+}
+
+// Location Tracking
+model Location {
+  id          String   @id @default(cuid())
+  latitude    Float
+  longitude   Float
+  accuracy    Float?
+  altitude    Float?
+  speed       Float?
+  heading     Float?
+  address     String?
+  timestamp   DateTime
+  createdAt   DateTime @default(now())
+  
+  // Device relation
+  deviceId    String
+  device      Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  
+  @@map("locations")
+}
+
+// App Activities
+model AppActivity {
+  id          String   @id @default(cuid())
+  appName     String
+  packageName String
+  isActive    Boolean  @default(true)
+  startTime   DateTime
+  endTime     DateTime?
+  duration    Int?     // in seconds
+  createdAt   DateTime @default(now())
+  
+  // Device relation
+  deviceId    String
+  device      Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  
+  @@map("app_activities")
+}
+
+// Device Commands (Firebase integration)
+model DeviceCommand {
+  id          String        @id @default(cuid())
+  command     CommandType
+  payload     Json?
+  status      CommandStatus @default(PENDING)
+  sentAt      DateTime      @default(now())
+  executedAt  DateTime?
+  response    Json?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  // Device relation
+  deviceId    String
+  device      Device        @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  
+  @@map("device_commands")
+}
+
+enum CommandType {
+  RECORD_AUDIO
+  RECORD_VIDEO
+  SCREEN_RECORDING
+  TAKE_PHOTO
+  GET_LOCATION
+  GET_CONTACTS
+  GET_CALL_LOGS
+  GET_MESSAGES
+  ENABLE_APP
+  DISABLE_APP
+  RESTART_DEVICE
+  WIPE_DATA
+}
+
+enum CommandStatus {
+  PENDING
+  SENT
+  EXECUTED
+  FAILED
+  CANCELLED
+}
+
+// User Sessions
+model Session {
+  id          String   @id @default(cuid())
+  token       String   @unique
+  refreshToken String? @unique
+  expiresAt   DateTime
+  isActive    Boolean  @default(true)
+  userAgent   String?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // User relation
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("sessions")
+}
+
+// Subscription Management
+model Subscription {
+  id          String           @id @default(cuid())
+  plan        SubscriptionPlan
+  status      SubscriptionStatus @default(ACTIVE)
+  startDate   DateTime
+  endDate     DateTime?
+  maxDevices  Int              @default(1)
+  features    Json?            // Feature flags
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  
+  // Tenant relation
+  tenantId    String
+  tenant      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@map("subscriptions")
+}
+
+enum SubscriptionPlan {
+  FREE
+  BASIC
+  PREMIUM
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  CANCELLED
+  EXPIRED
+  SUSPENDED
+}
+
+// System Logs
+model SystemLog {
+  id          String   @id @default(cuid())
+  level       LogLevel
+  message     String
+  metadata    Json?
+  userId      String?
+  deviceId    String?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  
+  @@map("system_logs")
+}
+
+enum LogLevel {
+  ERROR
+  WARN
+  INFO
+  DEBUG
+}
