@@ -5,12 +5,14 @@ import compression from 'compression';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
+import swaggerUi from 'swagger-ui-express';
 
 // Import configurations
 import { database } from './config/database';
 import { redis } from './config/redis';
 import { firebase } from './config/firebase';
 import { logger, morganStream } from './config/logger';
+import { swaggerSpec } from './config/swagger';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler';
@@ -84,7 +86,75 @@ class Application {
     // Custom request logging
     this.app.use(requestLogger);
 
-    // Health check endpoint
+    /**
+     * @swagger
+     * /health:
+     *   get:
+     *     summary: Health check endpoint
+     *     tags: [Health]
+     *     responses:
+     *       200:
+     *         description: All services are healthy
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                   example: ok
+     *                 timestamp:
+     *                   type: string
+     *                   format: date-time
+     *                   example: 2023-01-01T12:00:00Z
+     *                 services:
+     *                   type: object
+     *                   properties:
+     *                     database:
+     *                       type: string
+     *                       enum: [healthy, unhealthy]
+     *                       example: healthy
+     *                     redis:
+     *                       type: string
+     *                       enum: [healthy, unhealthy]
+     *                       example: healthy
+     *                     firebase:
+     *                       type: string
+     *                       enum: [healthy, unhealthy]
+     *                       example: healthy
+     *       503:
+     *         description: One or more services are unhealthy
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                   example: error
+     *                 message:
+     *                   type: string
+     *                   example: Health check failed
+     *                 timestamp:
+     *                   type: string
+     *                   format: date-time
+     *                   example: 2023-01-01T12:00:00Z
+     *                 services:
+     *                   type: object
+     *                   properties:
+     *                     database:
+     *                       type: string
+     *                       enum: [healthy, unhealthy]
+     *                       example: unhealthy
+     *                     redis:
+     *                       type: string
+     *                       enum: [healthy, unhealthy]
+     *                       example: healthy
+     *                     firebase:
+     *                       type: string
+     *                       enum: [healthy, unhealthy]
+     *                       example: healthy
+     */
     this.app.get('/health', async (req, res) => {
       try {
         const dbHealth = await database.healthCheck();
@@ -108,12 +178,20 @@ class Application {
         res.status(503).json({
           status: 'error',
           message: 'Health check failed',
+          timestamp: new Date().toISOString(),
         });
       }
     });
   }
 
   private initializeRoutes(): void {
+    // Swagger documentation
+    this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+      explorer: true,
+      customCss: '.swagger-ui .topbar { display: none }',
+      customSiteTitle: 'Mobile Tracker API Documentation',
+    }));
+
     // API routes
     this.app.use('/api/auth', authRoutes);
     this.app.use('/api/devices', deviceRoutes);
@@ -127,6 +205,8 @@ class Application {
         version: '1.0.0',
         status: 'running',
         timestamp: new Date().toISOString(),
+        documentation: '/api-docs',
+        health: '/health',
       });
     });
 
