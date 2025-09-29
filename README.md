@@ -90,11 +90,20 @@ tracker/
 
 ## 📋 Change Log
 
-### [Unreleased]
-- Initial project setup
-- Backend core infrastructure
-- Portal foundation
-- Database schema design
+### [v0.1.0] - 2025-01-29
+- ✅ Initial project setup with backend and portal folders
+- ✅ Backend core infrastructure with Express.js, TypeScript
+- ✅ Prisma schema design for multi-tenant SaaS architecture
+- ✅ Database configuration with MySQL support
+- ✅ Redis integration for caching and session management
+- ✅ Firebase Admin SDK integration for device commands
+- ✅ Centralized logging system with Winston
+- ✅ Error handling middleware with proper error types
+- ✅ Security middleware (CORS, Helmet, Rate Limiting)
+- ✅ Authentication middleware with JWT support
+- ✅ Basic API route structure (auth, devices, media, portal)
+- ✅ Environment configuration setup
+- ✅ Git repository initialization with proper .gitignore
 
 ## 🚀 Getting Started
 
