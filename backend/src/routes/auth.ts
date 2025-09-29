@@ -1,33 +1,16 @@
 import { Router } from 'express';
-import { body } from 'express-validator';
 import { asyncHandler } from '../middleware/errorHandler';
 import { authenticateToken } from '../middleware/auth';
+import { AuthController, authValidation } from '../controllers/auth.controller';
 
 const router = Router();
+const authController = new AuthController();
 
-// Placeholder auth routes - will be implemented later
-router.post('/login', [
-  body('email').isEmail().normalizeEmail(),
-  body('password').isLength({ min: 6 }),
-], asyncHandler(async (req, res) => {
-  res.json({ message: 'Login endpoint - to be implemented' });
-}));
-
-router.post('/register', [
-  body('email').isEmail().normalizeEmail(),
-  body('password').isLength({ min: 6 }),
-  body('firstName').trim().isLength({ min: 1 }),
-  body('lastName').trim().isLength({ min: 1 }),
-], asyncHandler(async (req, res) => {
-  res.json({ message: 'Register endpoint - to be implemented' });
-}));
-
-router.post('/logout', authenticateToken, asyncHandler(async (req, res) => {
-  res.json({ message: 'Logout endpoint - to be implemented' });
-}));
-
-router.get('/me', authenticateToken, asyncHandler(async (req, res) => {
-  res.json({ message: 'Profile endpoint - to be implemented' });
-}));
+// Authentication routes
+router.post('/register', authValidation.register, asyncHandler(authController.register));
+router.post('/login', authValidation.login, asyncHandler(authController.login));
+router.post('/refresh', authValidation.refreshToken, asyncHandler(authController.refreshToken));
+router.post('/logout', authenticateToken, authValidation.logout, asyncHandler(authController.logout));
+router.get('/me', authenticateToken, asyncHandler(authController.getProfile));
 
 export default router;

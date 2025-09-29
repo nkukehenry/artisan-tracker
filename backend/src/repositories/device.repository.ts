@@ -167,6 +167,24 @@ export class DeviceRepositoryImpl extends BaseRepositoryImpl<Device> implements 
     }
   }
 
+  async updateStatus(id: string, isOnline: boolean, lastSeenAt?: Date, batteryLevel?: number): Promise<Device> {
+    try {
+      const device = await this.prisma.device.update({
+        where: { id },
+        data: {
+          isOnline,
+          lastSeenAt: lastSeenAt || new Date(),
+          batteryLevel: batteryLevel || null,
+        },
+      });
+      logger.info('Device status updated', { id, isOnline });
+      return device as Device;
+    } catch (error) {
+      logger.error('Error updating device status', { id, error });
+      throw error;
+    }
+  }
+
   async create(data: CreateDeviceData): Promise<Device> {
     return super.create({
       ...data,

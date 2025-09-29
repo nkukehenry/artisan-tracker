@@ -1,15 +1,18 @@
 import { BaseRepository } from './repository.interface';
 
+export type MediaType = 'PHOTO' | 'VIDEO' | 'AUDIO' | 'SCREEN_RECORDING' | 'DOCUMENT' | 'OTHER';
+
 export interface MediaFile {
   id: string;
   fileName: string;
   filePath: string;
   fileSize: bigint;
   mimeType: string;
-  fileType: 'PHOTO' | 'VIDEO' | 'AUDIO' | 'SCREEN_RECORDING';
+  fileType: MediaType;
   metadata?: any;
   isEncrypted: boolean;
   createdAt: Date;
+  updatedAt: Date;
   deviceId: string;
 }
 
@@ -40,6 +43,7 @@ export interface CallLog {
   timestamp: Date;
   isIncoming: boolean;
   createdAt: Date;
+  updatedAt: Date;
   deviceId: string;
 }
 

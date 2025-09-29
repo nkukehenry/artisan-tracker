@@ -1,0 +1,532 @@
+### Mobile Tracker API Tests
+### Base URL: http://localhost:3001/api
+
+### Variables
+@baseUrl = http://localhost:3001/api
+@contentType = application/json
+
+### ===========================================
+### AUTHENTICATION TESTS
+### ===========================================
+
+### 1. Register a new tenant and user
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@newcompany.com",
+  "password": "password123",
+  "firstName": "John",
+  "lastName": "Doe",
+  "tenantName": "New Company Inc",
+  "tenantDomain": "newcompany.com"
+}
+
+### 2. Login with existing user
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@acme.com",
+  "password": "password123"
+}
+
+### 3. Login with super admin
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@mobiletracker.com",
+  "password": "password123"
+}
+
+### 4. Refresh token (replace with actual refresh token)
+POST {{baseUrl}}/auth/refresh
+Content-Type: {{contentType}}
+
+{
+  "refreshToken": "your-refresh-token-here"
+}
+
+### 5. Logout (replace with actual tokens)
+POST {{baseUrl}}/auth/logout
+Content-Type: {{contentType}}
+Authorization: Bearer your-access-token-here
+
+{
+  "refreshToken": "your-refresh-token-here"
+}
+
+### ===========================================
+### DEVICE MANAGEMENT TESTS
+### ===========================================
+
+### 6. Register a new device (replace with actual token)
+POST {{baseUrl}}/devices/register
+Content-Type: {{contentType}}
+Authorization: Bearer your-access-token-here
+
+{
+  "deviceId": "TEST-DEVICE-001",
+  "name": "Test iPhone",
+  "model": "iPhone 14 Pro",
+  "osVersion": "iOS 16.0",
+  "appVersion": "1.0.0"
+}
+
+### 7. Get all devices for current user
+GET {{baseUrl}}/devices
+Authorization: Bearer your-access-token-here
+
+### 8. Get device by ID (replace with actual device ID)
+GET {{baseUrl}}/devices/device-id-here
+Authorization: Bearer your-access-token-here
+
+### 9. Update device information
+PUT {{baseUrl}}/devices/device-id-here
+Content-Type: {{contentType}}
+Authorization: Bearer your-access-token-here
+
+{
+  "name": "Updated Device Name",
+  "model": "iPhone 14 Pro Max",
+  "osVersion": "iOS 16.1"
+}
+
+### 10. Delete device
+DELETE {{baseUrl}}/devices/device-id-here
+Authorization: Bearer your-access-token-here
+
+### 11. Get device status
+GET {{baseUrl}}/devices/device-id-here/status
+Authorization: Bearer your-access-token-here
+
+### 12. Update device status (from device)
+PUT {{baseUrl}}/devices/device-id-here/status
+Content-Type: {{contentType}}
+Authorization: Bearer your-access-token-here
+
+{
+  "isOnline": true,
+  "batteryLevel": 85,
+  "location": {
+    "latitude": 40.7128,
+    "longitude": -74.0060,
+    "accuracy": 10,
+    "address": "New York, NY, USA"
+  }
+}
+
+### ===========================================
+### DEVICE COMMANDS TESTS
+### ===========================================
+
+### 13. Send command to device
+POST {{baseUrl}}/devices/device-id-here/commands
+Content-Type: {{contentType}}
+Authorization: Bearer your-access-token-here
+
+{
+  "command": "GET_LOCATION",
+  "payload": {
+    "accuracy": "high"
+  }
+}
+
+### 14. Send photo command
+POST {{baseUrl}}/devices/device-id-here/commands
+Content-Type: {{contentType}}
+Authorization: Bearer your-access-token-here
+
+{
+  "command": "TAKE_PHOTO",
+  "payload": {
+    "quality": "high",
+    "flash": false
+  }
+}
+
+### 15. Send audio recording command
+POST {{baseUrl}}/devices/device-id-here/commands
+Content-Type: {{contentType}}
+Authorization: Bearer your-access-token-here
+
+{
+  "command": "RECORD_AUDIO",
+  "payload": {
+    "duration": 60,
+    "quality": "high"
+  }
+}
+
+### 16. Send video recording command
+POST {{baseUrl}}/devices/device-id-here/commands
+Content-Type: {{contentType}}
+Authorization: Bearer your-access-token-here
+
+{
+  "command": "RECORD_VIDEO",
+  "payload": {
+    "duration": 30,
+    "quality": "720p"
+  }
+}
+
+### 17. Send screen recording command
+POST {{baseUrl}}/devices/device-id-here/commands
+Content-Type: {{contentType}}
+Authorization: Bearer your-access-token-here
+
+{
+  "command": "SCREEN_RECORDING",
+  "payload": {
+    "duration": 60,
+    "quality": "1080p"
+  }
+}
+
+### 18. Get call logs
+POST {{baseUrl}}/devices/device-id-here/commands
+Content-Type: {{contentType}}
+Authorization: Bearer your-access-token-here
+
+{
+  "command": "GET_CALL_LOGS",
+  "payload": {
+    "limit": 50,
+    "dateFrom": "2024-01-01",
+    "dateTo": "2024-12-31"
+  }
+}
+
+### 19. Get contacts
+POST {{baseUrl}}/devices/device-id-here/commands
+Content-Type: {{contentType}}
+Authorization: Bearer your-access-token-here
+
+{
+  "command": "GET_CONTACTS",
+  "payload": {
+    "limit": 100
+  }
+}
+
+### 20. Get messages
+POST {{baseUrl}}/devices/device-id-here/commands
+Content-Type: {{contentType}}
+Authorization: Bearer your-access-token-here
+
+{
+  "command": "GET_MESSAGES",
+  "payload": {
+    "limit": 50,
+    "platforms": ["SMS", "WHATSAPP", "TELEGRAM"]
+  }
+}
+
+### 21. Enable app
+POST {{baseUrl}}/devices/device-id-here/commands
+Content-Type: {{contentType}}
+Authorization: Bearer your-access-token-here
+
+{
+  "command": "ENABLE_APP",
+  "payload": {
+    "packageName": "com.whatsapp"
+  }
+}
+
+### 22. Disable app
+POST {{baseUrl}}/devices/device-id-here/commands
+Content-Type: {{contentType}}
+Authorization: Bearer your-access-token-here
+
+{
+  "command": "DISABLE_APP",
+  "payload": {
+    "packageName": "com.instagram.android"
+  }
+}
+
+### 23. Get device commands history
+GET {{baseUrl}}/devices/device-id-here/commands
+Authorization: Bearer your-access-token-here
+
+### 24. Get device commands with pagination
+GET {{baseUrl}}/devices/device-id-here/commands?page=1&limit=10&status=EXECUTED
+Authorization: Bearer your-access-token-here
+
+### ===========================================
+### MEDIA MANAGEMENT TESTS
+### ===========================================
+
+### 25. Upload media file (photo)
+POST {{baseUrl}}/media/upload
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+Authorization: Bearer your-access-token-here
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="test-photo.jpg"
+Content-Type: image/jpeg
+
+< ./test-photo.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="deviceId"
+
+device-id-here
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="fileType"
+
+PHOTO
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### 26. Upload media file (video)
+POST {{baseUrl}}/media/upload
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+Authorization: Bearer your-access-token-here
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="test-video.mp4"
+Content-Type: video/mp4
+
+< ./test-video.mp4
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="deviceId"
+
+device-id-here
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="fileType"
+
+VIDEO
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### 27. Get media files for device
+GET {{baseUrl}}/media/device/device-id-here
+Authorization: Bearer your-access-token-here
+
+### 28. Get media files with pagination
+GET {{baseUrl}}/media/device/device-id-here?page=1&limit=10&fileType=PHOTO
+Authorization: Bearer your-access-token-here
+
+### 29. Download media file
+GET {{baseUrl}}/media/download/media-file-id-here
+Authorization: Bearer your-access-token-here
+
+### 30. Delete media file
+DELETE {{baseUrl}}/media/media-file-id-here
+Authorization: Bearer your-access-token-here
+
+### ===========================================
+### PORTAL DASHBOARD TESTS
+### ===========================================
+
+### 31. Get dashboard overview
+GET {{baseUrl}}/portal/dashboard
+Authorization: Bearer your-access-token-here
+
+### 32. Get tenant statistics
+GET {{baseUrl}}/portal/stats
+Authorization: Bearer your-access-token-here
+
+### 33. Get device statistics
+GET {{baseUrl}}/portal/devices/stats
+Authorization: Bearer your-access-token-here
+
+### 34. Get command statistics
+GET {{baseUrl}}/portal/commands/stats
+Authorization: Bearer your-access-token-here
+
+### 35. Get recent activity
+GET {{baseUrl}}/portal/activity
+Authorization: Bearer your-access-token-here
+
+### 36. Get system logs
+GET {{baseUrl}}/portal/logs
+Authorization: Bearer your-access-token-here
+
+### 37. Get system logs with filters
+GET {{baseUrl}}/portal/logs?level=ERROR&deviceId=device-id-here&page=1&limit=20
+Authorization: Bearer your-access-token-here
+
+### ===========================================
+### USER MANAGEMENT TESTS (Admin Only)
+### ===========================================
+
+### 38. Get all users in tenant
+GET {{baseUrl}}/portal/users
+Authorization: Bearer your-access-token-here
+
+### 39. Create new user
+POST {{baseUrl}}/portal/users
+Content-Type: {{contentType}}
+Authorization: Bearer your-access-token-here
+
+{
+  "email": "newuser@acme.com",
+  "password": "password123",
+  "firstName": "New",
+  "lastName": "User",
+  "role": "USER"
+}
+
+### 40. Update user
+PUT {{baseUrl}}/portal/users/user-id-here
+Content-Type: {{contentType}}
+Authorization: Bearer your-access-token-here
+
+{
+  "firstName": "Updated",
+  "lastName": "Name",
+  "role": "TENANT_ADMIN"
+}
+
+### 41. Deactivate user
+PUT {{baseUrl}}/portal/users/user-id-here/deactivate
+Authorization: Bearer your-access-token-here
+
+### 42. Activate user
+PUT {{baseUrl}}/portal/users/user-id-here/activate
+Authorization: Bearer your-access-token-here
+
+### ===========================================
+### TENANT MANAGEMENT TESTS (Super Admin Only)
+### ===========================================
+
+### 43. Get all tenants
+GET {{baseUrl}}/portal/tenants
+Authorization: Bearer your-access-token-here
+
+### 44. Create new tenant
+POST {{baseUrl}}/portal/tenants
+Content-Type: {{contentType}}
+Authorization: Bearer your-access-token-here
+
+{
+  "name": "Another Company",
+  "domain": "anothercompany.com",
+  "isActive": true
+}
+
+### 45. Update tenant
+PUT {{baseUrl}}/portal/tenants/tenant-id-here
+Content-Type: {{contentType}}
+Authorization: Bearer your-access-token-here
+
+{
+  "name": "Updated Company Name",
+  "domain": "updatedcompany.com"
+}
+
+### 46. Deactivate tenant
+PUT {{baseUrl}}/portal/tenants/tenant-id-here/deactivate
+Authorization: Bearer your-access-token-here
+
+### 47. Activate tenant
+PUT {{baseUrl}}/portal/tenants/tenant-id-here/activate
+Authorization: Bearer your-access-token-here
+
+### ===========================================
+### DATA RETRIEVAL TESTS
+### ===========================================
+
+### 48. Get call logs for device
+GET {{baseUrl}}/data/device-id-here/call-logs
+Authorization: Bearer your-access-token-here
+
+### 49. Get contacts for device
+GET {{baseUrl}}/data/device-id-here/contacts
+Authorization: Bearer your-access-token-here
+
+### 50. Get messages for device
+GET {{baseUrl}}/data/device-id-here/messages
+Authorization: Bearer your-access-token-here
+
+### 51. Get location history for device
+GET {{baseUrl}}/data/device-id-here/locations
+Authorization: Bearer your-access-token-here
+
+### 52. Get app activities for device
+GET {{baseUrl}}/data/device-id-here/app-activities
+Authorization: Bearer your-access-token-here
+
+### ===========================================
+### ERROR HANDLING TESTS
+### ===========================================
+
+### 53. Test invalid login
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "invalid@email.com",
+  "password": "wrongpassword"
+}
+
+### 54. Test unauthorized access
+GET {{baseUrl}}/devices
+Authorization: Bearer invalid-token
+
+### 55. Test invalid device ID
+GET {{baseUrl}}/devices/invalid-device-id
+Authorization: Bearer your-access-token-here
+
+### 56. Test invalid command
+POST {{baseUrl}}/devices/device-id-here/commands
+Content-Type: {{contentType}}
+Authorization: Bearer your-access-token-here
+
+{
+  "command": "INVALID_COMMAND",
+  "payload": {}
+}
+
+### ===========================================
+### RATE LIMITING TESTS
+### ===========================================
+
+### 57. Test rate limiting (make multiple requests quickly)
+GET {{baseUrl}}/devices
+Authorization: Bearer your-access-token-here
+
+### 58. Test rate limiting (make multiple requests quickly)
+GET {{baseUrl}}/devices
+Authorization: Bearer your-access-token-here
+
+### 59. Test rate limiting (make multiple requests quickly)
+GET {{baseUrl}}/devices
+Authorization: Bearer your-access-token-here
+
+### ===========================================
+### HEALTH CHECK TESTS
+### ===========================================
+
+### 60. Health check
+GET {{baseUrl}}/health
+
+### 61. Database health check
+GET {{baseUrl}}/health/database
+
+### 62. Redis health check
+GET {{baseUrl}}/health/redis
+
+### 63. Firebase health check
+GET {{baseUrl}}/health/firebase
+
+### ===========================================
+### NOTES
+### ===========================================
+
+### Instructions:
+### 1. Replace "your-access-token-here" with actual JWT token from login response
+### 2. Replace "device-id-here" with actual device ID from device registration
+### 3. Replace "user-id-here" with actual user ID
+### 4. Replace "tenant-id-here" with actual tenant ID
+### 5. Replace "media-file-id-here" with actual media file ID
+### 6. For file uploads, replace file paths with actual file paths
+### 7. Test endpoints in order for best results
+### 8. Some endpoints require specific roles (SUPER_ADMIN, TENANT_ADMIN, USER)
+### 9. Check response status codes and error messages
+### 10. Use the seeded data for initial testing:
+###    - Super Admin: admin@mobiletracker.com / password123
+###    - Tenant Admin: admin@acme.com / password123
+###    - Regular User: user1@acme.com / password123

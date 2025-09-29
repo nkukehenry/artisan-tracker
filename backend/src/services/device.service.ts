@@ -76,7 +76,7 @@ export class DeviceService implements IDeviceService {
   async updateDeviceStatus(deviceId: string, status: DeviceStatus): Promise<void> {
     try {
       // Update in database
-      await this.deviceRepository.updateDeviceStatus(deviceId, status);
+      await this.deviceRepository.updateStatus(deviceId, status.isOnline, new Date(), status.batteryLevel);
 
       // Update cache
       await redis.setDeviceStatus(deviceId, status);
@@ -208,7 +208,7 @@ export class DeviceService implements IDeviceService {
     }
   }
 
-  async getDeviceStats(tenantId?: string): Promise<any> {
+  async getDeviceStats(tenantId: string): Promise<any> {
     try {
       const stats = await this.deviceRepository.getDeviceStats(tenantId);
       return stats;

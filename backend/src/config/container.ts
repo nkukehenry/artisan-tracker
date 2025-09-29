@@ -86,6 +86,14 @@ class Container {
   public get<T>(key: string): T {
     return this.repositories.get(key) || this.services.get(key);
   }
+
+  // Service getter
+  public getService<T>(name: string): T {
+    if (!this.services.has(name)) {
+      throw new Error(`Service ${name} not found`);
+    }
+    return this.services.get(name) as T;
+  }
 }
 
 export const container = Container.getInstance();

