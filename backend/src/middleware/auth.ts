@@ -5,7 +5,7 @@ import { redis } from '../config/redis';
 import { logger } from '../config/logger';
 import { createError } from './errorHandler';
 
-export interface AuthenticatedRequest extends Request {
+export interface AuthenticatedRequest {
   user?: {
     id: string;
     email: string;
@@ -15,7 +15,7 @@ export interface AuthenticatedRequest extends Request {
 }
 
 export const authenticateToken = async (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
@@ -72,8 +72,10 @@ export const authenticateToken = async (
   }
 };
 
+export const requireAuth = authenticateToken;
+
 export const requireRole = (roles: string[]) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
       next(createError('Authentication required', 401));
       return;
@@ -89,7 +91,7 @@ export const requireRole = (roles: string[]) => {
 };
 
 export const requireTenantAccess = async (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
@@ -123,7 +125,7 @@ export const requireTenantAccess = async (
 };
 
 export const requireDeviceAccess = async (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
@@ -164,7 +166,7 @@ export const requireDeviceAccess = async (
 };
 
 export const optionalAuth = async (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {

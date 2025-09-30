@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { body, param, query, validationResult } from 'express-validator';
-import { Container } from '../config/container';
+import { container } from '../config/container';
 import { MessageRepository, CreateMessageData } from '../interfaces/message.interface';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { requireAuth, requireRole } from '../middleware/auth';
@@ -123,7 +123,7 @@ export class MessagesController {
   private messageRepository: MessageRepository;
 
   constructor() {
-    this.messageRepository = Container.getRepository<MessageRepository>('messageRepository');
+    this.messageRepository = container.getRepository<MessageRepository>('messageRepository');
   }
 
   /**

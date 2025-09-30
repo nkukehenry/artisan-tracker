@@ -1,10 +1,11 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { body, param, query, validationResult } from 'express-validator';
 import { container } from '../config/container';
 import { CallLogRepository, CreateCallLogData } from '../interfaces/media.interface';
 import { asyncHandler } from '../middleware/asyncHandler';
-import { AuthenticatedRequest, authenticateToken, requireRole } from '../middleware/auth';
+import { authenticateToken, requireRole } from '../middleware/auth';
 import { createError } from '../middleware/errorHandler';
+import { BadRequestError, NotFoundError } from '../utils/error';
 
 /**
  * @swagger
@@ -149,10 +150,10 @@ export class CallLogsController {
    *       500:
    *         $ref: '#/components/responses/InternalServerError'
    */
-  uploadCallLogs = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  uploadCallLogs = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      throw createError('Validation failed', 400, errors.array());
+      throw new BadRequestError('Validation failed', errors.array());
     }
 
     const { callLogs } = req.body;
@@ -245,10 +246,10 @@ export class CallLogsController {
    *       500:
    *         $ref: '#/components/responses/InternalServerError'
    */
-  getCallLogsByDevice = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  getCallLogsByDevice = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      throw createError('Validation failed', 400, errors.array());
+      throw new BadRequestError('Validation failed', errors.array());
     }
 
     const { deviceId } = req.params;
@@ -268,8 +269,7 @@ export class CallLogsController {
 
     const result = await this.callLogRepository.findByDevice(
       deviceId,
-      paginationOptions,
-      filterOptions
+      paginationOptions
     );
 
     res.json({
@@ -316,10 +316,10 @@ export class CallLogsController {
    *       500:
    *         $ref: '#/components/responses/InternalServerError'
    */
-  getCallLogById = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  getCallLogById = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      throw createError('Validation failed', 400, errors.array());
+      throw new BadRequestError('Validation failed', errors.array());
     }
 
     const { id } = req.params;
@@ -373,10 +373,10 @@ export class CallLogsController {
    *       500:
    *         $ref: '#/components/responses/InternalServerError'
    */
-  deleteCallLog = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  deleteCallLog = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      throw createError('Validation failed', 400, errors.array());
+      throw new BadRequestError('Validation failed', errors.array());
     }
 
     const { id } = req.params;

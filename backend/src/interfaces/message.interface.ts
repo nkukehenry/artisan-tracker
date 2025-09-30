@@ -26,9 +26,9 @@ export interface CreateMessageData {
   content: string;
   direction?: 'INCOMING' | 'OUTGOING';
   timestamp: Date;
-  isRead?: boolean;
+  isRead: boolean;
   metadata?: Record<string, any>;
-  isEncrypted?: boolean;
+  isEncrypted: boolean;
 }
 
 export interface MessageConversation {

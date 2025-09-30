@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { body, param, query, validationResult } from 'express-validator';
-import { Container } from '../config/container';
+import { container } from '../config/container';
 import { AppActivityRepository, CreateAppActivityData } from '../interfaces/app-activity.interface';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { requireAuth, requireRole } from '../middleware/auth';
@@ -109,7 +109,7 @@ export class AppActivitiesController {
   private appActivityRepository: AppActivityRepository;
 
   constructor() {
-    this.appActivityRepository = Container.getRepository<AppActivityRepository>('appActivityRepository');
+    this.appActivityRepository = container.getRepository<AppActivityRepository>('appActivityRepository');
   }
 
   /**

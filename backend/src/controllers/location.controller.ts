@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { body, param, query, validationResult } from 'express-validator';
-import { Container } from '../config/container';
+import { container } from '../config/container';
 import { LocationRepository, CreateLocationData } from '../interfaces/location.interface';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { requireAuth, requireRole } from '../middleware/auth';
@@ -143,7 +143,7 @@ export class LocationController {
   private locationRepository: LocationRepository;
 
   constructor() {
-    this.locationRepository = Container.getRepository<LocationRepository>('locationRepository');
+    this.locationRepository = container.getRepository<LocationRepository>('locationRepository');
   }
 
   /**

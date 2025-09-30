@@ -26,7 +26,7 @@ export interface CreateLocationData {
   heading?: number;
   address?: string;
   timestamp: Date;
-  isEncrypted?: boolean;
+  isEncrypted: boolean;
 }
 
 export interface LocationRepository extends BaseRepository<Location> {

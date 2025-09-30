@@ -22,7 +22,7 @@ export interface CreateAppActivityData {
   duration?: number;
   timestamp: Date;
   metadata?: Record<string, any>;
-  isEncrypted?: boolean;
+  isEncrypted: boolean;
 }
 
 export interface AppUsageSummary {

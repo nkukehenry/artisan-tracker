@@ -1,10 +1,11 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { body, param, query, validationResult } from 'express-validator';
 import { container } from '../config/container';
 import { ContactRepository, CreateContactData } from '../interfaces/media.interface';
 import { asyncHandler } from '../middleware/asyncHandler';
-import { AuthenticatedRequest, authenticateToken, requireRole } from '../middleware/auth';
+import { authenticateToken, requireRole } from '../middleware/auth';
 import { createError } from '../middleware/errorHandler';
+import { BadRequestError, NotFoundError } from '../utils/error';
 
 /**
  * @swagger
@@ -155,10 +156,10 @@ export class ContactsController {
    *       500:
    *         $ref: '#/components/responses/InternalServerError'
    */
-  uploadContacts = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  uploadContacts = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      throw createError('Validation failed', 400, errors.array());
+      throw new BadRequestError('Validation failed', errors.array());
     }
 
     const { contacts } = req.body;
@@ -238,10 +239,10 @@ export class ContactsController {
    *       500:
    *         $ref: '#/components/responses/InternalServerError'
    */
-  getContactsByDevice = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  getContactsByDevice = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      throw createError('Validation failed', 400, errors.array());
+      throw new BadRequestError('Validation failed', errors.array());
     }
 
     const { deviceId } = req.params;
@@ -259,19 +260,13 @@ export class ContactsController {
 
     const result = await this.contactRepository.findByDevice(
       deviceId,
-      paginationOptions,
-      filterOptions
+      paginationOptions
     );
 
     res.json({
       success: true,
       data: result.data,
-      pagination: {
-        page: result.page,
-        limit: result.limit,
-        total: result.total,
-        totalPages: result.totalPages,
-      },
+      pagination: result.pagination,
     });
   });
 
