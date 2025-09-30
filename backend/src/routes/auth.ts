@@ -4,6 +4,7 @@ import { authenticateToken } from '../middleware/auth';
 import { AuthController, authValidation } from '../controllers/auth.controller';
 
 const router = Router();
+
 const authController = new AuthController();
 
 /**

@@ -1,4 +1,4 @@
-### Mobile Tracker API Tests
+### Artisan Tracker API Tests
 ### Base URL: http://localhost:3001/api
 
 ### Variables

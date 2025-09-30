@@ -10,14 +10,16 @@ import { DeviceCommandRepositoryImpl } from '../repositories/device-command.repo
 // Services
 import { AuthService } from '../services/auth.service';
 import { DeviceService } from '../services/device.service';
+import { MediaService } from '../services/media.service';
 
 // Interfaces
 import { TenantRepository } from '../interfaces/tenant.interface';
 import { UserRepository } from '../interfaces/user.interface';
 import { DeviceRepository } from '../interfaces/device.interface';
 import { DeviceCommandRepository } from '../interfaces/command.interface';
-import { IAuthService } from '../services/auth.service';
-import { IDeviceService } from '../services/device.service';
+import { IAuthService } from '../interfaces/auth.interface';
+import { IDeviceService } from '../interfaces/device.interface';
+import { IMediaService } from '../interfaces/media.interface';
 
 class Container {
   private static instance: Container;
@@ -54,6 +56,7 @@ class Container {
     // Initialize services with dependencies
     this.services.set('authService', new AuthService(userRepository, tenantRepository));
     this.services.set('deviceService', new DeviceService(deviceRepository, deviceCommandRepository));
+    this.services.set('mediaService', new MediaService());
   }
 
   // Repository getters
@@ -80,6 +83,10 @@ class Container {
 
   public getDeviceService(): IDeviceService {
     return this.services.get('deviceService');
+  }
+
+  public getMediaService(): IMediaService {
+    return this.services.get('mediaService');
   }
 
   // Generic getter for testing

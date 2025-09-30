@@ -9,7 +9,7 @@ export class AuthController {
   private authService: IAuthService;
 
   constructor() {
-    this.authService = container.getService<IAuthService>('AuthService');
+    this.authService = container.getService<IAuthService>('authService');
   }
 
   /**
@@ -23,7 +23,7 @@ export class AuthController {
         throw createError('Validation failed', 400, errors.array());
       }
 
-      const { email, password, firstName, lastName, tenantName, tenantDomain } = req.body;
+      const { email, password, firstName, lastName, tenantName, domain } = req.body;
 
       const result = await this.authService.register({
         email,
@@ -31,7 +31,7 @@ export class AuthController {
         firstName,
         lastName,
         tenantName,
-        tenantDomain,
+        domain,
       });
 
       logger.info('User registration successful', { email, tenantName });
@@ -60,7 +60,7 @@ export class AuthController {
 
       const { email, password } = req.body;
 
-      const result = await this.authService.login({ email, password });
+      const result = await this.authService.login(email, password);
 
       logger.info('User login successful', { email, userId: result.user.id });
 
@@ -121,7 +121,7 @@ export class AuthController {
         throw createError('Access token is required', 400);
       }
 
-      await this.authService.logout(accessToken, refreshToken);
+      await this.authService.logout(refreshToken);
 
       logger.info('User logout successful');
 

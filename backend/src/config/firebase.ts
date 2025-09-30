@@ -20,6 +20,12 @@ class FirebaseService {
     try {
       // Check if Firebase is already initialized
       if (admin.apps.length === 0) {
+        // Check if Firebase credentials are provided
+        if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_PRIVATE_KEY || !process.env.FIREBASE_CLIENT_EMAIL) {
+          logger.warn('Firebase credentials not provided. Firebase features will be disabled.');
+          return;
+        }
+
         const serviceAccount = {
           projectId: process.env.FIREBASE_PROJECT_ID,
           privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
@@ -38,22 +44,28 @@ class FirebaseService {
       }
     } catch (error) {
       logger.error('Failed to initialize Firebase Admin SDK', error);
-      throw error;
+      // Don't throw error, just log it and continue without Firebase
+      logger.warn('Continuing without Firebase features');
     }
   }
 
-  public getApp(): admin.app.App {
-    if (!this.app) {
-      throw new Error('Firebase not initialized');
-    }
+  public getApp(): admin.app.App | null {
     return this.app;
   }
 
-  public getMessaging(): admin.messaging.Messaging {
+  public getMessaging(): admin.messaging.Messaging | null {
+    if (!this.app) {
+      logger.warn('Firebase not initialized. Messaging features disabled.');
+      return null;
+    }
     return admin.messaging();
   }
 
-  public getFirestore(): admin.firestore.Firestore {
+  public getFirestore(): admin.firestore.Firestore | null {
+    if (!this.app) {
+      logger.warn('Firebase not initialized. Firestore features disabled.');
+      return null;
+    }
     return admin.firestore();
   }
 
@@ -63,6 +75,9 @@ class FirebaseService {
     command: string,
     payload?: any
   ): Promise<string> {
+    if (!this.app) {
+      throw new Error('Firebase not initialized. Cannot send device command.');
+    }
     try {
       const message: admin.messaging.Message = {
         token: deviceToken,
@@ -85,7 +100,11 @@ class FirebaseService {
         },
       };
 
-      const response = await this.getMessaging().send(message);
+      const messaging = this.getMessaging();
+      if (!messaging) {
+        throw new Error('Firebase messaging not available');
+      }
+      const response = await messaging.send(message);
       logger.info('Device command sent successfully', {
         deviceToken,
         command,
@@ -110,6 +129,9 @@ class FirebaseService {
     body: string,
     data?: any
   ): Promise<string> {
+    if (!this.app) {
+      throw new Error('Firebase not initialized. Cannot send notification.');
+    }
     try {
       const message: admin.messaging.Message = {
         token: deviceToken,
@@ -139,7 +161,11 @@ class FirebaseService {
         },
       };
 
-      const response = await this.getMessaging().send(message);
+      const messaging = this.getMessaging();
+      if (!messaging) {
+        throw new Error('Firebase messaging not available');
+      }
+      const response = await messaging.send(message);
       logger.info('Notification sent successfully', {
         deviceToken,
         title,
@@ -185,7 +211,11 @@ class FirebaseService {
         },
       };
 
-      const response = await this.getMessaging().sendEachForMulticast(message);
+      const messaging = this.getMessaging();
+      if (!messaging) {
+        throw new Error('Firebase messaging not available');
+      }
+      const response = await messaging.sendEachForMulticast(message);
       logger.info('Multicast message sent', {
         deviceCount: deviceTokens.length,
         command,
@@ -221,7 +251,11 @@ class FirebaseService {
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       };
 
-      await this.getFirestore()
+      const firestore = this.getFirestore();
+      if (!firestore) {
+        throw new Error('Firebase Firestore not available');
+      }
+      await firestore
         .collection('device_commands')
         .add(commandData);
 
@@ -246,7 +280,11 @@ class FirebaseService {
     limit: number = 50
   ): Promise<any[]> {
     try {
-      const snapshot = await this.getFirestore()
+      const firestore = this.getFirestore();
+      if (!firestore) {
+        throw new Error('Firebase Firestore not available');
+      }
+      const snapshot = await firestore
         .collection('device_commands')
         .where('deviceId', '==', deviceId)
         .orderBy('createdAt', 'desc')
@@ -272,7 +310,12 @@ class FirebaseService {
   public async healthCheck(): Promise<boolean> {
     try {
       // Try to get a reference to Firestore
-      await this.getFirestore().collection('health_check').limit(1).get();
+      const firestore = this.getFirestore();
+      if (!firestore) {
+        logger.warn('Firebase not initialized - health check failed');
+        return false;
+      }
+      await firestore.collection('health_check').limit(1).get();
       return true;
     } catch (error) {
       logger.error('Firebase health check failed', error);

@@ -3,18 +3,21 @@ import { body, param, query, validationResult } from 'express-validator';
 import { container } from '../config/container';
 import { logger } from '../config/logger';
 import { createError } from '../utils/error';
-import { IDeviceService } from '../interfaces/device.interface';
+import { IMediaService } from '../interfaces/media.interface';
 import { MediaType } from '../interfaces/media.interface';
+import { IDeviceService } from '../interfaces/device.interface';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 
 export class MediaController {
+  private mediaService: IMediaService;
   private deviceService: IDeviceService;
 
   constructor() {
-    this.deviceService = container.getService<IDeviceService>('DeviceService');
+    this.mediaService = container.getService<IMediaService>('mediaService');
+    this.deviceService = container.getService<IDeviceService>('deviceService');
   }
 
   /**

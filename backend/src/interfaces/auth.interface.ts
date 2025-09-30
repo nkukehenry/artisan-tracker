@@ -1,37 +1,40 @@
-import { User } from './user.interface';
+import { User, CreateUserData } from './user.interface';
+import { Tenant, CreateTenantData } from './tenant.interface';
 
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface RegisterData {
+export interface RegisterRequest {
   email: string;
   password: string;
   firstName: string;
   lastName: string;
   tenantName: string;
-  tenantDomain?: string;
+  domain: string;
 }
 
-export interface AuthResult {
-  user: {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: string;
-    tenantId: string;
-  };
-  tokens: {
-    accessToken: string;
-    refreshToken: string;
-  };
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+export interface AuthResponse {
+  user: User;
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface UserWithTokens {
+  user: User;
+  accessToken: string;
+  refreshToken: string;
 }
 
 export interface IAuthService {
-  login(credentials: LoginCredentials): Promise<AuthResult>;
-  register(data: RegisterData): Promise<AuthResult>;
-  refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }>;
-  logout(accessToken: string, refreshToken: string): Promise<void>;
+  register(data: RegisterRequest): Promise<UserWithTokens>;
+  login(email: string, password: string): Promise<UserWithTokens>;
+  refreshToken(token: string): Promise<{ accessToken: string; newRefreshToken: string }>;
+  logout(refreshToken: string): Promise<void>;
+  getProfile(userId: string): Promise<User | null>;
 }

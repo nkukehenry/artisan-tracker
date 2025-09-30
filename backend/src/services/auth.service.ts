@@ -2,48 +2,11 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { UserRepository } from '../interfaces/user.interface';
 import { TenantRepository } from '../interfaces/tenant.interface';
+import { IAuthService, RegisterRequest, UserWithTokens } from '../interfaces/auth.interface';
 import { redis } from '../config/redis';
 import { logger } from '../config/logger';
 import { createError } from '../middleware/errorHandler';
 
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface RegisterData {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  tenantName?: string;
-  tenantDomain?: string;
-}
-
-export interface AuthResult {
-  user: {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: string;
-    tenantId: string;
-  };
-  tokens: {
-    accessToken: string;
-    refreshToken: string;
-  };
-}
-
-export interface IAuthService {
-  login(credentials: LoginCredentials): Promise<AuthResult>;
-  register(data: RegisterData): Promise<AuthResult>;
-  refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }>;
-  logout(accessToken: string, refreshToken: string): Promise<void>;
-  changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void>;
-  resetPassword(email: string): Promise<void>;
-  verifyToken(token: string): Promise<any>;
-}
 
 export class AuthService implements IAuthService {
   constructor(
@@ -51,9 +14,8 @@ export class AuthService implements IAuthService {
     private tenantRepository: TenantRepository
   ) {}
 
-  async login(credentials: LoginCredentials): Promise<AuthResult> {
+  async login(email: string, password: string): Promise<UserWithTokens> {
     try {
-      const { email, password } = credentials;
 
       // Find user by email
       const user = await this.userRepository.findByEmail(email);
@@ -81,25 +43,19 @@ export class AuthService implements IAuthService {
       logger.info('User logged in successfully', { userId: user.id, email: user.email });
 
       return {
-        user: {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
-          tenantId: user.tenantId,
-        },
-        tokens,
+        user: user,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
       };
     } catch (error) {
-      logger.error('Login failed', { email: credentials.email, error });
+      logger.error('Login failed', { email, error });
       throw error;
     }
   }
 
-  async register(data: RegisterData): Promise<AuthResult> {
+  async register(data: RegisterRequest): Promise<UserWithTokens> {
     try {
-      const { email, password, firstName, lastName, tenantName, tenantDomain } = data;
+      const { email, password, firstName, lastName, tenantName, domain } = data;
 
       // Check if user already exists
       const existingUser = await this.userRepository.findByEmail(email);
@@ -113,7 +69,7 @@ export class AuthService implements IAuthService {
         // Create new tenant
         const tenant = await this.tenantRepository.create({
           name: tenantName,
-          domain: tenantDomain || null,
+          domain: domain || null,
           isActive: true,
         });
         tenantId = tenant.id;
@@ -142,15 +98,9 @@ export class AuthService implements IAuthService {
       logger.info('User registered successfully', { userId: user.id, email: user.email, tenantId });
 
       return {
-        user: {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
-          tenantId: user.tenantId,
-        },
-        tokens,
+        user: user,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
       };
     } catch (error) {
       logger.error('Registration failed', { email: data.email, error });
@@ -158,13 +108,13 @@ export class AuthService implements IAuthService {
     }
   }
 
-  async refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+  async refreshToken(token: string): Promise<{ accessToken: string; newRefreshToken: string }> {
     try {
       // Verify refresh token
-      const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET!) as any;
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
       
       // Check if refresh token is blacklisted
-      const isBlacklisted = await redis.get(`blacklist:${refreshToken}`);
+      const isBlacklisted = await redis.get(`blacklist:${token}`);
       if (isBlacklisted) {
         throw createError('Token has been revoked', 401);
       }
@@ -179,27 +129,23 @@ export class AuthService implements IAuthService {
       const tokens = await this.generateTokens(user);
 
       // Blacklist old refresh token
-      await redis.set(`blacklist:${refreshToken}`, '1', 30 * 24 * 60 * 60); // 30 days
+      await redis.set(`blacklist:${token}`, '1', 30 * 24 * 60 * 60); // 30 days
 
-      return tokens;
+      return {
+        accessToken: tokens.accessToken,
+        newRefreshToken: tokens.refreshToken,
+      };
     } catch (error) {
       logger.error('Token refresh failed', { error });
       throw error;
     }
   }
 
-  async logout(accessToken: string, refreshToken: string): Promise<void> {
+  async logout(refreshToken: string): Promise<void> {
     try {
-      // Decode tokens to get expiration times
-      const accessDecoded = jwt.decode(accessToken) as any;
+      // Decode refresh token to get expiration time
       const refreshDecoded = jwt.decode(refreshToken) as any;
 
-      if (accessDecoded) {
-        const accessExp = accessDecoded.exp - Math.floor(Date.now() / 1000);
-        if (accessExp > 0) {
-          await redis.set(`blacklist:${accessToken}`, '1', accessExp);
-        }
-      }
 
       if (refreshDecoded) {
         const refreshExp = refreshDecoded.exp - Math.floor(Date.now() / 1000);
@@ -211,6 +157,22 @@ export class AuthService implements IAuthService {
       logger.info('User logged out successfully');
     } catch (error) {
       logger.error('Logout failed', { error });
+      throw error;
+    }
+  }
+
+  async getProfile(userId: string): Promise<any> {
+    try {
+      const user = await this.userRepository.findById(userId);
+      if (!user) {
+        throw createError('User not found', 404);
+      }
+
+      // Return user without password
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    } catch (error) {
+      logger.error('Get profile failed', { userId, error });
       throw error;
     }
   }

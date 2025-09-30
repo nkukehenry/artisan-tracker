@@ -100,3 +100,11 @@ export interface ContactRepository extends BaseRepository<Contact> {
   findByPhoneNumber(phoneNumber: string, deviceId?: string): Promise<Contact[]>;
   searchContacts(query: string, deviceId?: string): Promise<Contact[]>;
 }
+
+// Media Service Interface
+export interface IMediaService {
+  uploadMedia(data: CreateMediaFileData, tenantId: string, userId: string): Promise<MediaFile>;
+  getMediaById(id: string, tenantId: string): Promise<MediaFile | null>;
+  getMediaByDevice(deviceId: string, tenantId: string, options?: any): Promise<any>;
+  deleteMedia(id: string, tenantId: string): Promise<void>;
+}

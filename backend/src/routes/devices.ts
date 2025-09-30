@@ -4,6 +4,7 @@ import { authenticateToken } from '../middleware/auth';
 import { DeviceController, deviceValidation } from '../controllers/device.controller';
 
 const router = Router();
+
 const deviceController = new DeviceController();
 
 // All device routes require authentication

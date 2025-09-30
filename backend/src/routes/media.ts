@@ -4,6 +4,7 @@ import { authenticateToken } from '../middleware/auth';
 import { MediaController, mediaValidation, upload } from '../controllers/media.controller';
 
 const router = Router();
+
 const mediaController = new MediaController();
 
 // All media routes require authentication

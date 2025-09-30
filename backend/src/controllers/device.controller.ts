@@ -10,7 +10,7 @@ export class DeviceController {
   private deviceService: IDeviceService;
 
   constructor() {
-    this.deviceService = container.getService<IDeviceService>('DeviceService');
+    this.deviceService = container.getService<IDeviceService>('deviceService');
   }
 
   /**

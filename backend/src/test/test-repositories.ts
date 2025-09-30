@@ -35,6 +35,8 @@ async function testRepositories() {
       lastName: 'User',
       role: 'TENANT_ADMIN',
       tenantId: testTenant.id,
+      isActive: true,
+      lastLoginAt: null,
     });
     logger.info('✅ User created successfully', { userId: testUser.id });
 
@@ -57,6 +59,11 @@ async function testRepositories() {
       appVersion: '1.0.0',
       tenantId: testTenant.id,
       userId: testUser.id,
+      isActive: true,
+      isOnline: false,
+      lastSeenAt: null,
+      batteryLevel: null,
+      location: null,
     });
     logger.info('✅ Device created successfully', { deviceId: testDevice.id });
 
@@ -76,6 +83,9 @@ async function testRepositories() {
       command: 'GET_LOCATION',
       payload: { accuracy: 'high' },
       status: 'PENDING',
+      sentAt: new Date(),
+      executedAt: null,
+      response: null,
     });
     logger.info('✅ Device command created successfully', { commandId: testCommand.id });
 

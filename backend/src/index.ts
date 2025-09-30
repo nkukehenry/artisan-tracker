@@ -1,10 +1,13 @@
+// Load environment variables FIRST
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
-import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
 
 // Import configurations
@@ -23,9 +26,6 @@ import authRoutes from './routes/auth';
 import deviceRoutes from './routes/devices';
 import mediaRoutes from './routes/media';
 import portalRoutes from './routes/portal';
-
-// Load environment variables
-dotenv.config();
 
 class Application {
   private app: express.Application;
@@ -189,7 +189,7 @@ class Application {
     this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
       explorer: true,
       customCss: '.swagger-ui .topbar { display: none }',
-      customSiteTitle: 'Mobile Tracker API Documentation',
+      customSiteTitle: 'Artisan Tracker API Documentation',
     }));
 
     // API routes
@@ -201,7 +201,7 @@ class Application {
     // Root endpoint
     this.app.get('/', (req, res) => {
       res.json({
-        message: 'Mobile Tracker API',
+        message: 'Artisan Tracker API',
         version: '1.0.0',
         status: 'running',
         timestamp: new Date().toISOString(),
@@ -211,7 +211,7 @@ class Application {
     });
 
     // 404 handler
-    this.app.use('*', (req, res) => {
+    this.app.use((req, res) => {
       res.status(404).json({
         error: 'Route not found',
         path: req.originalUrl,

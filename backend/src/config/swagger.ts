@@ -4,7 +4,7 @@ import { SwaggerDefinition } from 'swagger-jsdoc';
 const swaggerDefinition: SwaggerDefinition = {
   openapi: '3.0.0',
   info: {
-    title: 'Mobile Tracker API',
+    title: 'Artisan Tracker API',
     version: '1.0.0',
     description: 'A comprehensive mobile device tracking and management API for SaaS platforms',
     contact: {
