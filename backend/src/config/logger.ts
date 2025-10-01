@@ -45,6 +45,11 @@ const fileFormat = winston.format.combine(
   winston.format.json()
 );
 
+// Get log directory from environment or use default
+const logDirectory = process.env.LOG_DIRECTORY || 'logs';
+const maxLogSize = parseInt(process.env.LOG_MAX_SIZE || '5242880', 10); // Default 5MB
+const maxLogFiles = parseInt(process.env.LOG_MAX_FILES || '5', 10); // Default 5 files
+
 // Define transports
 const transports = [
   // Console transport
@@ -54,19 +59,19 @@ const transports = [
   
   // File transport for errors
   new winston.transports.File({
-    filename: path.join(process.cwd(), 'logs', 'error.log'),
+    filename: path.join(process.cwd(), logDirectory, 'error.log'),
     level: 'error',
     format: fileFormat,
-    maxsize: 5242880, // 5MB
-    maxFiles: 5,
+    maxsize: maxLogSize,
+    maxFiles: maxLogFiles,
   }),
   
   // File transport for all logs
   new winston.transports.File({
-    filename: path.join(process.cwd(), 'logs', 'combined.log'),
+    filename: path.join(process.cwd(), logDirectory, 'combined.log'),
     format: fileFormat,
-    maxsize: 5242880, // 5MB
-    maxFiles: 5,
+    maxsize: maxLogSize,
+    maxFiles: maxLogFiles,
   }),
 ];
 

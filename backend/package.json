@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "set DATABASE_URL=mysql://root:Admin!2025@localhost:3306/tracker&& node dist/index.js",
+    "start": "node dist/index.js",
     "dev": "nodemon --exec ts-node --project tsconfig-dev.json src/index.ts",
     "test": "ts-node src/test/test-interfaces.ts",
     "test:interfaces": "ts-node src/test/test-interfaces.ts",
@@ -14,8 +14,17 @@
     "test:repositories": "ts-node src/test/test-repositories.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
-    "prisma:seed": "ts-node prisma/seed.ts"
+    "prisma:seed": "ts-node prisma/seed.ts",
+    "deploy:build": "npm ci && npm run prisma:generate && npm run build",
+    "deploy:migrate": "npm run prisma:migrate:deploy",
+    "pm2:start": "pm2 start ecosystem.config.js --env production",
+    "pm2:reload": "pm2 reload ecosystem.config.js --env production",
+    "pm2:stop": "pm2 stop tracker-api",
+    "pm2:delete": "pm2 delete tracker-api",
+    "pm2:logs": "pm2 logs tracker-api",
+    "pm2:monit": "pm2 monit"
   },
   "keywords": [
     "mobile",
