@@ -18,12 +18,20 @@ const swaggerDefinition: SwaggerDefinition = {
   },
   servers: [
     {
-      url: 'http://localhost:3001/api',
-      description: 'Development server',
+      url: 'http://localhost:83/api',
+      description: 'Development server (API)',
     },
     {
-      url: 'https://api.mobiletracker.com/api',
-      description: 'Production server',
+      url: 'http://localhost:83',
+      description: 'Development server (Root)',
+    },
+    {
+      url: 'https://tracker.mutindo.com/api',
+      description: 'Production server (API)',
+    },
+    {
+      url: 'https://tracker.mutindo.com',
+      description: 'Production server (Root)',
     },
   ],
   components: {
@@ -577,6 +585,50 @@ const swaggerDefinition: SwaggerDefinition = {
           },
         },
       },
+
+      // WebSocket Signaling schemas
+      WebSocketConnectedMessage: {
+        type: 'object',
+        description: 'Welcome message sent by server when client connects',
+        properties: {
+          type: {
+            type: 'string',
+            example: 'connected',
+          },
+          message: {
+            type: 'string',
+            example: 'Connected to signaling server',
+          },
+          clientsCount: {
+            type: 'integer',
+            example: 3,
+          },
+        },
+      },
+      WebSocketSignalMessage: {
+        type: 'object',
+        description: 'Generic signaling message format (offer, answer, ICE candidate, etc.)',
+        properties: {
+          type: {
+            type: 'string',
+            enum: ['offer', 'answer', 'ice-candidate', 'screen-share-offer', 'screen-share-answer', 'custom'],
+            example: 'offer',
+          },
+          data: {
+            type: 'object',
+            description: 'Message payload (varies by type)',
+            example: {
+              sdp: 'v=0\r\no=- 123456789 2 IN IP4 127.0.0.1...',
+              type: 'offer'
+            },
+          },
+          timestamp: {
+            type: 'string',
+            format: 'date-time',
+            example: '2023-01-01T12:00:00Z',
+          },
+        },
+      },
     },
     responses: {
       UnauthorizedError: {
@@ -691,6 +743,10 @@ const swaggerDefinition: SwaggerDefinition = {
       description: 'Media file upload, download, and management endpoints',
     },
     {
+      name: 'WebSocket',
+      description: 'WebSocket signaling server for real-time communication (screen sharing, WebRTC)',
+    },
+    {
       name: 'Health',
       description: 'System health and status endpoints',
     },
@@ -699,7 +755,7 @@ const swaggerDefinition: SwaggerDefinition = {
 
 const options = {
   definition: swaggerDefinition,
-  apis: ['./src/routes/*.ts', './src/controllers/*.ts'], // Path to the API docs
+  apis: ['./src/routes/*.ts', './src/controllers/*.ts', './src/index.ts'], // Path to the API docs
 };
 
 export const swaggerSpec = swaggerJsdoc(options);

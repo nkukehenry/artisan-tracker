@@ -25,11 +25,17 @@ import deviceRoutes from './routes/devices';
 import mediaRoutes from './routes/media';
 import portalRoutes from './routes/portal';
 
+// Import WebSocket signaling service
+import { SignalingService } from './services/signaling.service';
+
 dotenv.config();
 
 const app = express();
 const server = createServer(app);
 const PORT = parseInt(process.env.PORT || '83', 10);
+
+// Initialize WebSocket signaling server
+let signalingService: SignalingService;
 
 // Security middleware
 app.use(helmet({
@@ -43,10 +49,10 @@ app.use(helmet({
   },
 }));
 
-// CORS configuration
+// CORS configuration - Allow all origins
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:8080',
-  credentials: true,
+  origin: '*', // Allow all origins
+  credentials: false, // Must be false when origin is '*'
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
@@ -84,6 +90,74 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
 }));
 
 /**
+ * @swagger
+ * /signaling:
+ *   get:
+ *     summary: WebSocket signaling endpoint
+ *     tags: [WebSocket]
+ *     description: |
+ *       **⚠️ This is a WebSocket endpoint, not a REST API endpoint**
+ *       
+ *       ### Connection URLs:
+ *       - **Development:** `ws://localhost:83/signaling`
+ *       - **Production:** `wss://tracker.mutindo.com/signaling`
+ *       
+ *       ### Features:
+ *       - Real-time bidirectional communication
+ *       - Message broadcasting to all connected clients (except sender)
+ *       - Automatic health monitoring with ping/pong
+ *       - Perfect for WebRTC signaling (screen sharing, video calls)
+ *       
+ *       ### Connection Example:
+ *       ```javascript
+ *       const ws = new WebSocket('ws://localhost:83/signaling');
+ *       
+ *       ws.onopen = () => {
+ *         console.log('Connected to signaling server');
+ *       };
+ *       
+ *       ws.onmessage = (event) => {
+ *         const data = JSON.parse(event.data);
+ *         console.log('Received:', data);
+ *       };
+ *       
+ *       // Send message
+ *       ws.send(JSON.stringify({
+ *         type: 'offer',
+ *         data: { sdp: '...', type: 'offer' }
+ *       }));
+ *       ```
+ *       
+ *       ### Message Broadcasting:
+ *       Any message sent by a client is automatically broadcast to all other connected clients.
+ *       This enables peer-to-peer signaling for WebRTC connections.
+ *       
+ *       ### Testing:
+ *       - Open the test page: http://localhost:83/test-signaling.html
+ *       - Or use wscat: `wscat -c ws://localhost:83/signaling`
+ *       
+ *       ### Documentation:
+ *       See WEBSOCKET_SIGNALING.md for complete documentation including:
+ *       - WebRTC screen sharing examples
+ *       - Message format specifications
+ *       - Connection health monitoring
+ *       - Security considerations
+ *     responses:
+ *       101:
+ *         description: Switching Protocols - WebSocket connection established
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/WebSocketConnectedMessage'
+ *             example:
+ *               type: 'connected'
+ *               message: 'Connected to signaling server'
+ *               clientsCount: 3
+ *       400:
+ *         description: Bad Request - Invalid WebSocket upgrade request
+ *       426:
+ *         description: Upgrade Required - Client must upgrade to WebSocket protocol
+ *
  * @swagger
  * /health:
  *   get:
@@ -170,6 +244,11 @@ const shutdown = async () => {
       logger.info('HTTP server closed');
     });
     
+    // Close WebSocket connections
+    if (signalingService) {
+      await signalingService.shutdown();
+    }
+    
     await prisma.$disconnect();
     logger.info('Database disconnected');
     
@@ -215,11 +294,15 @@ const startServer = async () => {
     
     // Start server
     server.listen(PORT, () => {
+      // Initialize WebSocket signaling server after HTTP server starts
+      signalingService = new SignalingService(server);
+      
       logger.info(`🚀 Artisan Tracker API running on port ${PORT}`);
       logger.info(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
       logger.info(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
       logger.info(`💚 Health check: http://localhost:${PORT}/health`);
       logger.info(`🔗 API endpoints: http://localhost:${PORT}/api`);
+      logger.info(`🔌 WebSocket signaling: ws://localhost:${PORT}/signaling`);
     });
   } catch (error) {
     logger.error('Failed to start server', error);
