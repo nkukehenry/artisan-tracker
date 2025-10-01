@@ -73,7 +73,7 @@ export default function LoginPage() {
       <div 
         className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
         style={{
-          backgroundImage: 'url(https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80)',
+          backgroundImage: 'url(./images/login-bg.png)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
@@ -81,7 +81,7 @@ export default function LoginPage() {
       >
         <div className="max-w-md w-full space-y-8">
           {/* Translucent Card Container */}
-          <div className="bg-white/20 backdrop-blur-md rounded-2xl shadow-2xl border border-white/30 p-8">
+          <div className="bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl border border-white/30 p-8">
         {/* Header */}
         <div className="text-center">
           <div className="flex justify-center">
@@ -89,10 +89,10 @@ export default function LoginPage() {
               <Smartphone className="h-8 w-8 text-white" />
             </div>
           </div>
-          <h2 className="mt-6 text-3xl font-bold text-white">
+          <h2 className="mt-6 text-3xl font-bold text-blue-800">
             Sign in to your account
           </h2>
-          <p className="mt-2 text-sm text-white/90">
+          <p className="mt-2 text-sm text-gray-600">
             Welcome back to Mutindo Tracker
           </p>
         </div>
@@ -102,7 +102,7 @@ export default function LoginPage() {
           <div className="space-y-4">
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-white">
+              <label htmlFor="email" className="block text-sm font-medium text-blue-800">
                 Email address
               </label>
               <input
@@ -113,7 +113,7 @@ export default function LoginPage() {
                 value={formData.email}
                 onChange={handleInputChange}
                 className={`mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white/90 backdrop-blur-sm ${
-                  errors.email ? 'border-red-300' : 'border-white/50'
+                  errors.email ? 'border-red-300' : 'border-blue-800/50'
                 }`}
                 placeholder="Enter your email"
               />
@@ -124,7 +124,7 @@ export default function LoginPage() {
 
             {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-white">
+              <label htmlFor="password" className="block text-sm font-medium text-blue-800">
                 Password
               </label>
               <div className="mt-1 relative">
@@ -136,7 +136,7 @@ export default function LoginPage() {
                   value={formData.password}
                   onChange={handleInputChange}
                   className={`block w-full px-3 py-2 pr-10 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white/90 backdrop-blur-sm ${
-                    errors.password ? 'border-red-300' : 'border-white/50'
+                    errors.password ? 'border-red-300' : 'border-blue-800/50'
                   }`}
                   placeholder="Enter your password"
                 />
@@ -177,11 +177,11 @@ export default function LoginPage() {
 
           {/* Register Link */}
           <div className="text-center">
-            <p className="text-sm text-white/90">
+            <p className="text-sm text-blue-800/90">
               Don't have an account?{' '}
               <a
                 href="/register"
-                className="font-medium text-white hover:text-white/80"
+                className="font-medium text-blue-800 hover:text-blue-800/80"
               >
                 Sign up
               </a>
