@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'tracker-api',
+      name: 'artisan-tracker-api',
       script: './dist/index.js',
       instances: 'max', // Use all available CPU cores
       exec_mode: 'cluster',

@@ -8,7 +8,7 @@ set -e  # Exit on error
 
 ENVIRONMENT=${1:-production}
 APP_NAME="tracker-api"
-APP_DIR="/var/www/tracker/backend"
+APP_DIR="$(pwd)"
 BRANCH="main"
 
 echo "🚀 Starting deployment for $ENVIRONMENT environment..."
