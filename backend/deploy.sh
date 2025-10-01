@@ -7,8 +7,8 @@
 set -e  # Exit on error
 
 ENVIRONMENT=${1:-production}
-APP_NAME="artisan-tracker-api"
-APP_DIR="/var/www/artisan-tracker/backend"
+APP_NAME="tracker-api"
+APP_DIR="/var/www/tracker/backend"
 BRANCH="main"
 
 echo "🚀 Starting deployment for $ENVIRONMENT environment..."
@@ -32,8 +32,8 @@ print_warning() {
     echo -e "${YELLOW}⚠${NC} $1"
 }
 
-# Check if running as root
-if [ "$EUID" -eq 0 ]; then 
+# Check if running as root (skip on Windows)
+if [ -n "$EUID" ] && [ "$EUID" -eq 0 ]; then 
     print_error "Please do not run as root"
     exit 1
 fi
@@ -51,6 +51,10 @@ print_message "Changed to $APP_DIR"
 
 # Pull latest code
 print_message "Pulling latest code from $BRANCH branch..."
+
+# Fix git ownership issue if it exists
+git config --global --add safe.directory "$APP_DIR" 2>/dev/null || true
+
 git fetch origin
 git reset --hard origin/$BRANCH
 print_message "Code updated successfully"
