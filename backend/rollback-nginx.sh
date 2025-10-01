@@ -35,7 +35,7 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 BACKUP_DIR=${1:-""}
-SITE_NAME="tracker-api"
+SITE_NAME="artisan-tracker-api"
 NGINX_AVAILABLE="/etc/nginx/sites-available"
 NGINX_ENABLED="/etc/nginx/sites-enabled"
 
