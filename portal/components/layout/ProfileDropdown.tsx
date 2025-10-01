@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { User, Settings, LogOut, UserCircle, Shield } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/lib/hooks';
 import { logoutUser } from '@/store/slices/authSlice';
@@ -18,12 +19,14 @@ export default function ProfileDropdown({
   userEmail
 }: ProfileDropdownProps) {
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const { user } = useAppSelector((state) => state.auth);
   
   // Use Redux state if props not provided
   const displayName = userName || `${user?.firstName} ${user?.lastName}` || 'User';
-  const displayRole = userRole || user?.role || 'USER';
+  const displayRole = (userRole || user?.role || 'USER').replace('_', ' ');
   const displayEmail = userEmail || user?.email || '';
+  
   const handleProfile = () => {
     // TODO: Navigate to profile page
     console.log('Open profile');
@@ -34,13 +37,23 @@ export default function ProfileDropdown({
     console.log('Open settings');
   };
 
-  const handleLogout = () => {
-    dispatch(addToast({
-      type: 'info',
-      title: 'Logging Out',
-      message: 'You have been successfully logged out.',
-    }));
-    dispatch(logoutUser());
+  const handleLogout = async () => {
+    try {
+      dispatch(addToast({
+        type: 'info',
+        title: 'Logging Out',
+        message: 'You have been successfully logged out.',
+      }));
+      
+      await dispatch(logoutUser());
+      
+      // Redirect to login page after logout
+      router.push('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Even if logout fails, redirect to login
+      router.push('/login');
+    }
   };
 
   const dropdownItems = [
@@ -71,13 +84,13 @@ export default function ProfileDropdown({
     <Dropdown
       trigger={
         <div className="flex items-center gap-3">
-          <div className="text-right">
+          <div className="text-left">
             <p className="text-sm font-medium text-gray-700">{displayName}</p>
             <p className="text-xs text-gray-500">{displayRole}</p>
           </div>
           <div className="relative">
             <UserCircle className="h-8 w-8 text-gray-500" />
-            {displayRole === 'SUPER_ADMIN' && (
+            {displayRole === 'SUPER ADMIN' && (
               <Shield className="absolute -bottom-1 -right-1 h-4 w-4 text-blue-600 bg-white rounded-full" />
             )}
           </div>

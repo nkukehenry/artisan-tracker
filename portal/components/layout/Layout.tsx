@@ -29,13 +29,13 @@ export default function Layout({ children }: LayoutProps) {
         <Sidebar onClose={() => setSidebarOpen(false)} />
       </div>
 
-      {/* Main content */}
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <Navbar onMenuClick={() => setSidebarOpen(true)} />
-        <main className="flex-1 overflow-y-auto bg-white p-6">
-          {children}
-        </main>
-      </div>
-    </div>
-  );
-}
+          {/* Main content */}
+          <div className="flex flex-1 flex-col overflow-hidden">
+            <Navbar onMenuClick={() => setSidebarOpen(true)} />
+            <main className="flex-1 overflow-y-auto bg-white p-6">
+              {children}
+            </main>
+          </div>
+        </div>
+      );
+    }

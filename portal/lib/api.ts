@@ -57,11 +57,11 @@ apiClient.interceptors.response.use(
           }
         }
       } catch (refreshError) {
-        // Refresh failed, redirect to login
+        // Refresh failed, clear tokens
         if (typeof window !== 'undefined') {
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
-          window.location.href = '/login';
+          // Don't redirect here - let the auth state handle it
         }
       }
     }
@@ -75,7 +75,14 @@ export const handleApiError = (error: AxiosError) => {
   if (error.response) {
     // Server responded with error status
     const { status, data } = error.response;
-    const message = (data as any)?.message || 'An error occurred';
+    
+    // Handle nested error structure from Mutindo Tracker API
+    let message = 'An error occurred';
+    if ((data as any)?.error?.message) {
+      message = (data as any).error.message;
+    } else if ((data as any)?.message) {
+      message = (data as any).message;
+    }
     
     return {
       message,

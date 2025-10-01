@@ -373,14 +373,32 @@ export const deviceValidation = {
 
   getDeviceById: [
     param('id')
-      .isUUID()
-      .withMessage('Device ID must be a valid UUID'),
+      .custom((value) => {
+        // Accept Prisma ID format (starts with letters, contains alphanumeric)
+        const isPrismaId = /^[a-z0-9]{20,25}$/i.test(value);
+        // Also accept standard UUID format
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+        
+        if (!isPrismaId && !isUUID) {
+          throw new Error('Device ID must be a valid database ID format');
+        }
+        return true;
+      }),
   ],
 
   updateDevice: [
     param('id')
-      .isUUID()
-      .withMessage('Device ID must be a valid UUID'),
+      .custom((value) => {
+        // Accept Prisma ID format (starts with letters, contains alphanumeric)
+        const isPrismaId = /^[a-z0-9]{20,25}$/i.test(value);
+        // Also accept standard UUID format
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+        
+        if (!isPrismaId && !isUUID) {
+          throw new Error('Device ID must be a valid database ID format');
+        }
+        return true;
+      }),
     body('name')
       .optional()
       .trim()
@@ -405,14 +423,32 @@ export const deviceValidation = {
 
   deleteDevice: [
     param('id')
-      .isUUID()
-      .withMessage('Device ID must be a valid UUID'),
+      .custom((value) => {
+        // Accept Prisma ID format (starts with letters, contains alphanumeric)
+        const isPrismaId = /^[a-z0-9]{20,25}$/i.test(value);
+        // Also accept standard UUID format
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+        
+        if (!isPrismaId && !isUUID) {
+          throw new Error('Device ID must be a valid database ID format');
+        }
+        return true;
+      }),
   ],
 
   sendCommand: [
     param('id')
-      .isUUID()
-      .withMessage('Device ID must be a valid UUID'),
+      .custom((value) => {
+        // Accept Prisma ID format (starts with letters, contains alphanumeric)
+        const isPrismaId = /^[a-z0-9]{20,25}$/i.test(value);
+        // Also accept standard UUID format
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+        
+        if (!isPrismaId && !isUUID) {
+          throw new Error('Device ID must be a valid database ID format');
+        }
+        return true;
+      }),
     body('command')
       .isIn(['RECORD_AUDIO', 'RECORD_VIDEO', 'SCREEN_RECORDING', 'TAKE_PHOTO', 'GET_LOCATION', 'GET_CONTACTS', 'GET_CALL_LOGS', 'GET_MESSAGES', 'ENABLE_APP', 'DISABLE_APP', 'RESTART_DEVICE', 'WIPE_DATA'])
       .withMessage('Invalid command type'),
@@ -424,8 +460,17 @@ export const deviceValidation = {
 
   getDeviceCommands: [
     param('id')
-      .isUUID()
-      .withMessage('Device ID must be a valid UUID'),
+      .custom((value) => {
+        // Accept Prisma ID format (starts with letters, contains alphanumeric)
+        const isPrismaId = /^[a-z0-9]{20,25}$/i.test(value);
+        // Also accept standard UUID format
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+        
+        if (!isPrismaId && !isUUID) {
+          throw new Error('Device ID must be a valid database ID format');
+        }
+        return true;
+      }),
     query('status')
       .optional()
       .isIn(['PENDING', 'SENT', 'EXECUTED', 'FAILED', 'CANCELLED'])
@@ -452,7 +497,16 @@ export const deviceValidation = {
 
   getDeviceStatus: [
     param('id')
-      .isUUID()
-      .withMessage('Device ID must be a valid UUID'),
+      .custom((value) => {
+        // Accept Prisma ID format (starts with letters, contains alphanumeric)
+        const isPrismaId = /^[a-z0-9]{20,25}$/i.test(value);
+        // Also accept standard UUID format
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+        
+        if (!isPrismaId && !isUUID) {
+          throw new Error('Device ID must be a valid database ID format');
+        }
+        return true;
+      }),
   ],
 };

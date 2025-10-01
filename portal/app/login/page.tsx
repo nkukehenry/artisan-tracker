@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from '@/lib/hooks';
 import { loginUser, clearError } from '@/store/slices/authSlice';
 import { addToast } from '@/store/slices/appSlice';
 import { Smartphone, Eye, EyeOff } from 'lucide-react';
-import PublicRoute from '@/components/auth/PublicRoute';
+import AuthWrapper from '@/components/auth/AuthWrapper';
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -22,13 +22,15 @@ export default function LoginPage() {
 
   // Show success toast and redirect on successful login
   useEffect(() => {
+    
     if (isAuthenticated && user) {
       dispatch(addToast({
         type: 'success',
         title: 'Login Successful',
         message: `Welcome back, ${user.firstName}!`,
       }));
-      router.push('/dashboard');
+
+      router.push('/');
     }
   }, [isAuthenticated, user, dispatch, router]);
 
@@ -69,7 +71,7 @@ export default function LoginPage() {
   };
 
   return (
-    <PublicRoute>
+    <AuthWrapper>
       <div 
         className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
         style={{
@@ -161,7 +163,7 @@ export default function LoginPage() {
           {/* Error Message */}
           {error && (
             <div className="bg-red-500/20 border border-red-300/50 rounded-lg p-3 backdrop-blur-sm">
-              <p className="text-sm text-red-100">{error}</p>
+              <p className="text-sm text-red">{error}</p>
             </div>
           )}
 
@@ -191,6 +193,6 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
-    </PublicRoute>
+    </AuthWrapper>
   );
 }

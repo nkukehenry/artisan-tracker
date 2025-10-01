@@ -84,12 +84,12 @@ export default function NotificationDropdown() {
       {/* Trigger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative rounded-full p-1 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+        className="relative  p-1 text-gray-500 hover:text-gray-700 focus:outline-none active:outline-none"
         aria-label="View notifications"
       >
         <Bell className="h-6 w-6" />
         {unreadCount > 0 && (
-          <span className="absolute right-0 top-0 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white ring-2 ring-white">
+          <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white ring-2 ring-white">
             {unreadCount}
           </span>
         )}
@@ -140,13 +140,13 @@ export default function NotificationDropdown() {
             <div className="flex items-center justify-between">
               <button 
                 onClick={handleMarkAllRead}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium focus:outline-none active:outline-none"
               >
                 Mark all as read
               </button>
               <button 
                 onClick={handleNotificationSettings}
-                className="text-sm text-gray-600 hover:text-gray-700 font-medium"
+                className="text-sm text-gray-600 hover:text-gray-700 font-medium focus:outline-none active:outline-none"
               >
                 Settings
               </button>

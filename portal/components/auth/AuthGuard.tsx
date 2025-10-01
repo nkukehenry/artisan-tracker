@@ -1,46 +1,57 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAppDispatch, useAppSelector } from '@/lib/hooks';
-import { initializeAuth } from '@/store/slices/authSlice';
+import { useAppSelector } from '@/lib/hooks';
 
 interface AuthGuardProps {
   children: React.ReactNode;
 }
 
 export default function AuthGuard({ children }: AuthGuardProps) {
-  const dispatch = useAppDispatch();
   const { isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
   const router = useRouter();
+  const [hasRedirected, setHasRedirected] = useState(false);
 
+  // Redirect to login if not authenticated (after loading completes and we haven't redirected yet)
   useEffect(() => {
-    // Initialize auth state from localStorage
-    dispatch(initializeAuth());
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!isLoading && !isAuthenticated && !hasRedirected) {
+      setHasRedirected(true);
       router.push('/login');
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, hasRedirected, router]);
 
-  // Show loading spinner while checking authentication
+  // Reset redirect flag when authentication state changes
+  useEffect(() => {
+    if (isAuthenticated) {
+      setHasRedirected(false);
+    }
+  }, [isAuthenticated]);
+
+  // Show simple loading while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-200 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     );
   }
 
-  // Don't render children if not authenticated
+  // Show simple loading if not authenticated (redirect will happen via useEffect)
   if (!isAuthenticated) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Redirecting...</p>
+        </div>
+      </div>
+    );
   }
 
+  // Render children if authenticated
   return <>{children}</>;
 }

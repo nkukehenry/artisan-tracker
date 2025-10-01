@@ -7,12 +7,6 @@ export const store = configureStore({
     auth: authReducer,
     app: appReducer,
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: {
-        ignoredActions: ['persist/PERSIST'],
-      },
-    }),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

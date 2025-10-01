@@ -2,45 +2,47 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAppDispatch, useAppSelector } from '@/lib/hooks';
-import { initializeAuth } from '@/store/slices/authSlice';
+import { useAppSelector } from '@/lib/hooks';
 
 interface PublicRouteProps {
   children: React.ReactNode;
 }
 
 export default function PublicRoute({ children }: PublicRouteProps) {
-  const dispatch = useAppDispatch();
   const { isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
   const router = useRouter();
 
-  useEffect(() => {
-    // Initialize auth state from localStorage
-    dispatch(initializeAuth());
-  }, [dispatch]);
-
+  // Redirect to root (dashboard) if authenticated (after loading completes)
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.push('/dashboard');
+      router.push('/');
     }
   }, [isAuthenticated, isLoading, router]);
 
-  // Show loading spinner while checking authentication
+  // Show simple loading while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-200 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     );
   }
 
-  // Don't render children if authenticated (redirect to dashboard)
+  // Show simple loading if authenticated (redirect will happen via useEffect)
   if (isAuthenticated) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Redirecting...</p>
+        </div>
+      </div>
+    );
   }
 
+  // Render children if not authenticated
   return <>{children}</>;
 }

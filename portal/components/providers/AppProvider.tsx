@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useAppSelector, useAppDispatch } from '@/lib/hooks';
 import { setLoading, addToast } from '@/store/slices/appSlice';
-import { initializeAuth, loginUser, registerUser, logoutUser } from '@/store/slices/authSlice';
+import { initializeAuth } from '@/store/slices/authSlice';
 import LoaderOverlay from '@/components/ui/LoaderOverlay';
 import ToastContainer from '@/components/ui/ToastContainer';
 
@@ -14,21 +14,17 @@ interface AppProviderProps {
 export default function AppProvider({ children }: AppProviderProps) {
   const dispatch = useAppDispatch();
   const { isLoading, loadingMessage } = useAppSelector((state) => state.app);
-  const { isLoading: authLoading, user, error: authError } = useAppSelector((state) => state.auth);
+  const { isLoading: authLoading, error: authError, isAuthenticated } = useAppSelector((state) => state.auth);
 
-  // Initialize authentication on app start
+  // Initialize authentication on app start (only if not already initialized)
   useEffect(() => {
-    dispatch(initializeAuth());
-  }, [dispatch]);
-
-  // Update global loading state based on auth loading
-  useEffect(() => {
-    if (authLoading) {
-      dispatch(setLoading({ isLoading: true, message: 'Authenticating...' }));
-    } else {
-      dispatch(setLoading({ isLoading: false }));
+    // Only initialize if we haven't already tried to authenticate
+    if (!authLoading && !isAuthenticated && !authError) {
+      dispatch(initializeAuth());
     }
-  }, [authLoading, dispatch]);
+  }, [dispatch, authLoading, isAuthenticated, authError]);
+
+  // Don't show global loading for authentication - let AuthWrapper handle it
 
   // Handle auth errors with toasts
   useEffect(() => {

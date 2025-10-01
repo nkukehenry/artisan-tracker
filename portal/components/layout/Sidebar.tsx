@@ -13,6 +13,7 @@ import {
   Grid3X3,
   Plus,
   X,
+  Monitor,
 } from 'lucide-react';
 
 interface NavItem {
@@ -24,6 +25,7 @@ interface NavItem {
 const navigation: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Devices', href: '/devices', icon: Smartphone },
+  { name: 'Remote Control', href: '/remote-control', icon: Monitor },
   { name: 'Media', href: '/media', icon: Image },
   { name: 'Messages', href: '/messages', icon: MessageSquare },
   { name: 'Call Logs', href: '/call-logs', icon: Phone },
@@ -43,7 +45,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
     <div className="flex h-full w-64 flex-col bg-gray-900">
       {/* Logo */}
       <div className="flex h-16 items-center justify-between border-b border-gray-800 px-6">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 py-4">
           <div className="h-8 w-8 rounded-lg bg-blue-800 flex items-center justify-center">
             <Smartphone className="h-5 w-5 text-white" />
           </div>
@@ -68,16 +70,17 @@ export default function Sidebar({ onClose }: SidebarProps) {
               href={item.href}
               onClick={onClose}
               className={`
-                group flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors
+                group flex items-center rounded-lg px-3 py-4 text-sm font-medium transition-colors
                 ${
                   isActive
-                    ? 'bg-gray-800 text-white'
+                    ? 'bg-gray-800 text-blue-300'
                     : 'text-white hover:bg-gray-800'
                 }
               `}
             >
               <item.icon
-                className={`mr-3 h-5 w-5 flex-shrink-0 text-white`}
+                className={`mr-3 h-5 w-5 flex-shrink-0 ${
+                  isActive ? 'text-blue-300' : 'text-white'}`}
               />
               {item.name}
             </Link>
