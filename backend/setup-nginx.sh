@@ -14,9 +14,9 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-SITE_NAME="tracker-api"
+SITE_NAME="artisan-tracker-api"
 DOMAIN="tracker.mutindo.com"
-APP_DIR="/var/www/tracker/backend"
+APP_DIR="/var/www/artisan-tracker/backend"
 NGINX_AVAILABLE="/etc/nginx/sites-available"
 NGINX_ENABLED="/etc/nginx/sites-enabled"
 BACKUP_DIR="/etc/nginx/backups/$(date +%Y%m%d_%H%M%S)"
