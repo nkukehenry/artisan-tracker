@@ -83,7 +83,7 @@ export default function CallLogsPage() {
   const deviceOptions = [
     { value: '', label: 'Select a device' },
     ...devices.map(device => ({
-      value: device.id,
+      value: device.deviceId,
       label: device.name,
     })),
   ];
