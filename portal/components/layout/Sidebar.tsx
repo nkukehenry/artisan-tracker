@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation';
 import {
   Home,
   Smartphone,
-  Image,
   MessageSquare,
   Phone,
   Users,
@@ -23,14 +22,13 @@ interface NavItem {
 }
 
 const navigation: NavItem[] = [
-  { name: 'Dashboard', href: '/dashboard', icon: Home },
+  { name: 'Dashboard', href: '/', icon: Home },
   { name: 'Devices', href: '/devices', icon: Smartphone },
   { name: 'Remote Control', href: '/remote-control', icon: Monitor },
-  { name: 'Media', href: '/media', icon: Image },
   { name: 'Messages', href: '/messages', icon: MessageSquare },
   { name: 'Call Logs', href: '/call-logs', icon: Phone },
   { name: 'Contacts', href: '/contacts', icon: Users },
-  { name: 'Locations', href: '/locations', icon: MapPin },
+  { name: 'Location', href: '/location', icon: MapPin },
   { name: 'App Activities', href: '/app-activities', icon: Grid3X3 },
 ];
 

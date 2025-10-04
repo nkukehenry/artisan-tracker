@@ -2,192 +2,23 @@ import { Request, Response } from 'express';
 import { body, param, query, validationResult } from 'express-validator';
 import { container } from '../config/container';
 import { LocationRepository, CreateLocationData } from '../interfaces/location.interface';
+import { IDeviceService } from '../interfaces/device.interface';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { requireAuth, requireRole } from '../middleware/auth';
 import { BadRequestError, NotFoundError } from '../utils/error';
 
-/**
- * @swagger
- * components:
- *   schemas:
- *     Location:
- *       type: object
- *       required:
- *         - id
- *         - deviceId
- *         - latitude
- *         - longitude
- *         - accuracy
- *         - timestamp
- *         - createdAt
- *         - updatedAt
- *       properties:
- *         id:
- *           type: string
- *           format: uuid
- *           description: Unique identifier for the location entry
- *         deviceId:
- *           type: string
- *           format: uuid
- *           description: ID of the device that reported this location
- *         latitude:
- *           type: number
- *           format: double
- *           minimum: -90
- *           maximum: 90
- *           description: Latitude coordinate
- *         longitude:
- *           type: number
- *           format: double
- *           minimum: -180
- *           maximum: 180
- *           description: Longitude coordinate
- *         accuracy:
- *           type: number
- *           format: float
- *           minimum: 0
- *           description: Location accuracy in meters
- *         altitude:
- *           type: number
- *           format: float
- *           description: Altitude in meters
- *         speed:
- *           type: number
- *           format: float
- *           minimum: 0
- *           description: Speed in meters per second
- *         heading:
- *           type: number
- *           format: float
- *           minimum: 0
- *           maximum: 360
- *           description: Direction of travel in degrees
- *         address:
- *           type: string
- *           description: Human-readable address
- *         timestamp:
- *           type: string
- *           format: date-time
- *           description: When the location was recorded
- *         isEncrypted:
- *           type: boolean
- *           description: Whether the location data is encrypted
- *         createdAt:
- *           type: string
- *           format: date-time
- *         updatedAt:
- *           type: string
- *           format: date-time
- *     
- *     CreateLocationRequest:
- *       type: object
- *       required:
- *         - deviceId
- *         - latitude
- *         - longitude
- *         - accuracy
- *         - timestamp
- *       properties:
- *         deviceId:
- *           type: string
- *           format: uuid
- *         latitude:
- *           type: number
- *           format: double
- *           minimum: -90
- *           maximum: 90
- *         longitude:
- *           type: number
- *           format: double
- *           minimum: -180
- *           maximum: 180
- *         accuracy:
- *           type: number
- *           format: float
- *           minimum: 0
- *         altitude:
- *           type: number
- *           format: float
- *         speed:
- *           type: number
- *           format: float
- *           minimum: 0
- *         heading:
- *           type: number
- *           format: float
- *           minimum: 0
- *           maximum: 360
- *         address:
- *           type: string
- *         timestamp:
- *           type: string
- *           format: date-time
- *         isEncrypted:
- *           type: boolean
- *           default: false
- *     
- *     LocationsResponse:
- *       type: object
- *       properties:
- *         success:
- *           type: boolean
- *         data:
- *           type: array
- *           items:
- *             $ref: '#/components/schemas/Location'
- *         pagination:
- *           $ref: '#/components/schemas/PaginationInfo'
- */
+// Swagger documentation removed - kept only in routes
 
 export class LocationController {
   private locationRepository: LocationRepository;
+  private deviceService: IDeviceService;
 
   constructor() {
     this.locationRepository = container.getRepository<LocationRepository>('locationRepository');
+    this.deviceService = container.getService<IDeviceService>('deviceService');
   }
 
-  /**
-   * @swagger
-   * /api/locations:
-   *   post:
-   *     summary: Upload location data from device
-   *     tags: [Location]
-   *     security:
-   *       - bearerAuth: []
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             properties:
-   *               locations:
-   *                 type: array
-   *                 items:
-   *                   $ref: '#/components/schemas/CreateLocationRequest'
-   *     responses:
-   *       201:
-   *         description: Location data uploaded successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                 message:
-   *                   type: string
-   *                 data:
-   *                   type: array
-   *                   items:
-   *                     $ref: '#/components/schemas/Location'
-   *       400:
-   *         $ref: '#/components/responses/BadRequest'
-   *       401:
-   *         $ref: '#/components/responses/Unauthorized'
-   *       500:
-   *         $ref: '#/components/responses/InternalServerError'
-   */
+  // Swagger documentation removed - kept only in routes
   uploadLocations = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -203,9 +34,23 @@ export class LocationController {
 
     const createdLocations = [];
     for (const locationData of locations) {
+      // Look up device by deviceId to get the database ID
+      const device = await this.deviceService.getDeviceByDeviceId(locationData.deviceId);
+      if (!device) {
+        throw new NotFoundError(`Device with deviceId '${locationData.deviceId}' not found`);
+      }
+
       const location: CreateLocationData = {
-        ...locationData,
-        isEncrypted: locationData.isEncrypted ?? false,
+        deviceId: device.id, // Use the database ID from the lookup
+        latitude: locationData.latitude,
+        longitude: locationData.longitude,
+        accuracy: locationData.accuracy,
+        altitude: locationData.altitude,
+        speed: locationData.speed,
+        heading: locationData.heading,
+        address: locationData.address,
+        timestamp: new Date(locationData.timestamp),
+        // isEncrypted removed - not in Prisma schema
       };
       
       const created = await this.locationRepository.create(location);
@@ -219,71 +64,7 @@ export class LocationController {
     });
   });
 
-  /**
-   * @swagger
-   * /api/locations/device/{deviceId}:
-   *   get:
-   *     summary: Get location history for a specific device
-   *     tags: [Location]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: deviceId
-   *         required: true
-   *         schema:
-   *           type: string
-   *           format: uuid
-   *         description: Device ID
-   *       - in: query
-   *         name: page
-   *         schema:
-   *           type: integer
-   *           minimum: 1
-   *           default: 1
-   *         description: Page number
-   *       - in: query
-   *         name: limit
-   *         schema:
-   *           type: integer
-   *           minimum: 1
-   *           maximum: 100
-   *           default: 20
-   *         description: Number of items per page
-   *       - in: query
-   *         name: startDate
-   *         schema:
-   *           type: string
-   *           format: date-time
-   *         description: Start date filter
-   *       - in: query
-   *         name: endDate
-   *         schema:
-   *           type: string
-   *           format: date-time
-   *         description: End date filter
-   *       - in: query
-   *         name: minAccuracy
-   *         schema:
-   *           type: number
-   *           format: float
-   *         description: Minimum accuracy filter (in meters)
-   *     responses:
-   *       200:
-   *         description: Location history retrieved successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/LocationsResponse'
-   *       400:
-   *         $ref: '#/components/responses/BadRequest'
-   *       401:
-   *         $ref: '#/components/responses/Unauthorized'
-   *       404:
-   *         $ref: '#/components/responses/NotFound'
-   *       500:
-   *         $ref: '#/components/responses/InternalServerError'
-   */
+  // Swagger documentation removed - kept only in routes
   getLocationsByDevice = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -323,43 +104,7 @@ export class LocationController {
     });
   });
 
-  /**
-   * @swagger
-   * /api/locations/device/{deviceId}/current:
-   *   get:
-   *     summary: Get current location for a specific device
-   *     tags: [Location]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: deviceId
-   *         required: true
-   *         schema:
-   *           type: string
-   *           format: uuid
-   *         description: Device ID
-   *     responses:
-   *       200:
-   *         description: Current location retrieved successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                 data:
-   *                   $ref: '#/components/schemas/Location'
-   *       400:
-   *         $ref: '#/components/responses/BadRequest'
-   *       401:
-   *         $ref: '#/components/responses/Unauthorized'
-   *       404:
-   *         $ref: '#/components/responses/NotFound'
-   *       500:
-   *         $ref: '#/components/responses/InternalServerError'
-   */
+  // Swagger documentation removed - kept only in routes
   getCurrentLocation = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -380,43 +125,7 @@ export class LocationController {
     });
   });
 
-  /**
-   * @swagger
-   * /api/locations/{id}:
-   *   get:
-   *     summary: Get a specific location entry by ID
-   *     tags: [Location]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: id
-   *         required: true
-   *         schema:
-   *           type: string
-   *           format: uuid
-   *         description: Location ID
-   *     responses:
-   *       200:
-   *         description: Location entry retrieved successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                 data:
-   *                   $ref: '#/components/schemas/Location'
-   *       400:
-   *         $ref: '#/components/responses/BadRequest'
-   *       401:
-   *         $ref: '#/components/responses/Unauthorized'
-   *       404:
-   *         $ref: '#/components/responses/NotFound'
-   *       500:
-   *         $ref: '#/components/responses/InternalServerError'
-   */
+  // Swagger documentation removed - kept only in routes
   getLocationById = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -437,43 +146,7 @@ export class LocationController {
     });
   });
 
-  /**
-   * @swagger
-   * /api/locations/{id}:
-   *   delete:
-   *     summary: Delete a location entry
-   *     tags: [Location]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: id
-   *         required: true
-   *         schema:
-   *           type: string
-   *           format: uuid
-   *         description: Location ID
-   *     responses:
-   *       200:
-   *         description: Location entry deleted successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                 message:
-   *                   type: string
-   *       400:
-   *         $ref: '#/components/responses/BadRequest'
-   *       401:
-   *         $ref: '#/components/responses/Unauthorized'
-   *       404:
-   *         $ref: '#/components/responses/NotFound'
-   *       500:
-   *         $ref: '#/components/responses/InternalServerError'
-   */
+  // Swagger documentation removed - kept only in routes
   deleteLocation = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -504,8 +177,10 @@ export const locationValidation = {
       .isArray({ min: 1 })
       .withMessage('locations must be a non-empty array'),
     body('locations.*.deviceId')
-      .isUUID()
-      .withMessage('Device ID must be a valid UUID'),
+      .isString()
+      .trim()
+      .isLength({ min: 1, max: 50 })
+      .withMessage('Device ID must be between 1 and 50 characters'),
     body('locations.*.latitude')
       .isFloat({ min: -90, max: 90 })
       .withMessage('Latitude must be between -90 and 90'),
@@ -536,16 +211,15 @@ export const locationValidation = {
     body('locations.*.timestamp')
       .isISO8601()
       .withMessage('Timestamp must be a valid ISO 8601 date'),
-    body('locations.*.isEncrypted')
-      .optional()
-      .isBoolean()
-      .withMessage('isEncrypted must be a boolean'),
+    // isEncrypted validation removed - not in Prisma schema
   ],
 
   getLocationsByDevice: [
     param('deviceId')
-      .isUUID()
-      .withMessage('Device ID must be a valid UUID'),
+      .isString()
+      .trim()
+      .isLength({ min: 1, max: 50 })
+      .withMessage('Device ID must be between 1 and 50 characters'),
     query('page')
       .optional()
       .isInt({ min: 1 })
@@ -570,8 +244,10 @@ export const locationValidation = {
 
   getCurrentLocation: [
     param('deviceId')
-      .isUUID()
-      .withMessage('Device ID must be a valid UUID'),
+      .isString()
+      .trim()
+      .isLength({ min: 1, max: 50 })
+      .withMessage('Device ID must be between 1 and 50 characters'),
   ],
 
   getLocationById: [
@@ -586,3 +262,4 @@ export const locationValidation = {
       .withMessage('Location ID must be a valid UUID'),
   ],
 };
+

@@ -117,7 +117,7 @@ export function useDevices() {
     }
   };
 
-  const updateDevice = async (deviceId: string, deviceData: Partial<DeviceFormData>) => {
+  const updateDevice = async (deviceId: string, deviceData: Partial<UpdateDeviceData>) => {
     dispatch(setLoading({ isLoading: true, message: 'Updating device...' }));
     
     try {

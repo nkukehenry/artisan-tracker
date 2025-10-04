@@ -2,7 +2,8 @@
 ### Base URL: http://localhost:3001/api
 
 ### Variables
-@baseUrl = http://localhost:3001/api
+@baseUrl = http://localhost:83/api
+@validToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWc1anpveXAwMDA2a2hwOHh1eno2MDRhIiwiZW1haWwiOiJhZG1pbkBhY21lLmNvbSIsInJvbGUiOiJURU5BTlRfQURNSU4iLCJ0ZW5hbnRJZCI6ImNtZzVqem8wNDAwMDBraHA4MW5xMG54ZHUiLCJpYXQiOjE3NTk1NzUzOTcsImV4cCI6MTc2MDE4MDE5N30.Nun_NKfvXCajbuf0-okWYq8twVjGeUJvWDmUhjEEZ3Q
 @contentType = application/json
 
 ### ===========================================
@@ -51,7 +52,7 @@ Content-Type: {{contentType}}
 ### 5. Logout (replace with actual tokens)
 POST {{baseUrl}}/auth/logout
 Content-Type: {{contentType}}
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 {
   "refreshToken": "your-refresh-token-here"
@@ -64,7 +65,7 @@ Authorization: Bearer your-access-token-here
 ### 6. Register a new device (replace with actual token)
 POST {{baseUrl}}/devices/register
 Content-Type: {{contentType}}
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 {
   "deviceId": "TEST-DEVICE-001",
@@ -76,16 +77,16 @@ Authorization: Bearer your-access-token-here
 
 ### 7. Get all devices for current user
 GET {{baseUrl}}/devices
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### 8. Get device by ID (replace with actual device ID)
 GET {{baseUrl}}/devices/device-id-here
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### 9. Update device information
 PUT {{baseUrl}}/devices/device-id-here
 Content-Type: {{contentType}}
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 {
   "name": "Updated Device Name",
@@ -95,16 +96,16 @@ Authorization: Bearer your-access-token-here
 
 ### 10. Delete device
 DELETE {{baseUrl}}/devices/device-id-here
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### 11. Get device status
 GET {{baseUrl}}/devices/device-id-here/status
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### 12. Update device status (from device)
 PUT {{baseUrl}}/devices/device-id-here/status
 Content-Type: {{contentType}}
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 {
   "isOnline": true,
@@ -124,7 +125,7 @@ Authorization: Bearer your-access-token-here
 ### 13. Send command to device
 POST {{baseUrl}}/devices/device-id-here/commands
 Content-Type: {{contentType}}
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 {
   "command": "GET_LOCATION",
@@ -136,7 +137,7 @@ Authorization: Bearer your-access-token-here
 ### 14. Send photo command
 POST {{baseUrl}}/devices/device-id-here/commands
 Content-Type: {{contentType}}
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 {
   "command": "TAKE_PHOTO",
@@ -149,7 +150,7 @@ Authorization: Bearer your-access-token-here
 ### 15. Send audio recording command
 POST {{baseUrl}}/devices/device-id-here/commands
 Content-Type: {{contentType}}
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 {
   "command": "RECORD_AUDIO",
@@ -162,7 +163,7 @@ Authorization: Bearer your-access-token-here
 ### 16. Send video recording command
 POST {{baseUrl}}/devices/device-id-here/commands
 Content-Type: {{contentType}}
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 {
   "command": "RECORD_VIDEO",
@@ -175,7 +176,7 @@ Authorization: Bearer your-access-token-here
 ### 17. Send screen recording command
 POST {{baseUrl}}/devices/device-id-here/commands
 Content-Type: {{contentType}}
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 {
   "command": "SCREEN_RECORDING",
@@ -188,7 +189,7 @@ Authorization: Bearer your-access-token-here
 ### 18. Get call logs
 POST {{baseUrl}}/devices/device-id-here/commands
 Content-Type: {{contentType}}
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 {
   "command": "GET_CALL_LOGS",
@@ -202,7 +203,7 @@ Authorization: Bearer your-access-token-here
 ### 19. Get contacts
 POST {{baseUrl}}/devices/device-id-here/commands
 Content-Type: {{contentType}}
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 {
   "command": "GET_CONTACTS",
@@ -214,7 +215,7 @@ Authorization: Bearer your-access-token-here
 ### 20. Get messages
 POST {{baseUrl}}/devices/device-id-here/commands
 Content-Type: {{contentType}}
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 {
   "command": "GET_MESSAGES",
@@ -227,7 +228,7 @@ Authorization: Bearer your-access-token-here
 ### 21. Enable app
 POST {{baseUrl}}/devices/device-id-here/commands
 Content-Type: {{contentType}}
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 {
   "command": "ENABLE_APP",
@@ -239,7 +240,7 @@ Authorization: Bearer your-access-token-here
 ### 22. Disable app
 POST {{baseUrl}}/devices/device-id-here/commands
 Content-Type: {{contentType}}
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 {
   "command": "DISABLE_APP",
@@ -250,11 +251,11 @@ Authorization: Bearer your-access-token-here
 
 ### 23. Get device commands history
 GET {{baseUrl}}/devices/device-id-here/commands
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### 24. Get device commands with pagination
 GET {{baseUrl}}/devices/device-id-here/commands?page=1&limit=10&status=EXECUTED
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### ===========================================
 ### MEDIA MANAGEMENT TESTS
@@ -263,7 +264,7 @@ Authorization: Bearer your-access-token-here
 ### 25. Upload media file (photo)
 POST {{baseUrl}}/media/upload
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="file"; filename="test-photo.jpg"
@@ -283,7 +284,7 @@ PHOTO
 ### 26. Upload media file (video)
 POST {{baseUrl}}/media/upload
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="file"; filename="test-video.mp4"
@@ -302,19 +303,19 @@ VIDEO
 
 ### 27. Get media files for device
 GET {{baseUrl}}/media/device/device-id-here
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### 28. Get media files with pagination
 GET {{baseUrl}}/media/device/device-id-here?page=1&limit=10&fileType=PHOTO
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### 29. Download media file
 GET {{baseUrl}}/media/download/media-file-id-here
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### 30. Delete media file
 DELETE {{baseUrl}}/media/media-file-id-here
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### ===========================================
 ### PORTAL DASHBOARD TESTS
@@ -322,31 +323,31 @@ Authorization: Bearer your-access-token-here
 
 ### 31. Get dashboard overview
 GET {{baseUrl}}/portal/dashboard
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### 32. Get tenant statistics
 GET {{baseUrl}}/portal/stats
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### 33. Get device statistics
 GET {{baseUrl}}/portal/devices/stats
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### 34. Get command statistics
 GET {{baseUrl}}/portal/commands/stats
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### 35. Get recent activity
 GET {{baseUrl}}/portal/activity
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### 36. Get system logs
 GET {{baseUrl}}/portal/logs
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### 37. Get system logs with filters
 GET {{baseUrl}}/portal/logs?level=ERROR&deviceId=device-id-here&page=1&limit=20
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### ===========================================
 ### USER MANAGEMENT TESTS (Admin Only)
@@ -354,12 +355,12 @@ Authorization: Bearer your-access-token-here
 
 ### 38. Get all users in tenant
 GET {{baseUrl}}/portal/users
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### 39. Create new user
 POST {{baseUrl}}/portal/users
 Content-Type: {{contentType}}
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 {
   "email": "newuser@acme.com",
@@ -372,7 +373,7 @@ Authorization: Bearer your-access-token-here
 ### 40. Update user
 PUT {{baseUrl}}/portal/users/user-id-here
 Content-Type: {{contentType}}
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 {
   "firstName": "Updated",
@@ -382,11 +383,11 @@ Authorization: Bearer your-access-token-here
 
 ### 41. Deactivate user
 PUT {{baseUrl}}/portal/users/user-id-here/deactivate
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### 42. Activate user
 PUT {{baseUrl}}/portal/users/user-id-here/activate
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### ===========================================
 ### TENANT MANAGEMENT TESTS (Super Admin Only)
@@ -394,12 +395,12 @@ Authorization: Bearer your-access-token-here
 
 ### 43. Get all tenants
 GET {{baseUrl}}/portal/tenants
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### 44. Create new tenant
 POST {{baseUrl}}/portal/tenants
 Content-Type: {{contentType}}
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 {
   "name": "Another Company",
@@ -410,7 +411,7 @@ Authorization: Bearer your-access-token-here
 ### 45. Update tenant
 PUT {{baseUrl}}/portal/tenants/tenant-id-here
 Content-Type: {{contentType}}
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 {
   "name": "Updated Company Name",
@@ -419,11 +420,11 @@ Authorization: Bearer your-access-token-here
 
 ### 46. Deactivate tenant
 PUT {{baseUrl}}/portal/tenants/tenant-id-here/deactivate
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### 47. Activate tenant
 PUT {{baseUrl}}/portal/tenants/tenant-id-here/activate
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### ===========================================
 ### DATA RETRIEVAL TESTS
@@ -431,29 +432,113 @@ Authorization: Bearer your-access-token-here
 
 ### 48. Get call logs for device
 GET {{baseUrl}}/data/device-id-here/call-logs
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### 49. Get contacts for device
 GET {{baseUrl}}/data/device-id-here/contacts
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### 50. Get messages for device
 GET {{baseUrl}}/data/device-id-here/messages
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### 51. Get location history for device
 GET {{baseUrl}}/data/device-id-here/locations
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### 52. Get app activities for device
-GET {{baseUrl}}/data/device-id-here/app-activities
-Authorization: Bearer your-access-token-here
+GET {{baseUrl}}/app-activities/device/DEVICE-001
+Authorization: Bearer {{validToken}}
+
+### ===========================================
+### FETCH DATA ENDPOINTS TESTS
+### ===========================================
+
+### 53. Get call logs for device
+GET {{baseUrl}}/call-logs/device/DEVICE-001
+Authorization: Bearer {{validToken}}
+
+### 54. Get call logs for device with filters
+GET {{baseUrl}}/call-logs/device/DEVICE-001?page=1&limit=10&callType=INCOMING&startDate=2024-01-01T00:00:00Z&endDate=2024-12-31T23:59:59Z
+Authorization: Bearer {{validToken}}
+
+### 55. Get contacts for device
+GET {{baseUrl}}/contacts/device/DEVICE-001
+Authorization: Bearer {{validToken}}
+
+### 56. Get contacts for device with search
+GET {{baseUrl}}/contacts/device/DEVICE-001?page=1&limit=20&search=john
+Authorization: Bearer {{validToken}}
+
+### 57. Get messages for device
+GET {{baseUrl}}/messages/device/DEVICE-001
+Authorization: Bearer {{validToken}}
+
+### 58. Get messages for device with filters
+GET {{baseUrl}}/messages/device/DEVICE-001?page=1&limit=15&messageType=SMS&startDate=2024-01-01T00:00:00Z&endDate=2024-12-31T23:59:59Z
+Authorization: Bearer {{validToken}}
+
+### 59. Get message conversations for device
+GET {{baseUrl}}/messages/device/DEVICE-001/conversations
+Authorization: Bearer {{validToken}}
+
+### 60. Get message conversations with filters
+GET {{baseUrl}}/messages/device/DEVICE-001/conversations?page=1&limit=10&messageType=WHATSAPP
+Authorization: Bearer {{validToken}}
+
+### 61. Get location history for device
+GET {{baseUrl}}/location/device/DEVICE-001
+Authorization: Bearer {{validToken}}
+
+### 62. Get location history with filters
+GET {{baseUrl}}/location/device/DEVICE-001?page=1&limit=20&startDate=2024-01-01T00:00:00Z&endDate=2024-12-31T23:59:59Z&minAccuracy=10
+Authorization: Bearer {{validToken}}
+
+### 63. Get current location for device
+GET {{baseUrl}}/location/device/DEVICE-001/current
+Authorization: Bearer {{validToken}}
+
+### 64. Get app activities for device with filters
+GET {{baseUrl}}/app-activities/device/DEVICE-001?page=1&limit=15&appName=WhatsApp&startDate=2024-01-01T00:00:00Z&endDate=2024-12-31T23:59:59Z
+Authorization: Bearer {{validToken}}
+
+### 65. Get app usage summary for device
+GET {{baseUrl}}/app-activities/device/DEVICE-001/summary
+Authorization: Bearer {{validToken}}
+
+### 66. Get app usage summary with date range
+GET {{baseUrl}}/app-activities/device/DEVICE-001/summary?startDate=2024-01-01T00:00:00Z&endDate=2024-12-31T23:59:59Z
+Authorization: Bearer {{validToken}}
+
+### ===========================================
+### INDIVIDUAL RECORD FETCH TESTS
+### ===========================================
+
+### 67. Get specific call log by ID
+GET {{baseUrl}}/call-logs/call-log-id-here
+Authorization: Bearer {{validToken}}
+
+### 68. Get specific contact by ID
+GET {{baseUrl}}/contacts/contact-id-here
+Authorization: Bearer {{validToken}}
+
+### 69. Get specific message by ID
+GET {{baseUrl}}/messages/message-id-here
+Authorization: Bearer {{validToken}}
+
+### 70. Get specific location by ID
+GET {{baseUrl}}/location/location-id-here
+Authorization: Bearer {{validToken}}
+
+### 71. Get specific app activity by ID
+GET {{baseUrl}}/app-activities/app-activity-id-here
+Authorization: Bearer {{validToken}}
 
 ### ===========================================
 ### ERROR HANDLING TESTS
 ### ===========================================
 
-### 53. Test invalid login
+### 72. Test invalid login
 POST {{baseUrl}}/auth/login
 Content-Type: {{contentType}}
 
@@ -462,18 +547,18 @@ Content-Type: {{contentType}}
   "password": "wrongpassword"
 }
 
-### 54. Test unauthorized access
+### 73. Test unauthorized access
 GET {{baseUrl}}/devices
-Authorization: Bearer invalid-token
+Authorization: Bearer {{validToken}}
 
-### 55. Test invalid device ID
+### 74. Test invalid device ID
 GET {{baseUrl}}/devices/invalid-device-id
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
-### 56. Test invalid command
+### 75. Test invalid command
 POST {{baseUrl}}/devices/device-id-here/commands
 Content-Type: {{contentType}}
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 {
   "command": "INVALID_COMMAND",
@@ -484,32 +569,32 @@ Authorization: Bearer your-access-token-here
 ### RATE LIMITING TESTS
 ### ===========================================
 
-### 57. Test rate limiting (make multiple requests quickly)
+### 76. Test rate limiting (make multiple requests quickly)
 GET {{baseUrl}}/devices
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
-### 58. Test rate limiting (make multiple requests quickly)
+### 77. Test rate limiting (make multiple requests quickly)
 GET {{baseUrl}}/devices
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
-### 59. Test rate limiting (make multiple requests quickly)
+### 78. Test rate limiting (make multiple requests quickly)
 GET {{baseUrl}}/devices
-Authorization: Bearer your-access-token-here
+Authorization: Bearer {{validToken}}
 
 ### ===========================================
 ### HEALTH CHECK TESTS
 ### ===========================================
 
-### 60. Health check
+### 79. Health check
 GET {{baseUrl}}/health
 
-### 61. Database health check
+### 80. Database health check
 GET {{baseUrl}}/health/database
 
-### 62. Redis health check
+### 81. Redis health check
 GET {{baseUrl}}/health/redis
 
-### 63. Firebase health check
+### 82. Firebase health check
 GET {{baseUrl}}/health/firebase
 
 ### ===========================================
@@ -517,7 +602,7 @@ GET {{baseUrl}}/health/firebase
 ### ===========================================
 
 ### Instructions:
-### 1. Replace "your-access-token-here" with actual JWT token from login response
+### 1. Replace "{{validToken}}" with actual JWT token from login response
 ### 2. Replace "device-id-here" with actual device ID from device registration
 ### 3. Replace "user-id-here" with actual user ID
 ### 4. Replace "tenant-id-here" with actual tenant ID

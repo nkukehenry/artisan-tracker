@@ -1,4 +1,5 @@
 import apiClient, { handleApiError } from './api';
+import { AxiosError } from 'axios';
 
 // Auth API endpoints
 export const authApi = {
@@ -19,10 +20,10 @@ export const authApi = {
         success: true,
         data: response.data.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: handleApiError(error),
+        error: error instanceof Error ? handleApiError(error as AxiosError) : { message: 'An unexpected error occurred', status: 0, data: null },
       };
     }
   },
@@ -37,10 +38,10 @@ export const authApi = {
         success: true,
         data: response.data.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: handleApiError(error),
+        error: error instanceof Error ? handleApiError(error as AxiosError) : { message: 'An unexpected error occurred', status: 0, data: null },
       };
     }
   },
@@ -53,10 +54,10 @@ export const authApi = {
         success: true,
         data: response.data.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: handleApiError(error),
+        error: error instanceof Error ? handleApiError(error as AxiosError) : { message: 'An unexpected error occurred', status: 0, data: null },
       };
     }
   },
@@ -69,10 +70,10 @@ export const authApi = {
         success: true,
         data: response.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: handleApiError(error),
+        error: error instanceof Error ? handleApiError(error as AxiosError) : { message: 'An unexpected error occurred', status: 0, data: null },
       };
     }
   },
@@ -85,10 +86,10 @@ export const authApi = {
         success: true,
         data: response.data.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: handleApiError(error),
+        error: error instanceof Error ? handleApiError(error as AxiosError) : { message: 'An unexpected error occurred', status: 0, data: null },
       };
     }
   },

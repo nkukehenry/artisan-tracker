@@ -4,15 +4,15 @@ export interface Message extends BaseEntity {
   id: string;
   deviceId: string;
   messageType: 'SMS' | 'WHATSAPP' | 'TELEGRAM' | 'FACEBOOK' | 'INSTAGRAM' | 'TWITTER' | 'EMAIL' | 'OTHER';
-  platform?: string;
+  // platform removed - not in Prisma schema
   sender?: string;
   recipient?: string;
   content: string;
-  direction?: 'INCOMING' | 'OUTGOING';
+  // direction removed - not in Prisma schema
   timestamp: Date;
   isRead: boolean;
   metadata?: Record<string, any>;
-  isEncrypted: boolean;
+  // isEncrypted: boolean; // Removed as not in Prisma schema
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,15 +20,15 @@ export interface Message extends BaseEntity {
 export interface CreateMessageData {
   deviceId: string;
   messageType: 'SMS' | 'WHATSAPP' | 'TELEGRAM' | 'FACEBOOK' | 'INSTAGRAM' | 'TWITTER' | 'EMAIL' | 'OTHER';
-  platform?: string;
+  // platform removed - not in Prisma schema
   sender?: string;
   recipient?: string;
   content: string;
-  direction?: 'INCOMING' | 'OUTGOING';
+  // direction removed - not in Prisma schema
   timestamp: Date;
   isRead: boolean;
   metadata?: Record<string, any>;
-  isEncrypted: boolean;
+  // isEncrypted: boolean; // Removed as not in Prisma schema
 }
 
 export interface MessageConversation {

@@ -34,7 +34,7 @@ apiClient.interceptors.response.use(
     return response;
   },
   async (error: AxiosError) => {
-    const originalRequest = error.config as any;
+    const originalRequest = error.config as { headers: Record<string, string>; _retry?: boolean };
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
@@ -56,7 +56,7 @@ apiClient.interceptors.response.use(
             return apiClient(originalRequest);
           }
         }
-      } catch (refreshError) {
+      } catch {
         // Refresh failed, clear tokens
         if (typeof window !== 'undefined') {
           localStorage.removeItem('accessToken');
@@ -78,16 +78,21 @@ export const handleApiError = (error: AxiosError) => {
     
     // Handle nested error structure from Mutindo Tracker API
     let message = 'An error occurred';
-    if ((data as any)?.error?.message) {
-      message = (data as any).error.message;
-    } else if ((data as any)?.message) {
-      message = (data as any).message;
+    const dataObj = data as Record<string, unknown>;
+    
+    if (dataObj?.error && typeof dataObj.error === 'object' && dataObj.error !== null) {
+      const errorObj = dataObj.error as Record<string, unknown>;
+      if ('message' in errorObj && typeof errorObj.message === 'string') {
+        message = errorObj.message;
+      }
+    } else if (dataObj?.message && typeof dataObj.message === 'string') {
+      message = dataObj.message;
     }
     
     return {
       message,
       status,
-      data: (data as any)?.data || null,
+      data: (data as Record<string, unknown>)?.data || null,
     };
   } else if (error.request) {
     // Request was made but no response received

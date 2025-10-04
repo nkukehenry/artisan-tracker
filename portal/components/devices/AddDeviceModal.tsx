@@ -58,9 +58,9 @@ export default function AddDeviceModal({ isOpen, onClose, onAdd }: AddDeviceModa
       setFormData({
         name: '',
         deviceId: '',
-        type: 'Mobile',
-        owner: '',
-        location: '',
+        model: '',
+        osVersion: '',
+        appVersion: '',
       });
       setErrors({});
     }

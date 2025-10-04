@@ -6,6 +6,11 @@ import { TenantRepositoryImpl } from '../repositories/tenant.repository';
 import { UserRepositoryImpl } from '../repositories/user.repository';
 import { DeviceRepositoryImpl } from '../repositories/device.repository';
 import { DeviceCommandRepositoryImpl } from '../repositories/device-command.repository';
+import { CallLogRepositoryImpl } from '../repositories/call-log.repository';
+import { ContactRepositoryImpl } from '../repositories/contact.repository';
+import { LocationRepositoryImpl } from '../repositories/location.repository';
+import { AppActivityRepositoryImpl } from '../repositories/app-activity.repository';
+import { MessageRepositoryImpl } from '../repositories/message.repository';
 
 // Services
 import { AuthService } from '../services/auth.service';
@@ -44,6 +49,11 @@ class Container {
     this.repositories.set('userRepository', new UserRepositoryImpl(prisma));
     this.repositories.set('deviceRepository', new DeviceRepositoryImpl(prisma));
     this.repositories.set('deviceCommandRepository', new DeviceCommandRepositoryImpl(prisma));
+    this.repositories.set('callLogRepository', new CallLogRepositoryImpl(prisma));
+    this.repositories.set('contactRepository', new ContactRepositoryImpl(prisma));
+    this.repositories.set('locationRepository', new LocationRepositoryImpl(prisma));
+    this.repositories.set('appActivityRepository', new AppActivityRepositoryImpl(prisma));
+    this.repositories.set('messageRepository', new MessageRepositoryImpl(prisma));
   }
 
   private initializeServices(): void {

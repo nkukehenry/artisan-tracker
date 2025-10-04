@@ -2,172 +2,23 @@ import { Request, Response } from 'express';
 import { body, param, query, validationResult } from 'express-validator';
 import { container } from '../config/container';
 import { MessageRepository, CreateMessageData } from '../interfaces/message.interface';
+import { IDeviceService } from '../interfaces/device.interface';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { requireAuth, requireRole } from '../middleware/auth';
 import { BadRequestError, NotFoundError } from '../utils/error';
 
-/**
- * @swagger
- * components:
- *   schemas:
- *     Message:
- *       type: object
- *       required:
- *         - id
- *         - deviceId
- *         - messageType
- *         - content
- *         - timestamp
- *         - createdAt
- *         - updatedAt
- *       properties:
- *         id:
- *           type: string
- *           format: uuid
- *           description: Unique identifier for the message
- *         deviceId:
- *           type: string
- *           format: uuid
- *           description: ID of the device that received/sent this message
- *         messageType:
- *           type: string
- *           enum: [SMS, WHATSAPP, TELEGRAM, FACEBOOK, INSTAGRAM, TWITTER, EMAIL, OTHER]
- *           description: Type of messaging platform
- *         platform:
- *           type: string
- *           description: Specific messaging platform name
- *         sender:
- *           type: string
- *           description: Sender identifier (phone number, username, email)
- *         recipient:
- *           type: string
- *           description: Recipient identifier (phone number, username, email)
- *         content:
- *           type: string
- *           description: Message content
- *         direction:
- *           type: string
- *           enum: [INCOMING, OUTGOING]
- *           description: Message direction
- *         timestamp:
- *           type: string
- *           format: date-time
- *           description: When the message was sent/received
- *         isRead:
- *           type: boolean
- *           description: Whether the message has been read
- *         metadata:
- *           type: object
- *           description: Additional message-specific data
- *         isEncrypted:
- *           type: boolean
- *           description: Whether the message content is encrypted
- *         createdAt:
- *           type: string
- *           format: date-time
- *         updatedAt:
- *           type: string
- *           format: date-time
- *     
- *     CreateMessageRequest:
- *       type: object
- *       required:
- *         - deviceId
- *         - messageType
- *         - content
- *         - timestamp
- *       properties:
- *         deviceId:
- *           type: string
- *           format: uuid
- *         messageType:
- *           type: string
- *           enum: [SMS, WHATSAPP, TELEGRAM, FACEBOOK, INSTAGRAM, TWITTER, EMAIL, OTHER]
- *         platform:
- *           type: string
- *         sender:
- *           type: string
- *         recipient:
- *           type: string
- *         content:
- *           type: string
- *         direction:
- *           type: string
- *           enum: [INCOMING, OUTGOING]
- *         timestamp:
- *           type: string
- *           format: date-time
- *         isRead:
- *           type: boolean
- *           default: false
- *         metadata:
- *           type: object
- *         isEncrypted:
- *           type: boolean
- *           default: false
- *     
- *     MessagesResponse:
- *       type: object
- *       properties:
- *         success:
- *           type: boolean
- *         data:
- *           type: array
- *           items:
- *             $ref: '#/components/schemas/Message'
- *         pagination:
- *           $ref: '#/components/schemas/PaginationInfo'
- */
+// Swagger documentation removed - kept only in routes
 
 export class MessagesController {
   private messageRepository: MessageRepository;
+  private deviceService: IDeviceService;
 
   constructor() {
     this.messageRepository = container.getRepository<MessageRepository>('messageRepository');
+    this.deviceService = container.getService<IDeviceService>('deviceService');
   }
 
-  /**
-   * @swagger
-   * /api/messages:
-   *   post:
-   *     summary: Upload messages from device
-   *     tags: [Messages]
-   *     security:
-   *       - bearerAuth: []
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             properties:
-   *               messages:
-   *                 type: array
-   *                 items:
-   *                   $ref: '#/components/schemas/CreateMessageRequest'
-   *     responses:
-   *       201:
-   *         description: Messages uploaded successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                 message:
-   *                   type: string
-   *                 data:
-   *                   type: array
-   *                   items:
-   *                     $ref: '#/components/schemas/Message'
-   *       400:
-   *         $ref: '#/components/responses/BadRequest'
-   *       401:
-   *         $ref: '#/components/responses/Unauthorized'
-   *       500:
-   *         $ref: '#/components/responses/InternalServerError'
-   */
+  // Swagger documentation removed - kept only in routes
   uploadMessages = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -183,10 +34,24 @@ export class MessagesController {
 
     const createdMessages = [];
     for (const messageData of messages) {
+      // Look up device by deviceId to get the database ID
+      const device = await this.deviceService.getDeviceByDeviceId(messageData.deviceId);
+      if (!device) {
+        throw new NotFoundError(`Device with deviceId '${messageData.deviceId}' not found`);
+      }
+
       const message: CreateMessageData = {
-        ...messageData,
-        isEncrypted: messageData.isEncrypted ?? false,
+        deviceId: device.id, // Use the database ID from the lookup
+        messageType: messageData.messageType,
+        // platform removed - not in Prisma schema
+        sender: messageData.sender,
+        recipient: messageData.recipient,
+        content: messageData.content,
+        // direction removed - not in Prisma schema
+        timestamp: messageData.timestamp,
         isRead: messageData.isRead ?? false,
+        metadata: messageData.metadata,
+        // isEncrypted: messageData.isEncrypted ?? false, // Removed as not in schema
       };
       
       const created = await this.messageRepository.create(message);
@@ -200,82 +65,7 @@ export class MessagesController {
     });
   });
 
-  /**
-   * @swagger
-   * /api/messages/device/{deviceId}:
-   *   get:
-   *     summary: Get messages for a specific device
-   *     tags: [Messages]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: deviceId
-   *         required: true
-   *         schema:
-   *           type: string
-   *           format: uuid
-   *         description: Device ID
-   *       - in: query
-   *         name: page
-   *         schema:
-   *           type: integer
-   *           minimum: 1
-   *           default: 1
-   *         description: Page number
-   *       - in: query
-   *         name: limit
-   *         schema:
-   *           type: integer
-   *           minimum: 1
-   *           maximum: 100
-   *           default: 20
-   *         description: Number of items per page
-   *       - in: query
-   *         name: messageType
-   *         schema:
-   *           type: string
-   *           enum: [SMS, WHATSAPP, TELEGRAM, FACEBOOK, INSTAGRAM, TWITTER, EMAIL, OTHER]
-   *         description: Filter by message type
-   *       - in: query
-   *         name: direction
-   *         schema:
-   *           type: string
-   *           enum: [INCOMING, OUTGOING]
-   *         description: Filter by message direction
-   *       - in: query
-   *         name: sender
-   *         schema:
-   *           type: string
-   *         description: Filter by sender
-   *       - in: query
-   *         name: startDate
-   *         schema:
-   *           type: string
-   *           format: date-time
-   *         description: Start date filter
-   *       - in: query
-   *         name: endDate
-   *         schema:
-   *           type: string
-   *           format: date-time
-   *         description: End date filter
-   *     responses:
-   *       200:
-   *         description: Messages retrieved successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/MessagesResponse'
-   *       400:
-   *         $ref: '#/components/responses/BadRequest'
-   *       401:
-   *         $ref: '#/components/responses/Unauthorized'
-   *       404:
-   *         $ref: '#/components/responses/NotFound'
-   *       500:
-   *         $ref: '#/components/responses/InternalServerError'
-   */
+  // Swagger documentation removed - kept only in routes
   getMessagesByDevice = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -317,80 +107,7 @@ export class MessagesController {
     });
   });
 
-  /**
-   * @swagger
-   * /api/messages/device/{deviceId}/conversations:
-   *   get:
-   *     summary: Get message conversations for a specific device
-   *     tags: [Messages]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: deviceId
-   *         required: true
-   *         schema:
-   *           type: string
-   *           format: uuid
-   *         description: Device ID
-   *       - in: query
-   *         name: page
-   *         schema:
-   *           type: integer
-   *           minimum: 1
-   *           default: 1
-   *         description: Page number
-   *       - in: query
-   *         name: limit
-   *         schema:
-   *           type: integer
-   *           minimum: 1
-   *           maximum: 100
-   *           default: 20
-   *         description: Number of items per page
-   *       - in: query
-   *         name: messageType
-   *         schema:
-   *           type: string
-   *           enum: [SMS, WHATSAPP, TELEGRAM, FACEBOOK, INSTAGRAM, TWITTER, EMAIL, OTHER]
-   *         description: Filter by message type
-   *     responses:
-   *       200:
-   *         description: Message conversations retrieved successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                 data:
-   *                   type: array
-   *                   items:
-   *                     type: object
-   *                     properties:
-   *                       contact:
-   *                         type: string
-   *                       messageType:
-   *                         type: string
-   *                       lastMessage:
-   *                         type: string
-   *                       lastMessageTime:
-   *                         type: string
-   *                         format: date-time
-   *                       messageCount:
-   *                         type: integer
-   *                       unreadCount:
-   *                         type: integer
-   *       400:
-   *         $ref: '#/components/responses/BadRequest'
-   *       401:
-   *         $ref: '#/components/responses/Unauthorized'
-   *       404:
-   *         $ref: '#/components/responses/NotFound'
-   *       500:
-   *         $ref: '#/components/responses/InternalServerError'
-   */
+  // Swagger documentation removed - kept only in routes
   getMessageConversations = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -422,43 +139,7 @@ export class MessagesController {
     });
   });
 
-  /**
-   * @swagger
-   * /api/messages/{id}:
-   *   get:
-   *     summary: Get a specific message by ID
-   *     tags: [Messages]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: id
-   *         required: true
-   *         schema:
-   *           type: string
-   *           format: uuid
-   *         description: Message ID
-   *     responses:
-   *       200:
-   *         description: Message retrieved successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                 data:
-   *                   $ref: '#/components/schemas/Message'
-   *       400:
-   *         $ref: '#/components/responses/BadRequest'
-   *       401:
-   *         $ref: '#/components/responses/Unauthorized'
-   *       404:
-   *         $ref: '#/components/responses/NotFound'
-   *       500:
-   *         $ref: '#/components/responses/InternalServerError'
-   */
+  // Swagger documentation removed - kept only in routes
   getMessageById = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -479,43 +160,7 @@ export class MessagesController {
     });
   });
 
-  /**
-   * @swagger
-   * /api/messages/{id}:
-   *   delete:
-   *     summary: Delete a message
-   *     tags: [Messages]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: id
-   *         required: true
-   *         schema:
-   *           type: string
-   *           format: uuid
-   *         description: Message ID
-   *     responses:
-   *       200:
-   *         description: Message deleted successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                 message:
-   *                   type: string
-   *       400:
-   *         $ref: '#/components/responses/BadRequest'
-   *       401:
-   *         $ref: '#/components/responses/Unauthorized'
-   *       404:
-   *         $ref: '#/components/responses/NotFound'
-   *       500:
-   *         $ref: '#/components/responses/InternalServerError'
-   */
+  // Swagger documentation removed - kept only in routes
   deleteMessage = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -546,8 +191,10 @@ export const messagesValidation = {
       .isArray({ min: 1 })
       .withMessage('messages must be a non-empty array'),
     body('messages.*.deviceId')
-      .isUUID()
-      .withMessage('Device ID must be a valid UUID'),
+      .isString()
+      .trim()
+      .isLength({ min: 1, max: 50 })
+      .withMessage('Device ID must be between 1 and 50 characters'),
     body('messages.*.messageType')
       .isIn(['SMS', 'WHATSAPP', 'TELEGRAM', 'FACEBOOK', 'INSTAGRAM', 'TWITTER', 'EMAIL', 'OTHER'])
       .withMessage('Invalid message type'),
@@ -589,16 +236,15 @@ export const messagesValidation = {
       .optional()
       .isObject()
       .withMessage('Metadata must be an object'),
-    body('messages.*.isEncrypted')
-      .optional()
-      .isBoolean()
-      .withMessage('isEncrypted must be a boolean'),
+    // isEncrypted validation removed - not in Prisma schema
   ],
 
   getMessagesByDevice: [
     param('deviceId')
-      .isUUID()
-      .withMessage('Device ID must be a valid UUID'),
+      .isString()
+      .trim()
+      .isLength({ min: 1, max: 50 })
+      .withMessage('Device ID must be between 1 and 50 characters'),
     query('page')
       .optional()
       .isInt({ min: 1 })
@@ -633,8 +279,10 @@ export const messagesValidation = {
 
   getMessageConversations: [
     param('deviceId')
-      .isUUID()
-      .withMessage('Device ID must be a valid UUID'),
+      .isString()
+      .trim()
+      .isLength({ min: 1, max: 50 })
+      .withMessage('Device ID must be between 1 and 50 characters'),
     query('page')
       .optional()
       .isInt({ min: 1 })
@@ -661,3 +309,4 @@ export const messagesValidation = {
       .withMessage('Message ID must be a valid UUID'),
   ],
 };
+

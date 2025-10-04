@@ -18,6 +18,7 @@ export interface Device {
   userId?: string;
   createdAt: string;
   updatedAt: string;
+  [key: string]: unknown;
 }
 
 export type DeviceType = 'smartphone' | 'tablet' | 'laptop' | 'watch' | 'other';

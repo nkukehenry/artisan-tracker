@@ -1,5 +1,6 @@
 import apiClient, { handleApiError } from './api';
-import { SendCommandData, DeviceCommand } from '@/types/command';
+import { AxiosError } from 'axios';
+import { SendCommandData } from '@/types/command';
 
 // Command API endpoints
 export const commandApi = {
@@ -11,10 +12,10 @@ export const commandApi = {
         success: true,
         data: response.data.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: handleApiError(error),
+        error: error instanceof Error ? handleApiError(error as AxiosError) : { message: 'An unexpected error occurred', status: 0, data: null },
       };
     }
   },
@@ -31,10 +32,10 @@ export const commandApi = {
         success: true,
         data: response.data.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: handleApiError(error),
+        error: error instanceof Error ? handleApiError(error as AxiosError) : { message: 'An unexpected error occurred', status: 0, data: null },
       };
     }
   },
@@ -47,10 +48,10 @@ export const commandApi = {
         success: true,
         data: response.data.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: handleApiError(error),
+        error: error instanceof Error ? handleApiError(error as AxiosError) : { message: 'An unexpected error occurred', status: 0, data: null },
       };
     }
   },
@@ -63,10 +64,10 @@ export const commandApi = {
         success: true,
         data: response.data.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: handleApiError(error),
+        error: error instanceof Error ? handleApiError(error as AxiosError) : { message: 'An unexpected error occurred', status: 0, data: null },
       };
     }
   },

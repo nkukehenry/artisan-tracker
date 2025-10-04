@@ -14,17 +14,8 @@ export interface DeviceStatus {
   osVersion?: string;
 }
 
-export interface IDeviceService {
-  registerDevice(data: any): Promise<any>;
-  updateDeviceStatus(deviceId: string, status: DeviceStatus): Promise<void>;
-  getDeviceById(id: string): Promise<any>;
-  getDevicesByTenant(tenantId: string, options?: any): Promise<any>;
-  getDevicesByUser(userId: string, options?: any): Promise<any>;
-  sendCommand(deviceId: string, command: string, payload?: any): Promise<any>;
-  getDeviceCommands(deviceId: string, options?: any): Promise<any>;
-  getDeviceStats(tenantId?: string): Promise<any>;
-  deleteDevice(deviceId: string): Promise<void>;
-}
+// Import the interface from the interfaces file instead of defining it here
+import { IDeviceService } from '../interfaces/device.interface';
 
 export class DeviceService implements IDeviceService {
   constructor(
@@ -73,17 +64,21 @@ export class DeviceService implements IDeviceService {
     }
   }
 
-  async updateDeviceStatus(deviceId: string, status: DeviceStatus): Promise<void> {
+  async updateDeviceStatus(deviceId: string, data: any): Promise<any> {
     try {
       // Update in database
-      await this.deviceRepository.updateStatus(deviceId, status.isOnline, new Date(), status.batteryLevel);
+      await this.deviceRepository.updateStatus(deviceId, data.isOnline, new Date(), data.batteryLevel);
 
       // Update cache
-      await redis.setDeviceStatus(deviceId, status);
+      await redis.setDeviceStatus(deviceId, data);
 
-      logger.info('Device status updated successfully', { deviceId, status });
+      // Get updated device
+      const device = await this.deviceRepository.findByDeviceId(deviceId);
+      
+      logger.info('Device status updated successfully', { deviceId, data });
+      return device;
     } catch (error) {
-      logger.error('Device status update failed', { deviceId, status, error });
+      logger.error('Device status update failed', { deviceId, data, error });
       throw error;
     }
   }
@@ -107,6 +102,29 @@ export class DeviceService implements IDeviceService {
       return device;
     } catch (error) {
       logger.error('Get device by ID failed', { id, error });
+      throw error;
+    }
+  }
+
+  async getDeviceByDeviceId(deviceId: string): Promise<any> {
+    try {
+      const device = await this.deviceRepository.findByDeviceId(deviceId);
+      if (!device) {
+        return null;
+      }
+
+      // Get cached status
+      const cachedStatus = await redis.getDeviceStatus(device.deviceId);
+      if (cachedStatus) {
+        device.isOnline = cachedStatus.isOnline;
+        device.lastSeenAt = cachedStatus.lastSeenAt;
+        device.batteryLevel = cachedStatus.batteryLevel;
+        device.location = cachedStatus.location;
+      }
+
+      return device;
+    } catch (error) {
+      logger.error('Get device by device ID failed', { deviceId, error });
       throw error;
     }
   }
@@ -155,8 +173,60 @@ export class DeviceService implements IDeviceService {
     }
   }
 
-  async sendCommand(deviceId: string, command: string, payload?: any): Promise<any> {
+
+  async getDeviceStats(tenantId: string): Promise<any> {
     try {
+      const stats = await this.deviceRepository.getDeviceStats(tenantId);
+      return stats;
+    } catch (error) {
+      logger.error('Get device stats failed', { tenantId, error });
+      throw error;
+    }
+  }
+
+  async deleteDevice(id: string): Promise<void> {
+    try {
+      // Get device
+      const device = await this.deviceRepository.findById(id);
+      if (!device) {
+        throw createError('Device not found', 404);
+      }
+
+      // Cancel pending commands
+      await this.deviceCommandRepository.cancelPendingCommands(device.id);
+
+      // Delete device
+      await this.deviceRepository.delete(device.id);
+
+      // Remove from cache
+      await redis.del(`device:${device.deviceId}:status`);
+
+      logger.info('Device deleted successfully', { deviceId: device.deviceId });
+    } catch (error) {
+      logger.error('Delete device failed', { id, error });
+      throw error;
+    }
+  }
+
+  async updateDevice(id: string, data: any): Promise<any> {
+    try {
+      const device = await this.deviceRepository.update(id, data);
+      if (!device) {
+        throw createError('Device not found', 404);
+      }
+
+      logger.info('Device updated successfully', { id, data });
+      return device;
+    } catch (error) {
+      logger.error('Update device failed', { id, data, error });
+      throw error;
+    }
+  }
+
+  async sendCommand(data: any): Promise<any> {
+    try {
+      const { deviceId, command, payload } = data;
+      
       // Get device
       const device = await this.deviceRepository.findByDeviceId(deviceId);
       if (!device) {
@@ -187,7 +257,7 @@ export class DeviceService implements IDeviceService {
 
       return commandRecord;
     } catch (error) {
-      logger.error('Send device command failed', { deviceId, command, error });
+      logger.error('Send device command failed', { data, error });
       throw error;
     }
   }
@@ -208,36 +278,12 @@ export class DeviceService implements IDeviceService {
     }
   }
 
-  async getDeviceStats(tenantId: string): Promise<any> {
+  async getDeviceStatus(deviceId: string): Promise<any> {
     try {
-      const stats = await this.deviceRepository.getDeviceStats(tenantId);
-      return stats;
+      const cachedStatus = await redis.getDeviceStatus(deviceId);
+      return cachedStatus;
     } catch (error) {
-      logger.error('Get device stats failed', { tenantId, error });
-      throw error;
-    }
-  }
-
-  async deleteDevice(deviceId: string): Promise<void> {
-    try {
-      // Get device
-      const device = await this.deviceRepository.findByDeviceId(deviceId);
-      if (!device) {
-        throw createError('Device not found', 404);
-      }
-
-      // Cancel pending commands
-      await this.deviceCommandRepository.cancelPendingCommands(device.id);
-
-      // Delete device
-      await this.deviceRepository.delete(device.id);
-
-      // Remove from cache
-      await redis.del(`device:${deviceId}:status`);
-
-      logger.info('Device deleted successfully', { deviceId });
-    } catch (error) {
-      logger.error('Delete device failed', { deviceId, error });
+      logger.error('Get device status failed', { deviceId, error });
       throw error;
     }
   }

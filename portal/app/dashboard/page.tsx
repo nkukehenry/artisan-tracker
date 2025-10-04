@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAppSelector } from '@/lib/hooks';
 
 export default function DashboardPage() {
   const router = useRouter();

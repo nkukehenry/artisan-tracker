@@ -6,104 +6,7 @@ import { asyncHandler } from '../middleware/asyncHandler';
 import { requireAuth, requireRole } from '../middleware/auth';
 import { BadRequestError, NotFoundError } from '../utils/error';
 
-/**
- * @swagger
- * components:
- *   schemas:
- *     AppActivity:
- *       type: object
- *       required:
- *         - id
- *         - deviceId
- *         - appName
- *         - packageName
- *         - activityType
- *         - timestamp
- *         - createdAt
- *         - updatedAt
- *       properties:
- *         id:
- *           type: string
- *           format: uuid
- *           description: Unique identifier for the app activity
- *         deviceId:
- *           type: string
- *           format: uuid
- *           description: ID of the device that recorded this activity
- *         appName:
- *           type: string
- *           description: Human-readable app name
- *         packageName:
- *           type: string
- *           description: Android package name or iOS bundle identifier
- *         activityType:
- *           type: string
- *           enum: [OPENED, CLOSED, INSTALLED, UNINSTALLED, UPDATED, PERMISSION_GRANTED, PERMISSION_DENIED]
- *           description: Type of app activity
- *         duration:
- *           type: integer
- *           minimum: 0
- *           description: Duration in seconds (for OPENED/CLOSED activities)
- *         timestamp:
- *           type: string
- *           format: date-time
- *           description: When the activity occurred
- *         metadata:
- *           type: object
- *           description: Additional activity-specific data
- *         isEncrypted:
- *           type: boolean
- *           description: Whether the activity data is encrypted
- *         createdAt:
- *           type: string
- *           format: date-time
- *         updatedAt:
- *           type: string
- *           format: date-time
- *     
- *     CreateAppActivityRequest:
- *       type: object
- *       required:
- *         - deviceId
- *         - appName
- *         - packageName
- *         - activityType
- *         - timestamp
- *       properties:
- *         deviceId:
- *           type: string
- *           format: uuid
- *         appName:
- *           type: string
- *         packageName:
- *           type: string
- *         activityType:
- *           type: string
- *           enum: [OPENED, CLOSED, INSTALLED, UNINSTALLED, UPDATED, PERMISSION_GRANTED, PERMISSION_DENIED]
- *         duration:
- *           type: integer
- *           minimum: 0
- *         timestamp:
- *           type: string
- *           format: date-time
- *         metadata:
- *           type: object
- *         isEncrypted:
- *           type: boolean
- *           default: false
- *     
- *     AppActivitiesResponse:
- *       type: object
- *       properties:
- *         success:
- *           type: boolean
- *         data:
- *           type: array
- *           items:
- *             $ref: '#/components/schemas/AppActivity'
- *         pagination:
- *           $ref: '#/components/schemas/PaginationInfo'
- */
+// App Activities Controller - handles app activity operations
 
 export class AppActivitiesController {
   private appActivityRepository: AppActivityRepository;
@@ -112,48 +15,7 @@ export class AppActivitiesController {
     this.appActivityRepository = container.getRepository<AppActivityRepository>('appActivityRepository');
   }
 
-  /**
-   * @swagger
-   * /api/app-activities:
-   *   post:
-   *     summary: Upload app activities from device
-   *     tags: [App Activities]
-   *     security:
-   *       - bearerAuth: []
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             properties:
-   *               appActivities:
-   *                 type: array
-   *                 items:
-   *                   $ref: '#/components/schemas/CreateAppActivityRequest'
-   *     responses:
-   *       201:
-   *         description: App activities uploaded successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                 message:
-   *                   type: string
-   *                 data:
-   *                   type: array
-   *                   items:
-   *                     $ref: '#/components/schemas/AppActivity'
-   *       400:
-   *         $ref: '#/components/responses/BadRequest'
-   *       401:
-   *         $ref: '#/components/responses/Unauthorized'
-   *       500:
-   *         $ref: '#/components/responses/InternalServerError'
-   */
+  // Swagger documentation removed - kept only in routes
   uploadAppActivities = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -171,7 +33,7 @@ export class AppActivitiesController {
     for (const activityData of appActivities) {
       const activity: CreateAppActivityData = {
         ...activityData,
-        isEncrypted: activityData.isEncrypted ?? false,
+        // isEncrypted removed - not in Prisma schema
       };
       
       const created = await this.appActivityRepository.create(activity);
@@ -185,76 +47,7 @@ export class AppActivitiesController {
     });
   });
 
-  /**
-   * @swagger
-   * /api/app-activities/device/{deviceId}:
-   *   get:
-   *     summary: Get app activities for a specific device
-   *     tags: [App Activities]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: deviceId
-   *         required: true
-   *         schema:
-   *           type: string
-   *           format: uuid
-   *         description: Device ID
-   *       - in: query
-   *         name: page
-   *         schema:
-   *           type: integer
-   *           minimum: 1
-   *           default: 1
-   *         description: Page number
-   *       - in: query
-   *         name: limit
-   *         schema:
-   *           type: integer
-   *           minimum: 1
-   *           maximum: 100
-   *           default: 20
-   *         description: Number of items per page
-   *       - in: query
-   *         name: activityType
-   *         schema:
-   *           type: string
-   *           enum: [OPENED, CLOSED, INSTALLED, UNINSTALLED, UPDATED, PERMISSION_GRANTED, PERMISSION_DENIED]
-   *         description: Filter by activity type
-   *       - in: query
-   *         name: appName
-   *         schema:
-   *           type: string
-   *         description: Filter by app name
-   *       - in: query
-   *         name: startDate
-   *         schema:
-   *           type: string
-   *           format: date-time
-   *         description: Start date filter
-   *       - in: query
-   *         name: endDate
-   *         schema:
-   *           type: string
-   *           format: date-time
-   *         description: End date filter
-   *     responses:
-   *       200:
-   *         description: App activities retrieved successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/AppActivitiesResponse'
-   *       400:
-   *         $ref: '#/components/responses/BadRequest'
-   *       401:
-   *         $ref: '#/components/responses/Unauthorized'
-   *       404:
-   *         $ref: '#/components/responses/NotFound'
-   *       500:
-   *         $ref: '#/components/responses/InternalServerError'
-   */
+  // Swagger documentation removed - kept only in routes
   getAppActivitiesByDevice = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -295,74 +88,7 @@ export class AppActivitiesController {
     });
   });
 
-  /**
-   * @swagger
-   * /api/app-activities/device/{deviceId}/summary:
-   *   get:
-   *     summary: Get app usage summary for a specific device
-   *     tags: [App Activities]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: deviceId
-   *         required: true
-   *         schema:
-   *           type: string
-   *           format: uuid
-   *         description: Device ID
-   *       - in: query
-   *         name: startDate
-   *         schema:
-   *           type: string
-   *           format: date-time
-   *         description: Start date for summary
-   *       - in: query
-   *         name: endDate
-   *         schema:
-   *           type: string
-   *           format: date-time
-   *         description: End date for summary
-   *     responses:
-   *       200:
-   *         description: App usage summary retrieved successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                 data:
-   *                   type: object
-   *                   properties:
-   *                     totalApps:
-   *                       type: integer
-   *                     totalUsageTime:
-   *                       type: integer
-   *                       description: Total usage time in seconds
-   *                     mostUsedApps:
-   *                       type: array
-   *                       items:
-   *                         type: object
-   *                         properties:
-   *                           appName:
-   *                             type: string
-   *                           packageName:
-   *                             type: string
-   *                           usageTime:
-   *                             type: integer
-   *                           openCount:
-   *                             type: integer
-   *       400:
-   *         $ref: '#/components/responses/BadRequest'
-   *       401:
-   *         $ref: '#/components/responses/Unauthorized'
-   *       404:
-   *         $ref: '#/components/responses/NotFound'
-   *       500:
-   *         $ref: '#/components/responses/InternalServerError'
-   */
+  // Swagger documentation removed - kept only in routes
   getAppUsageSummary = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -386,43 +112,7 @@ export class AppActivitiesController {
     });
   });
 
-  /**
-   * @swagger
-   * /api/app-activities/{id}:
-   *   get:
-   *     summary: Get a specific app activity by ID
-   *     tags: [App Activities]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: id
-   *         required: true
-   *         schema:
-   *           type: string
-   *           format: uuid
-   *         description: App activity ID
-   *     responses:
-   *       200:
-   *         description: App activity retrieved successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                 data:
-   *                   $ref: '#/components/schemas/AppActivity'
-   *       400:
-   *         $ref: '#/components/responses/BadRequest'
-   *       401:
-   *         $ref: '#/components/responses/Unauthorized'
-   *       404:
-   *         $ref: '#/components/responses/NotFound'
-   *       500:
-   *         $ref: '#/components/responses/InternalServerError'
-   */
+  // Swagger documentation removed - kept only in routes
   getAppActivityById = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -443,43 +133,7 @@ export class AppActivitiesController {
     });
   });
 
-  /**
-   * @swagger
-   * /api/app-activities/{id}:
-   *   delete:
-   *     summary: Delete an app activity
-   *     tags: [App Activities]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: id
-   *         required: true
-   *         schema:
-   *           type: string
-   *           format: uuid
-   *         description: App activity ID
-   *     responses:
-   *       200:
-   *         description: App activity deleted successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                 message:
-   *                   type: string
-   *       400:
-   *         $ref: '#/components/responses/BadRequest'
-   *       401:
-   *         $ref: '#/components/responses/Unauthorized'
-   *       404:
-   *         $ref: '#/components/responses/NotFound'
-   *       500:
-   *         $ref: '#/components/responses/InternalServerError'
-   */
+  // Swagger documentation removed - kept only in routes
   deleteAppActivity = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -536,16 +190,15 @@ export const appActivitiesValidation = {
       .optional()
       .isObject()
       .withMessage('Metadata must be an object'),
-    body('appActivities.*.isEncrypted')
-      .optional()
-      .isBoolean()
-      .withMessage('isEncrypted must be a boolean'),
+    // isEncrypted validation removed - not in Prisma schema
   ],
 
   getAppActivitiesByDevice: [
     param('deviceId')
-      .isUUID()
-      .withMessage('Device ID must be a valid UUID'),
+      .isString()
+      .trim()
+      .isLength({ min: 1, max: 50 })
+      .withMessage('Device ID must be between 1 and 50 characters'),
     query('page')
       .optional()
       .isInt({ min: 1 })
@@ -576,8 +229,10 @@ export const appActivitiesValidation = {
 
   getAppUsageSummary: [
     param('deviceId')
-      .isUUID()
-      .withMessage('Device ID must be a valid UUID'),
+      .isString()
+      .trim()
+      .isLength({ min: 1, max: 50 })
+      .withMessage('Device ID must be between 1 and 50 characters'),
     query('startDate')
       .optional()
       .isISO8601()
@@ -600,3 +255,4 @@ export const appActivitiesValidation = {
       .withMessage('App activity ID must be a valid UUID'),
   ],
 };
+

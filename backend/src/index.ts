@@ -24,6 +24,11 @@ import authRoutes from './routes/auth';
 import deviceRoutes from './routes/devices';
 import mediaRoutes from './routes/media';
 import portalRoutes from './routes/portal';
+import callLogsRoutes from './routes/call-logs';
+import contactsRoutes from './routes/contacts';
+import locationRoutes from './routes/location';
+import appActivitiesRoutes from './routes/app-activities';
+import messagesRoutes from './routes/messages';
 
 // Import WebSocket signaling service
 import { SignalingService } from './services/signaling.service';
@@ -222,6 +227,11 @@ app.use('/api/auth', authRoutes);
 app.use('/api/devices', deviceRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/portal', portalRoutes);
+app.use('/api/call-logs', callLogsRoutes);
+app.use('/api/contacts', contactsRoutes);
+app.use('/api/location', locationRoutes);
+app.use('/api/app-activities', appActivitiesRoutes);
+app.use('/api/messages', messagesRoutes);
 
 // 404 handler
 app.use((req, res) => {

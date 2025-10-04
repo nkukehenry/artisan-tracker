@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useAppSelector, useAppDispatch } from '@/lib/hooks';
-import { setLoading, addToast } from '@/store/slices/appSlice';
+import { addToast } from '@/store/slices/appSlice';
 import { initializeAuth } from '@/store/slices/authSlice';
 import LoaderOverlay from '@/components/ui/LoaderOverlay';
 import ToastContainer from '@/components/ui/ToastContainer';

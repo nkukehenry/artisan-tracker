@@ -2,154 +2,24 @@ import { Request, Response } from 'express';
 import { body, param, query, validationResult } from 'express-validator';
 import { container } from '../config/container';
 import { CallLogRepository, CreateCallLogData } from '../interfaces/media.interface';
+import { IDeviceService } from '../interfaces/device.interface';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { authenticateToken, requireRole } from '../middleware/auth';
 import { createError } from '../middleware/errorHandler';
 import { BadRequestError, NotFoundError } from '../utils/error';
 
-/**
- * @swagger
- * components:
- *   schemas:
- *     CallLog:
- *       type: object
- *       required:
- *         - id
- *         - deviceId
- *         - phoneNumber
- *         - callType
- *         - duration
- *         - timestamp
- *         - createdAt
- *         - updatedAt
- *       properties:
- *         id:
- *           type: string
- *           format: uuid
- *           description: Unique identifier for the call log
- *         deviceId:
- *           type: string
- *           format: uuid
- *           description: ID of the device that made/received the call
- *         phoneNumber:
- *           type: string
- *           description: Phone number involved in the call
- *         contactName:
- *           type: string
- *           description: Name of the contact (if available)
- *         callType:
- *           type: string
- *           enum: [INCOMING, OUTGOING, MISSED]
- *           description: Type of call
- *         duration:
- *           type: integer
- *           minimum: 0
- *           description: Call duration in seconds
- *         timestamp:
- *           type: string
- *           format: date-time
- *           description: When the call occurred
- *         isEncrypted:
- *           type: boolean
- *           description: Whether the call log is encrypted
- *         createdAt:
- *           type: string
- *           format: date-time
- *         updatedAt:
- *           type: string
- *           format: date-time
- *     
- *     CreateCallLogRequest:
- *       type: object
- *       required:
- *         - deviceId
- *         - phoneNumber
- *         - callType
- *         - duration
- *         - timestamp
- *       properties:
- *         deviceId:
- *           type: string
- *           format: uuid
- *         phoneNumber:
- *           type: string
- *         contactName:
- *           type: string
- *         callType:
- *           type: string
- *           enum: [INCOMING, OUTGOING, MISSED]
- *         duration:
- *           type: integer
- *           minimum: 0
- *         timestamp:
- *           type: string
- *           format: date-time
- *         isEncrypted:
- *           type: boolean
- *           default: false
- *     
- *     CallLogsResponse:
- *       type: object
- *       properties:
- *         success:
- *           type: boolean
- *         data:
- *           type: array
- *           items:
- *             $ref: '#/components/schemas/CallLog'
- *         pagination:
- *           $ref: '#/components/schemas/PaginationInfo'
- */
+// Call Logs Controller - handles call log operations
 
 export class CallLogsController {
   private callLogRepository: CallLogRepository;
+  private deviceService: IDeviceService;
 
   constructor() {
     this.callLogRepository = container.getRepository<CallLogRepository>('callLogRepository');
+    this.deviceService = container.getService<IDeviceService>('deviceService');
   }
 
-  /**
-   * @swagger
-   * /api/call-logs:
-   *   post:
-   *     summary: Upload call logs from device
-   *     tags: [Call Logs]
-   *     security:
-   *       - bearerAuth: []
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             properties:
-   *               callLogs:
-   *                 type: array
-   *                 items:
-   *                   $ref: '#/components/schemas/CreateCallLogRequest'
-   *     responses:
-   *       201:
-   *         description: Call logs uploaded successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                 message:
-   *                   type: string
-   *                 data:
-   *                   type: array
-   *                   items:
-   *                     $ref: '#/components/schemas/CallLog'
-   *       400:
-   *         $ref: '#/components/responses/BadRequest'
-   *       401:
-   *         $ref: '#/components/responses/Unauthorized'
-   *       500:
-   *         $ref: '#/components/responses/InternalServerError'
-   */
+  // Upload call logs from device
   uploadCallLogs = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -165,9 +35,20 @@ export class CallLogsController {
 
     const createdCallLogs = [];
     for (const callLogData of callLogs) {
+      // Look up device by deviceId to get the database ID
+      const device = await this.deviceService.getDeviceByDeviceId(callLogData.deviceId);
+      if (!device) {
+        throw new NotFoundError(`Device with deviceId '${callLogData.deviceId}' not found`);
+      }
+
       const callLog: CreateCallLogData = {
-        ...callLogData,
-        isEncrypted: callLogData.isEncrypted ?? false,
+        phoneNumber: callLogData.phoneNumber,
+        contactName: callLogData.contactName,
+        callType: callLogData.callType,
+        duration: callLogData.duration,
+        timestamp: new Date(callLogData.timestamp),
+        isIncoming: callLogData.callType === 'INCOMING',
+        deviceId: device.id, // Use the database ID from the lookup
       };
       
       const created = await this.callLogRepository.create(callLog);
@@ -181,71 +62,7 @@ export class CallLogsController {
     });
   });
 
-  /**
-   * @swagger
-   * /api/call-logs/device/{deviceId}:
-   *   get:
-   *     summary: Get call logs for a specific device
-   *     tags: [Call Logs]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: deviceId
-   *         required: true
-   *         schema:
-   *           type: string
-   *           format: uuid
-   *         description: Device ID
-   *       - in: query
-   *         name: page
-   *         schema:
-   *           type: integer
-   *           minimum: 1
-   *           default: 1
-   *         description: Page number
-   *       - in: query
-   *         name: limit
-   *         schema:
-   *           type: integer
-   *           minimum: 1
-   *           maximum: 100
-   *           default: 20
-   *         description: Number of items per page
-   *       - in: query
-   *         name: callType
-   *         schema:
-   *           type: string
-   *           enum: [INCOMING, OUTGOING, MISSED]
-   *         description: Filter by call type
-   *       - in: query
-   *         name: startDate
-   *         schema:
-   *           type: string
-   *           format: date-time
-   *         description: Start date filter
-   *       - in: query
-   *         name: endDate
-   *         schema:
-   *           type: string
-   *           format: date-time
-   *         description: End date filter
-   *     responses:
-   *       200:
-   *         description: Call logs retrieved successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/CallLogsResponse'
-   *       400:
-   *         $ref: '#/components/responses/BadRequest'
-   *       401:
-   *         $ref: '#/components/responses/Unauthorized'
-   *       404:
-   *         $ref: '#/components/responses/NotFound'
-   *       500:
-   *         $ref: '#/components/responses/InternalServerError'
-   */
+  // Get call logs for a specific device
   getCallLogsByDevice = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -279,43 +96,7 @@ export class CallLogsController {
     });
   });
 
-  /**
-   * @swagger
-   * /api/call-logs/{id}:
-   *   get:
-   *     summary: Get a specific call log by ID
-   *     tags: [Call Logs]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: id
-   *         required: true
-   *         schema:
-   *           type: string
-   *           format: uuid
-   *         description: Call log ID
-   *     responses:
-   *       200:
-   *         description: Call log retrieved successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                 data:
-   *                   $ref: '#/components/schemas/CallLog'
-   *       400:
-   *         $ref: '#/components/responses/BadRequest'
-   *       401:
-   *         $ref: '#/components/responses/Unauthorized'
-   *       404:
-   *         $ref: '#/components/responses/NotFound'
-   *       500:
-   *         $ref: '#/components/responses/InternalServerError'
-   */
+  // Get a specific call log by ID
   getCallLogById = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -336,43 +117,7 @@ export class CallLogsController {
     });
   });
 
-  /**
-   * @swagger
-   * /api/call-logs/{id}:
-   *   delete:
-   *     summary: Delete a call log
-   *     tags: [Call Logs]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: id
-   *         required: true
-   *         schema:
-   *           type: string
-   *           format: uuid
-   *         description: Call log ID
-   *     responses:
-   *       200:
-   *         description: Call log deleted successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                 message:
-   *                   type: string
-   *       400:
-   *         $ref: '#/components/responses/BadRequest'
-   *       401:
-   *         $ref: '#/components/responses/Unauthorized'
-   *       404:
-   *         $ref: '#/components/responses/NotFound'
-   *       500:
-   *         $ref: '#/components/responses/InternalServerError'
-   */
+  // Delete a call log
   deleteCallLog = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -403,8 +148,10 @@ export const callLogsValidation = {
       .isArray({ min: 1 })
       .withMessage('callLogs must be a non-empty array'),
     body('callLogs.*.deviceId')
-      .isUUID()
-      .withMessage('Device ID must be a valid UUID'),
+      .isString()
+      .trim()
+      .isLength({ min: 1, max: 50 })
+      .withMessage('Device ID must be between 1 and 50 characters'),
     body('callLogs.*.phoneNumber')
       .isString()
       .trim()
@@ -420,21 +167,21 @@ export const callLogsValidation = {
       .isIn(['INCOMING', 'OUTGOING', 'MISSED'])
       .withMessage('Call type must be INCOMING, OUTGOING, or MISSED'),
     body('callLogs.*.duration')
+      .optional()
       .isInt({ min: 0 })
       .withMessage('Duration must be a non-negative integer'),
     body('callLogs.*.timestamp')
       .isISO8601()
       .withMessage('Timestamp must be a valid ISO 8601 date'),
-    body('callLogs.*.isEncrypted')
-      .optional()
-      .isBoolean()
-      .withMessage('isEncrypted must be a boolean'),
+    // isEncrypted validation removed - not in Prisma schema
   ],
 
   getCallLogsByDevice: [
     param('deviceId')
-      .isUUID()
-      .withMessage('Device ID must be a valid UUID'),
+      .isString()
+      .trim()
+      .isLength({ min: 1, max: 50 })
+      .withMessage('Device ID must be between 1 and 50 characters'),
     query('page')
       .optional()
       .isInt({ min: 1 })
@@ -469,3 +216,4 @@ export const callLogsValidation = {
       .withMessage('Call log ID must be a valid UUID'),
   ],
 };
+

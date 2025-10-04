@@ -4,7 +4,7 @@ import { useState } from 'react';
 import AuthWrapper from '@/components/auth/AuthWrapper';
 import Layout from '@/components/layout/Layout';
 import { Plus } from 'lucide-react';
-import { Device } from '@/types/device';
+import { Device, DeviceFormData } from '@/types/device';
 import { useDevices } from '@/hooks/useDevices';
 import { createDeviceTableColumns } from '@/components/devices/DeviceTableColumns';
 import DataTable from '@/components/ui/DataTable';
@@ -22,16 +22,14 @@ export default function DevicesPage() {
   } = useDevices();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
-
-  const handleAddDevice = (deviceData: any) => {
+  const handleAddDevice = (deviceData: DeviceFormData) => {
     addDevice(deviceData);
     setIsAddModalOpen(false);
   };
 
   const handleEditDevice = (device: Device) => {
-    setSelectedDevice(device);
     // TODO: Open edit modal
+    console.log('Edit device:', device);
   };
 
   const handleDeleteDevice = (deviceId: string) => {
@@ -39,8 +37,8 @@ export default function DevicesPage() {
   };
 
   const handleViewDevice = (device: Device) => {
-    setSelectedDevice(device);
     // TODO: Open view modal
+    console.log('View device:', device);
   };
 
   const columns = createDeviceTableColumns({

@@ -1,4 +1,5 @@
 import apiClient, { handleApiError } from './api';
+import { AxiosError } from 'axios';
 
 // Device API endpoints
 export const deviceApi = {
@@ -16,10 +17,10 @@ export const deviceApi = {
         success: true,
         data: response.data.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: handleApiError(error),
+        error: error instanceof Error ? handleApiError(error as AxiosError) : { message: 'An unexpected error occurred', status: 0, data: null },
       };
     }
   },
@@ -32,10 +33,10 @@ export const deviceApi = {
         success: true,
         data: response.data.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: handleApiError(error),
+        error: error instanceof Error ? handleApiError(error as AxiosError) : { message: 'An unexpected error occurred', status: 0, data: null },
       };
     }
   },
@@ -54,10 +55,10 @@ export const deviceApi = {
         success: true,
         data: response.data.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: handleApiError(error),
+        error: error instanceof Error ? handleApiError(error as AxiosError) : { message: 'An unexpected error occurred', status: 0, data: null },
       };
     }
   },
@@ -76,10 +77,10 @@ export const deviceApi = {
         success: true,
         data: response.data.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: handleApiError(error),
+        error: error instanceof Error ? handleApiError(error as AxiosError) : { message: 'An unexpected error occurred', status: 0, data: null },
       };
     }
   },
@@ -92,10 +93,10 @@ export const deviceApi = {
         success: true,
         data: response.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: handleApiError(error),
+        error: error instanceof Error ? handleApiError(error as AxiosError) : { message: 'An unexpected error occurred', status: 0, data: null },
       };
     }
   },
@@ -113,10 +114,10 @@ export const deviceApi = {
         success: true,
         data: response.data.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: handleApiError(error),
+        error: error instanceof Error ? handleApiError(error as AxiosError) : { message: 'An unexpected error occurred', status: 0, data: null },
       };
     }
   },
@@ -134,10 +135,10 @@ export const deviceApi = {
         success: true,
         data: response.data.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: handleApiError(error),
+        error: error instanceof Error ? handleApiError(error as AxiosError) : { message: 'An unexpected error occurred', status: 0, data: null },
       };
     }
   },
@@ -155,10 +156,10 @@ export const deviceApi = {
         success: true,
         data: response.data.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: handleApiError(error),
+        error: error instanceof Error ? handleApiError(error as AxiosError) : { message: 'An unexpected error occurred', status: 0, data: null },
       };
     }
   },
@@ -177,10 +178,10 @@ export const deviceApi = {
         success: true,
         data: response.data.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: handleApiError(error),
+        error: error instanceof Error ? handleApiError(error as AxiosError) : { message: 'An unexpected error occurred', status: 0, data: null },
       };
     }
   },
@@ -198,10 +199,10 @@ export const deviceApi = {
         success: true,
         data: response.data.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: handleApiError(error),
+        error: error instanceof Error ? handleApiError(error as AxiosError) : { message: 'An unexpected error occurred', status: 0, data: null },
       };
     }
   },
@@ -209,7 +210,7 @@ export const deviceApi = {
   // Send command to device
   sendDeviceCommand: async (deviceId: string, command: {
     type: string;
-    payload?: any;
+    payload?: Record<string, unknown>;
   }) => {
     try {
       const response = await apiClient.post(`/devices/${deviceId}/commands`, command);
@@ -217,10 +218,10 @@ export const deviceApi = {
         success: true,
         data: response.data.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: handleApiError(error),
+        error: error instanceof Error ? handleApiError(error as AxiosError) : { message: 'An unexpected error occurred', status: 0, data: null },
       };
     }
   },
@@ -237,10 +238,10 @@ export const deviceApi = {
         success: true,
         data: response.data.data,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
-        error: handleApiError(error),
+        error: error instanceof Error ? handleApiError(error as AxiosError) : { message: 'An unexpected error occurred', status: 0, data: null },
       };
     }
   },

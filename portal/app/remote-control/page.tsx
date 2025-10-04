@@ -1,17 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AuthWrapper from '@/components/auth/AuthWrapper';
 import Layout from '@/components/layout/Layout';
 import { Device } from '@/types/device';
-import { DeviceCommand, CommandType, SendCommandData } from '@/types/command';
+import { CommandType, SendCommandData } from '@/types/command';
 import { deviceApi } from '@/lib/deviceApi';
 import { commandApi } from '@/lib/commandApi';
 import { useAppDispatch } from '@/lib/hooks';
 import { addToast } from '@/store/slices/appSlice';
 import { 
   Monitor,
-  Play,
   Square,
   Camera,
   Mic,
@@ -20,7 +19,6 @@ import {
   Users,
   Phone,
   MessageSquare,
-  Power,
   Trash2,
   RefreshCw,
   ChevronDown,
@@ -41,10 +39,18 @@ export default function RemoteControlPage() {
   const [peerConnection, setPeerConnection] = useState<RTCPeerConnection | null>(null);
   const [wsConnection, setWsConnection] = useState<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [previousRecordings, setPreviousRecordings] = useState<any[]>([]);
+  const [previousRecordings, setPreviousRecordings] = useState<Array<{
+    id: string;
+    deviceId: string;
+    deviceName: string;
+    type: string;
+    timestamp: string;
+    duration: string;
+    size: string;
+  }>>([]);
 
   // Load devices
-  const loadDevices = async () => {
+  const loadDevices = useCallback(async () => {
     try {
       const result = await deviceApi.getDevices();
       if (result.success) {
@@ -56,7 +62,7 @@ export default function RemoteControlPage() {
           message: result.error?.message || 'Failed to load devices',
         }));
       }
-    } catch (error) {
+    } catch {
       dispatch(addToast({
         type: 'error',
         title: 'Failed to load devices',
@@ -65,16 +71,18 @@ export default function RemoteControlPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [dispatch]);
 
   // Load previous recordings (mock data for now)
-  const loadPreviousRecordings = async () => {
+  const loadPreviousRecordings = useCallback(async () => {
     // TODO: Implement API call to get previous recordings
+    if (!selectedDevice) return;
+    
     setPreviousRecordings([
       {
         id: '1',
-        deviceId: selectedDevice?.id,
-        deviceName: selectedDevice?.name,
+        deviceId: selectedDevice.id,
+        deviceName: selectedDevice.name,
         type: 'screen_recording',
         duration: '2:34',
         timestamp: new Date().toISOString(),
@@ -82,15 +90,15 @@ export default function RemoteControlPage() {
       },
       {
         id: '2',
-        deviceId: selectedDevice?.id,
-        deviceName: selectedDevice?.name,
+        deviceId: selectedDevice.id,
+        deviceName: selectedDevice.name,
         type: 'audio_recording',
         duration: '1:45',
         timestamp: new Date(Date.now() - 86400000).toISOString(),
         size: '8.7 MB'
       }
     ]);
-  };
+  }, [selectedDevice]);
 
   // WebSocket connection functions
   const connectWebSocket = () => {
@@ -178,7 +186,7 @@ export default function RemoteControlPage() {
     setScreenShareStatus('disconnected');
   };
 
-  const sendMessage = (message: any) => {
+  const sendMessage = (message: Record<string, unknown>) => {
     if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
       wsConnection.send(JSON.stringify(message));
       return true;
@@ -223,7 +231,7 @@ export default function RemoteControlPage() {
     return pc;
   };
 
-  const handleWebRTCOffer = async (message: any) => {
+  const handleWebRTCOffer = async (message: { type: string; offer: RTCSessionDescriptionInit; deviceId: string }) => {
     console.log('Offer received:', message);
     setScreenShareStatus('offer received');
     
@@ -234,7 +242,7 @@ export default function RemoteControlPage() {
     const pc = peerConnection || setupPeerConnection();
     
     try {
-      await pc.setRemoteDescription(new RTCSessionDescription(message));
+      await pc.setRemoteDescription(new RTCSessionDescription(message.offer));
       const answer = await pc.createAnswer();
       
       const answerPayload = {
@@ -252,15 +260,11 @@ export default function RemoteControlPage() {
     }
   };
 
-  const handleIceCandidate = async (message: any) => {
+  const handleIceCandidate = async (message: { type: string; candidate: RTCIceCandidateInit }) => {
     if (!peerConnection) return;
     
     try {
-      const candidate = new RTCIceCandidate({
-        sdpMLineIndex: message.label,
-        sdpMid: message.id,
-        candidate: message.candidate
-      });
+      const candidate = new RTCIceCandidate(message.candidate);
       await peerConnection.addIceCandidate(candidate);
       console.log('Remote candidate added');
     } catch (error) {
@@ -269,7 +273,7 @@ export default function RemoteControlPage() {
   };
 
   // Send command to device
-  const sendCommand = async (command: CommandType, payload?: any) => {
+  const sendCommand = async (command: CommandType, payload?: Record<string, unknown>) => {
     if (!selectedDevice) {
       dispatch(addToast({
         type: 'error',
@@ -297,7 +301,7 @@ export default function RemoteControlPage() {
           message: result.error?.message || 'Command failed',
         }));
       }
-    } catch (error) {
+    } catch {
       dispatch(addToast({
         type: 'error',
         title: 'Failed to send command',
@@ -349,24 +353,24 @@ export default function RemoteControlPage() {
           }
         }, 1000); // Wait 1 second for WebSocket to be ready
       }
-    } catch (error) {
+    } catch (err) {
       dispatch(addToast({
         type: 'error',
         title: 'Screen Share Error',
-        message: error instanceof Error ? error.message : 'Failed to start screen share',
+        message: err instanceof Error ? err.message : 'Failed to start screen share',
       }));
     }
   };
 
   useEffect(() => {
     loadDevices();
-  }, []);
+  }, [loadDevices]);
 
   useEffect(() => {
     if (selectedDevice) {
       loadPreviousRecordings();
     }
-  }, [selectedDevice]);
+  }, [selectedDevice, loadPreviousRecordings]);
 
   // Cleanup WebSocket connection on unmount
   useEffect(() => {

@@ -19,19 +19,11 @@ const swaggerDefinition: SwaggerDefinition = {
   servers: [
     {
       url: 'http://localhost:83/api',
-      description: 'Development server (API)',
-    },
-    {
-      url: 'http://localhost:83',
-      description: 'Development server (Root)',
+      description: 'Development server',
     },
     {
       url: 'https://tracker.mutindo.com/api',
-      description: 'Production server (API)',
-    },
-    {
-      url: 'https://tracker.mutindo.com',
-      description: 'Production server (Root)',
+      description: 'Production server',
     },
   ],
   components: {
@@ -586,6 +578,471 @@ const swaggerDefinition: SwaggerDefinition = {
         },
       },
 
+      // Data schemas
+      CallLog: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            format: 'uuid',
+            example: '123e4567-e89b-12d3-a456-426614174000',
+          },
+          deviceId: {
+            type: 'string',
+            format: 'uuid',
+            example: '123e4567-e89b-12d3-a456-426614174000',
+          },
+          phoneNumber: {
+            type: 'string',
+            example: '1234567890',
+          },
+          contactName: {
+            type: 'string',
+            example: 'John Doe',
+          },
+          callType: {
+            type: 'string',
+            enum: ['INCOMING', 'OUTGOING', 'MISSED', 'REJECTED'],
+            example: 'OUTGOING',
+          },
+          duration: {
+            type: 'integer',
+            minimum: 0,
+            example: 120,
+          },
+          timestamp: {
+            type: 'string',
+            format: 'date-time',
+            example: '2023-01-01T12:00:00Z',
+          },
+          isIncoming: {
+            type: 'boolean',
+            example: false,
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+            example: '2023-01-01T12:00:00Z',
+          },
+          updatedAt: {
+            type: 'string',
+            format: 'date-time',
+            example: '2023-01-01T12:00:00Z',
+          },
+        },
+      },
+      CreateCallLogRequest: {
+        type: 'object',
+        required: ['deviceId', 'phoneNumber', 'callType', 'timestamp'],
+        properties: {
+          deviceId: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 50,
+            example: 'DEVICE-001',
+          },
+          phoneNumber: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 20,
+            example: '1234567890',
+          },
+          contactName: {
+            type: 'string',
+            maxLength: 100,
+            example: 'John Doe',
+          },
+          callType: {
+            type: 'string',
+            enum: ['INCOMING', 'OUTGOING', 'MISSED', 'REJECTED'],
+            example: 'OUTGOING',
+          },
+          duration: {
+            type: 'integer',
+            minimum: 0,
+            example: 120,
+          },
+          timestamp: {
+            type: 'string',
+            format: 'date-time',
+            example: '2023-01-01T12:00:00Z',
+          },
+        },
+      },
+      Contact: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            format: 'uuid',
+            example: '123e4567-e89b-12d3-a456-426614174000',
+          },
+          deviceId: {
+            type: 'string',
+            format: 'uuid',
+            example: '123e4567-e89b-12d3-a456-426614174000',
+          },
+          name: {
+            type: 'string',
+            example: 'John Doe',
+          },
+          phoneNumber: {
+            type: 'string',
+            example: '1234567890',
+          },
+          email: {
+            type: 'string',
+            format: 'email',
+            example: 'john@example.com',
+          },
+          avatar: {
+            type: 'string',
+            example: 'https://example.com/avatar.jpg',
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+            example: '2023-01-01T12:00:00Z',
+          },
+          updatedAt: {
+            type: 'string',
+            format: 'date-time',
+            example: '2023-01-01T12:00:00Z',
+          },
+        },
+      },
+      CreateContactRequest: {
+        type: 'object',
+        required: ['deviceId', 'name'],
+        properties: {
+          deviceId: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 50,
+            example: 'DEVICE-001',
+          },
+          name: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 100,
+            example: 'John Doe',
+          },
+          phoneNumber: {
+            type: 'string',
+            maxLength: 20,
+            example: '1234567890',
+          },
+          email: {
+            type: 'string',
+            format: 'email',
+            example: 'john@example.com',
+          },
+          avatar: {
+            type: 'string',
+            example: 'https://example.com/avatar.jpg',
+          },
+        },
+      },
+      Message: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            format: 'uuid',
+            example: '123e4567-e89b-12d3-a456-426614174000',
+          },
+          deviceId: {
+            type: 'string',
+            format: 'uuid',
+            example: '123e4567-e89b-12d3-a456-426614174000',
+          },
+          messageType: {
+            type: 'string',
+            enum: ['SMS', 'WHATSAPP', 'TELEGRAM', 'FACEBOOK', 'INSTAGRAM', 'TWITTER', 'EMAIL', 'OTHER'],
+            example: 'SMS',
+          },
+          // platform removed - not in Prisma schema
+          sender: {
+            type: 'string',
+            example: '1234567890',
+          },
+          recipient: {
+            type: 'string',
+            example: '0987654321',
+          },
+          content: {
+            type: 'string',
+            example: 'Hello World',
+          },
+          // direction removed - not in Prisma schema
+          timestamp: {
+            type: 'string',
+            format: 'date-time',
+            example: '2023-01-01T12:00:00Z',
+          },
+          isRead: {
+            type: 'boolean',
+            example: false,
+          },
+          metadata: {
+            type: 'object',
+            example: {},
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+            example: '2023-01-01T12:00:00Z',
+          },
+          updatedAt: {
+            type: 'string',
+            format: 'date-time',
+            example: '2023-01-01T12:00:00Z',
+          },
+        },
+      },
+      CreateMessageRequest: {
+        type: 'object',
+        required: ['deviceId', 'messageType', 'content', 'timestamp'],
+        properties: {
+          deviceId: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 50,
+            example: 'DEVICE-001',
+          },
+          messageType: {
+            type: 'string',
+            enum: ['SMS', 'WHATSAPP', 'TELEGRAM', 'FACEBOOK', 'INSTAGRAM', 'TWITTER', 'EMAIL', 'OTHER'],
+            example: 'SMS',
+          },
+          // platform removed - not in Prisma schema
+          sender: {
+            type: 'string',
+            example: '1234567890',
+          },
+          recipient: {
+            type: 'string',
+            example: '0987654321',
+          },
+          content: {
+            type: 'string',
+            example: 'Hello World',
+          },
+          // direction removed - not in Prisma schema
+          timestamp: {
+            type: 'string',
+            format: 'date-time',
+            example: '2023-01-01T12:00:00Z',
+          },
+          isRead: {
+            type: 'boolean',
+            example: false,
+          },
+          metadata: {
+            type: 'object',
+            example: {},
+          },
+        },
+      },
+      Location: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            format: 'uuid',
+            example: '123e4567-e89b-12d3-a456-426614174000',
+          },
+          deviceId: {
+            type: 'string',
+            format: 'uuid',
+            example: '123e4567-e89b-12d3-a456-426614174000',
+          },
+          latitude: {
+            type: 'number',
+            example: 40.7128,
+          },
+          longitude: {
+            type: 'number',
+            example: -74.0060,
+          },
+          accuracy: {
+            type: 'number',
+            example: 10.5,
+          },
+          altitude: {
+            type: 'number',
+            example: 100.0,
+          },
+          speed: {
+            type: 'number',
+            example: 5.2,
+          },
+          heading: {
+            type: 'number',
+            example: 45.0,
+          },
+          address: {
+            type: 'string',
+            example: '123 Main St, New York, NY 10001',
+          },
+          timestamp: {
+            type: 'string',
+            format: 'date-time',
+            example: '2023-01-01T12:00:00Z',
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+            example: '2023-01-01T12:00:00Z',
+          },
+          updatedAt: {
+            type: 'string',
+            format: 'date-time',
+            example: '2023-01-01T12:00:00Z',
+          },
+        },
+      },
+      CreateLocationRequest: {
+        type: 'object',
+        required: ['deviceId', 'latitude', 'longitude', 'timestamp'],
+        properties: {
+          deviceId: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 50,
+            example: 'DEVICE-001',
+          },
+          latitude: {
+            type: 'number',
+            example: 40.7128,
+          },
+          longitude: {
+            type: 'number',
+            example: -74.0060,
+          },
+          accuracy: {
+            type: 'number',
+            example: 10.5,
+          },
+          altitude: {
+            type: 'number',
+            example: 100.0,
+          },
+          speed: {
+            type: 'number',
+            example: 5.2,
+          },
+          heading: {
+            type: 'number',
+            example: 45.0,
+          },
+          address: {
+            type: 'string',
+            example: '123 Main St, New York, NY 10001',
+          },
+          timestamp: {
+            type: 'string',
+            format: 'date-time',
+            example: '2023-01-01T12:00:00Z',
+          },
+        },
+      },
+      AppActivity: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            format: 'uuid',
+            example: '123e4567-e89b-12d3-a456-426614174000',
+          },
+          deviceId: {
+            type: 'string',
+            format: 'uuid',
+            example: '123e4567-e89b-12d3-a456-426614174000',
+          },
+          appName: {
+            type: 'string',
+            example: 'WhatsApp',
+          },
+          packageName: {
+            type: 'string',
+            example: 'com.whatsapp',
+          },
+          activityType: {
+            type: 'string',
+            enum: ['OPENED', 'CLOSED', 'INSTALLED', 'UNINSTALLED', 'UPDATED', 'PERMISSION_GRANTED', 'PERMISSION_DENIED'],
+            example: 'OPENED',
+          },
+          duration: {
+            type: 'integer',
+            minimum: 0,
+            example: 120,
+          },
+          timestamp: {
+            type: 'string',
+            format: 'date-time',
+            example: '2023-01-01T12:00:00Z',
+          },
+          metadata: {
+            type: 'object',
+            example: {},
+          },
+          isEncrypted: {
+            type: 'boolean',
+            example: false,
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+            example: '2023-01-01T12:00:00Z',
+          },
+          updatedAt: {
+            type: 'string',
+            format: 'date-time',
+            example: '2023-01-01T12:00:00Z',
+          },
+        },
+      },
+      CreateAppActivityRequest: {
+        type: 'object',
+        required: ['deviceId', 'appName', 'packageName', 'activityType', 'timestamp'],
+        properties: {
+          deviceId: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 50,
+            example: 'DEVICE-001',
+          },
+          appName: {
+            type: 'string',
+            example: 'WhatsApp',
+          },
+          packageName: {
+            type: 'string',
+            example: 'com.whatsapp',
+          },
+          activityType: {
+            type: 'string',
+            enum: ['OPENED', 'CLOSED', 'INSTALLED', 'UNINSTALLED', 'UPDATED', 'PERMISSION_GRANTED', 'PERMISSION_DENIED'],
+            example: 'OPENED',
+          },
+          duration: {
+            type: 'integer',
+            minimum: 0,
+            example: 120,
+          },
+          timestamp: {
+            type: 'string',
+            format: 'date-time',
+            example: '2023-01-01T12:00:00Z',
+          },
+          metadata: {
+            type: 'object',
+            example: {},
+          },
+        },
+      },
+
       // WebSocket Signaling schemas
       WebSocketConnectedMessage: {
         type: 'object',
@@ -747,6 +1204,26 @@ const swaggerDefinition: SwaggerDefinition = {
       description: 'WebSocket signaling server for real-time communication (screen sharing, WebRTC)',
     },
     {
+      name: 'Call Logs',
+      description: 'Call logs upload and management endpoints',
+    },
+    {
+      name: 'Contacts',
+      description: 'Contacts upload and management endpoints',
+    },
+    {
+      name: 'Location',
+      description: 'Location data upload and management endpoints',
+    },
+    {
+      name: 'App Activities',
+      description: 'App activities upload and management endpoints',
+    },
+    {
+      name: 'Messages',
+      description: 'Messages upload and management endpoints',
+    },
+    {
       name: 'Health',
       description: 'System health and status endpoints',
     },
@@ -755,7 +1232,7 @@ const swaggerDefinition: SwaggerDefinition = {
 
 const options = {
   definition: swaggerDefinition,
-  apis: ['./src/routes/*.ts', './src/controllers/*.ts', './src/index.ts'], // Path to the API docs
+  apis: ['./src/routes/*.ts', './src/index.ts'], // Path to the API docs - only routes and main file
 };
 
 export const swaggerSpec = swaggerJsdoc(options);

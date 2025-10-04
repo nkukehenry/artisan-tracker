@@ -2,160 +2,24 @@ import { Request, Response } from 'express';
 import { body, param, query, validationResult } from 'express-validator';
 import { container } from '../config/container';
 import { ContactRepository, CreateContactData } from '../interfaces/media.interface';
+import { IDeviceService } from '../interfaces/device.interface';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { authenticateToken, requireRole } from '../middleware/auth';
 import { createError } from '../middleware/errorHandler';
 import { BadRequestError, NotFoundError } from '../utils/error';
 
-/**
- * @swagger
- * components:
- *   schemas:
- *     Contact:
- *       type: object
- *       required:
- *         - id
- *         - deviceId
- *         - name
- *         - phoneNumber
- *         - createdAt
- *         - updatedAt
- *       properties:
- *         id:
- *           type: string
- *           format: uuid
- *           description: Unique identifier for the contact
- *         deviceId:
- *           type: string
- *           format: uuid
- *           description: ID of the device that owns this contact
- *         name:
- *           type: string
- *           description: Contact name
- *         phoneNumber:
- *           type: string
- *           description: Primary phone number
- *         email:
- *           type: string
- *           format: email
- *           description: Email address
- *         additionalPhoneNumbers:
- *           type: array
- *           items:
- *             type: string
- *           description: Additional phone numbers
- *         address:
- *           type: string
- *           description: Contact address
- *         company:
- *           type: string
- *           description: Company name
- *         notes:
- *           type: string
- *           description: Additional notes
- *         isEncrypted:
- *           type: boolean
- *           description: Whether the contact data is encrypted
- *         createdAt:
- *           type: string
- *           format: date-time
- *         updatedAt:
- *           type: string
- *           format: date-time
- *     
- *     CreateContactRequest:
- *       type: object
- *       required:
- *         - deviceId
- *         - name
- *         - phoneNumber
- *       properties:
- *         deviceId:
- *           type: string
- *           format: uuid
- *         name:
- *           type: string
- *         phoneNumber:
- *           type: string
- *         email:
- *           type: string
- *           format: email
- *         additionalPhoneNumbers:
- *           type: array
- *           items:
- *             type: string
- *         address:
- *           type: string
- *         company:
- *           type: string
- *         notes:
- *           type: string
- *         isEncrypted:
- *           type: boolean
- *           default: false
- *     
- *     ContactsResponse:
- *       type: object
- *       properties:
- *         success:
- *           type: boolean
- *         data:
- *           type: array
- *           items:
- *             $ref: '#/components/schemas/Contact'
- *         pagination:
- *           $ref: '#/components/schemas/PaginationInfo'
- */
+// Swagger documentation removed - kept only in routes
 
 export class ContactsController {
   private contactRepository: ContactRepository;
+  private deviceService: IDeviceService;
 
   constructor() {
     this.contactRepository = container.getRepository<ContactRepository>('contactRepository');
+    this.deviceService = container.getService<IDeviceService>('deviceService');
   }
 
-  /**
-   * @swagger
-   * /api/contacts:
-   *   post:
-   *     summary: Upload contacts from device
-   *     tags: [Contacts]
-   *     security:
-   *       - bearerAuth: []
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             properties:
-   *               contacts:
-   *                 type: array
-   *                 items:
-   *                   $ref: '#/components/schemas/CreateContactRequest'
-   *     responses:
-   *       201:
-   *         description: Contacts uploaded successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                 message:
-   *                   type: string
-   *                 data:
-   *                   type: array
-   *                   items:
-   *                     $ref: '#/components/schemas/Contact'
-   *       400:
-   *         $ref: '#/components/responses/BadRequest'
-   *       401:
-   *         $ref: '#/components/responses/Unauthorized'
-   *       500:
-   *         $ref: '#/components/responses/InternalServerError'
-   */
+  // Swagger documentation removed - kept only in routes
   uploadContacts = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -171,9 +35,18 @@ export class ContactsController {
 
     const createdContacts = [];
     for (const contactData of contacts) {
+      // Look up device by deviceId to get the database ID
+      const device = await this.deviceService.getDeviceByDeviceId(contactData.deviceId);
+      if (!device) {
+        throw new NotFoundError(`Device with deviceId '${contactData.deviceId}' not found`);
+      }
+
       const contact: CreateContactData = {
-        ...contactData,
-        isEncrypted: contactData.isEncrypted ?? false,
+        name: contactData.name,
+        phoneNumber: contactData.phoneNumber,
+        email: contactData.email,
+        avatar: contactData.avatar,
+        deviceId: device.id, // Use the database ID from the lookup
       };
       
       const created = await this.contactRepository.create(contact);
@@ -187,58 +60,7 @@ export class ContactsController {
     });
   });
 
-  /**
-   * @swagger
-   * /api/contacts/device/{deviceId}:
-   *   get:
-   *     summary: Get contacts for a specific device
-   *     tags: [Contacts]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: deviceId
-   *         required: true
-   *         schema:
-   *           type: string
-   *           format: uuid
-   *         description: Device ID
-   *       - in: query
-   *         name: page
-   *         schema:
-   *           type: integer
-   *           minimum: 1
-   *           default: 1
-   *         description: Page number
-   *       - in: query
-   *         name: limit
-   *         schema:
-   *           type: integer
-   *           minimum: 1
-   *           maximum: 100
-   *           default: 20
-   *         description: Number of items per page
-   *       - in: query
-   *         name: search
-   *         schema:
-   *           type: string
-   *         description: Search by name or phone number
-   *     responses:
-   *       200:
-   *         description: Contacts retrieved successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: '#/components/schemas/ContactsResponse'
-   *       400:
-   *         $ref: '#/components/responses/BadRequest'
-   *       401:
-   *         $ref: '#/components/responses/Unauthorized'
-   *       404:
-   *         $ref: '#/components/responses/NotFound'
-   *       500:
-   *         $ref: '#/components/responses/InternalServerError'
-   */
+  // Swagger documentation removed - kept only in routes
   getContactsByDevice = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -270,43 +92,7 @@ export class ContactsController {
     });
   });
 
-  /**
-   * @swagger
-   * /api/contacts/{id}:
-   *   get:
-   *     summary: Get a specific contact by ID
-   *     tags: [Contacts]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: id
-   *         required: true
-   *         schema:
-   *           type: string
-   *           format: uuid
-   *         description: Contact ID
-   *     responses:
-   *       200:
-   *         description: Contact retrieved successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                 data:
-   *                   $ref: '#/components/schemas/Contact'
-   *       400:
-   *         $ref: '#/components/responses/BadRequest'
-   *       401:
-   *         $ref: '#/components/responses/Unauthorized'
-   *       404:
-   *         $ref: '#/components/responses/NotFound'
-   *       500:
-   *         $ref: '#/components/responses/InternalServerError'
-   */
+  // Swagger documentation removed - kept only in routes
   getContactById = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -327,43 +113,7 @@ export class ContactsController {
     });
   });
 
-  /**
-   * @swagger
-   * /api/contacts/{id}:
-   *   delete:
-   *     summary: Delete a contact
-   *     tags: [Contacts]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: id
-   *         required: true
-   *         schema:
-   *           type: string
-   *           format: uuid
-   *         description: Contact ID
-   *     responses:
-   *       200:
-   *         description: Contact deleted successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                 message:
-   *                   type: string
-   *       400:
-   *         $ref: '#/components/responses/BadRequest'
-   *       401:
-   *         $ref: '#/components/responses/Unauthorized'
-   *       404:
-   *         $ref: '#/components/responses/NotFound'
-   *       500:
-   *         $ref: '#/components/responses/InternalServerError'
-   */
+  // Swagger documentation removed - kept only in routes
   deleteContact = asyncHandler(async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -394,8 +144,10 @@ export const contactsValidation = {
       .isArray({ min: 1 })
       .withMessage('contacts must be a non-empty array'),
     body('contacts.*.deviceId')
-      .isUUID()
-      .withMessage('Device ID must be a valid UUID'),
+      .isString()
+      .trim()
+      .isLength({ min: 1, max: 50 })
+      .withMessage('Device ID must be between 1 and 50 characters'),
     body('contacts.*.name')
       .isString()
       .trim()
@@ -438,16 +190,15 @@ export const contactsValidation = {
       .trim()
       .isLength({ max: 500 })
       .withMessage('Notes must be less than 500 characters'),
-    body('contacts.*.isEncrypted')
-      .optional()
-      .isBoolean()
-      .withMessage('isEncrypted must be a boolean'),
+    // isEncrypted validation removed - not in Prisma schema
   ],
 
   getContactsByDevice: [
     param('deviceId')
-      .isUUID()
-      .withMessage('Device ID must be a valid UUID'),
+      .isString()
+      .trim()
+      .isLength({ min: 1, max: 50 })
+      .withMessage('Device ID must be between 1 and 50 characters'),
     query('page')
       .optional()
       .isInt({ min: 1 })
@@ -476,3 +227,4 @@ export const contactsValidation = {
       .withMessage('Contact ID must be a valid UUID'),
   ],
 };
+

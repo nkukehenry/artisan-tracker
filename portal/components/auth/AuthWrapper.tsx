@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAppSelector, useAppDispatch } from '@/lib/hooks';
 import { setLoading } from '@/store/slices/appSlice';
-import LoaderOverlay from '@/components/ui/LoaderOverlay';
 
 interface AuthWrapperProps {
   children: React.ReactNode;
@@ -12,7 +11,6 @@ interface AuthWrapperProps {
 
 export default function AuthWrapper({ children }: AuthWrapperProps) {
   const { isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
-  const { isLoading: globalLoading } = useAppSelector((state) => state.app);
   const dispatch = useAppDispatch();
   const router = useRouter();
   const pathname = usePathname();

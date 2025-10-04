@@ -16,12 +16,11 @@ export interface DeviceTableColumnsProps {
 
 interface DeviceActionsProps {
   device: Device;
-  onView: (device: Device) => void;
   onEdit: (device: Device) => void;
   onDelete: (deviceId: string) => void;
 }
 
-function DeviceActions({ device, onView, onEdit, onDelete }: DeviceActionsProps) {
+function DeviceActions({ device, onEdit, onDelete }: DeviceActionsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -132,7 +131,6 @@ function DeviceActions({ device, onView, onEdit, onDelete }: DeviceActionsProps)
 }
 
 export function createDeviceTableColumns({
-  onView,
   onEdit,
   onDelete,
 }: DeviceTableColumnsProps): Column<Device>[] {
@@ -217,7 +215,6 @@ export function createDeviceTableColumns({
         <div className="flex items-center justify-end">
           <DeviceActions
             device={device}
-            onView={onView}
             onEdit={onEdit}
             onDelete={onDelete}
           />

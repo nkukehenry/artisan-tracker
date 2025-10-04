@@ -5,7 +5,7 @@ import { ReactNode } from 'react';
 export interface Column<T> {
   key: keyof T | string;
   label: string;
-  render?: (item: T, value: any) => ReactNode;
+  render?: (item: T, value: unknown) => ReactNode;
   sortable?: boolean;
   className?: string;
 }
@@ -19,7 +19,7 @@ export interface DataTableProps<T> {
   className?: string;
 }
 
-export default function DataTable<T extends Record<string, any>>({
+export default function DataTable<T extends Record<string, unknown> = Record<string, unknown>>({
   data,
   columns,
   onRowClick,
@@ -70,12 +70,24 @@ export default function DataTable<T extends Record<string, any>>({
               >
                 {columns.map((column, colIndex) => {
                   const value = typeof column.key === 'string' 
-                    ? column.key.split('.').reduce((obj, key) => obj?.[key], item)
+                    ? (() => {
+                        let result: unknown = item;
+                        for (const key of column.key.split('.')) {
+                          if (result && typeof result === 'object' && key in result) {
+                            result = (result as Record<string, unknown>)[key];
+                          } else {
+                            return undefined;
+                          }
+                        }
+                        return result;
+                      })()
                     : item[column.key];
+                  
+                  const renderedValue = column.render ? column.render(item, value) : value;
                   
                   return (
                     <td key={colIndex} className="px-4 py-2 whitespace-nowrap">
-                      {column.render ? column.render(item, value) : value}
+                      {renderedValue as ReactNode}
                     </td>
                   );
                 })}

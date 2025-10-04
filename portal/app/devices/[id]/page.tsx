@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import AuthWrapper from '@/components/auth/AuthWrapper';
 import Layout from '@/components/layout/Layout';
@@ -28,7 +28,7 @@ export default function DeviceDetailsPage() {
 
 
   // Load device details
-  const loadDevice = async () => {
+  const loadDevice = useCallback(async () => {
     try {
       const result = await deviceApi.getDevice(deviceId);
       if (result.success) {
@@ -41,7 +41,7 @@ export default function DeviceDetailsPage() {
         }));
         router.push('/devices');
       }
-    } catch (error) {
+    } catch {
       dispatch(addToast({
         type: 'error',
         title: 'Failed to load device',
@@ -51,13 +51,13 @@ export default function DeviceDetailsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [deviceId, dispatch, router]);
 
   useEffect(() => {
     if (deviceId) {
       loadDevice();
     }
-  }, [deviceId]);
+  }, [deviceId, loadDevice]);
 
   if (isLoading) {
     return (

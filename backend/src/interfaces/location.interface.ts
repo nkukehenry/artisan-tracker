@@ -11,7 +11,7 @@ export interface Location extends BaseEntity {
   heading?: number;
   address?: string;
   timestamp: Date;
-  isEncrypted: boolean;
+  // isEncrypted removed - not in Prisma schema
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,7 +26,7 @@ export interface CreateLocationData {
   heading?: number;
   address?: string;
   timestamp: Date;
-  isEncrypted: boolean;
+  // isEncrypted removed - not in Prisma schema
 }
 
 export interface LocationRepository extends BaseRepository<Location> {

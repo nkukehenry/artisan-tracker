@@ -10,13 +10,11 @@ import Dropdown from '../ui/Dropdown';
 interface ProfileDropdownProps {
   userName?: string;
   userRole?: string;
-  userEmail?: string;
 }
 
 export default function ProfileDropdown({ 
   userName, 
-  userRole,
-  userEmail
+  userRole
 }: ProfileDropdownProps) {
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -25,7 +23,6 @@ export default function ProfileDropdown({
   // Use Redux state if props not provided
   const displayName = userName || `${user?.firstName} ${user?.lastName}` || 'User';
   const displayRole = (userRole || user?.role || 'USER').replace('_', ' ');
-  const displayEmail = userEmail || user?.email || '';
   
   const handleProfile = () => {
     // TODO: Navigate to profile page
