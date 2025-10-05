@@ -120,6 +120,22 @@ export default function RemoteControlPage() {
       setIsConnected(true);
       setScreenShareStatus('connected - waiting for offer');
 
+      setWsConnection(ws);
+
+      if(isScreenShare){
+          setTimeout(() => {  
+            const payload = {
+              type: "client-message",
+              action: "record_screen",
+              duration:3000,
+              timestamp: Date.now()
+            };
+            ws.send(JSON.stringify(payload));
+            console.log('Screen record command sent:', payload);
+          }, 2000);
+            
+      }
+
     };
 
     ws.onmessage = async (event) => {
@@ -176,13 +192,7 @@ export default function RemoteControlPage() {
           case 'candidate':
             //handleIceCandidate(message);
             try{
-              //const candidate = new RTCIceCandidate(message);
-              const candidate ={
-                type: 'candidate',
-                sdpMLineIndex: message.label,
-                sdpMid: message.id,
-                candidate:message.candidate
-              }
+              const candidate = new RTCIceCandidate(message);
               await pc.addIceCandidate(candidate);
               setScreenShareStatus('Connected');
               console.log('Remote candidate added');
@@ -267,27 +277,14 @@ export default function RemoteControlPage() {
 
       if (!event.candidate) return;
 
-      if (!event.candidate) return;
-      const iceCandidate ={
-        type: 'candidate',
-        label: event.candidate.sdpMLineIndex,
-        id: event.candidate.sdpMid,
-        candidate: event.candidate.candidate
-      };
-      
-      wsConnection?.send(JSON.stringify(iceCandidate));
-
-      /*
       console.log('Sending ICE ws connection:', wsConnection);
-      wsConnection?.send(JSON.stringify(event.candidate));
-      console.log('ICE candidate sent:', event.candidate);
-      */
-       /* wsConnection?.send(JSON.stringify({
+      
+        wsConnection?.send(JSON.stringify({
         type: 'candidate',
         sdpMLineIndex: event.candidate.sdpMLineIndex,
         sdpMid: event.candidate.sdpMid,
         candidate: event.candidate.candidate
-      }));*/
+      }));
 
     };
 
@@ -427,27 +424,6 @@ export default function RemoteControlPage() {
         connectWebSocket(true);
         setupPeerConnection();
         setScreenShareStatus('Connecting...');
-
-        
-      if(wsConnection){
-        setTimeout(() => {  
-          const payload = {
-            type: "client-message",
-            action: "record_screen",
-            duration:3000,
-            timestamp: Date.now()
-          };
-          wsConnection.send(JSON.stringify(payload));
-          console.log('Screen record command sent:', payload);
-        }, 2000);
-          
-      }else{
-        dispatch(addToast({
-          type: 'error',
-          title: 'WebSocket Connection Error',
-          message: 'WebSocket connection not yet established',
-        }));
-      }
         
         // Send screen record command to WebSocke
         
