@@ -132,6 +132,48 @@ export class CallLogRepositoryImpl extends BaseRepositoryImpl<CallLog> implement
     }
   }
 
+  async findByPhoneNumberAndTimestamp(phoneNumber: string, timestamp: Date, deviceId?: string): Promise<CallLog[]> {
+    try {
+      const where: any = { 
+        phoneNumber,
+        timestamp: {
+          gte: new Date(timestamp.getTime() - 60000), // 1 minute before
+          lte: new Date(timestamp.getTime() + 60000), // 1 minute after
+        }
+      };
+      
+      if (deviceId) {
+        const device = await this.prisma.device.findUnique({
+          where: { deviceId }
+        });
+        if (device) {
+          where.deviceId = device.id;
+        }
+      }
+
+      const data = await this.prisma.callLog.findMany({
+        where,
+        orderBy: { timestamp: 'desc' },
+      });
+
+      return data.map(item => ({
+        id: item.id,
+        phoneNumber: item.phoneNumber,
+        contactName: item.contactName || undefined,
+        callType: item.callType,
+        duration: item.duration || undefined,
+        timestamp: item.timestamp,
+        isIncoming: item.isIncoming,
+        createdAt: item.createdAt,
+        updatedAt: item.createdAt,
+        deviceId: item.deviceId,
+      }));
+    } catch (error) {
+      logger.error('Error finding call logs by phone number and timestamp', { phoneNumber, timestamp, deviceId, error });
+      throw error;
+    }
+  }
+
   async getCallStats(deviceId?: string): Promise<{
     total: number;
     incoming: number;

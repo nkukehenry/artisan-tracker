@@ -30,7 +30,6 @@ import { log } from 'console';
 
 export default function RemoteControlPage() {
   const dispatch = useAppDispatch();
-  const wsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'ws://localhost:9090/signaling';
   //const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const [devices, setDevices] = useState<Device[]>([]);
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
@@ -39,7 +38,7 @@ export default function RemoteControlPage() {
   const [isScreenShareModalOpen, setIsScreenShareModalOpen] = useState(false);
   const [screenShareStatus, setScreenShareStatus] = useState('disconnected');
   const [peerConnection, setPeerConnection] = useState<RTCPeerConnection | null>(null);
-  const [wsConnection, setWsConnection] = useState<WebSocket | null>(new WebSocket(wsUrl));
+  const [wsConnection, setWsConnection] = useState<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [previousRecordings, setPreviousRecordings] = useState<Array<{
     id: string;
@@ -105,20 +104,38 @@ export default function RemoteControlPage() {
   // WebSocket connection functions
   const connectWebSocket = (isScreenShare: boolean=false) => {
 
-   
+    if(wsConnection)
+      wsConnection.close();
+
     if ( !selectedDevice) { //wsConnection ||
       return;
     }
-    const ws = wsConnection || new WebSocket(wsUrl);
+
+    const wsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'ws://localhost:9090/signaling';
     console.log('Attempting to connect to WebSocket:', wsUrl);
     
-    if(wsConnection)
-      setWsConnection(ws);
+    const ws = new WebSocket(wsUrl);
+    setWsConnection(ws);
 
     ws.onopen = () => {
       console.log('WebSocket connected for remote control');
       setIsConnected(true);
       setScreenShareStatus('connected - waiting for offer');
+
+      
+      if(isScreenShare){
+          setTimeout(() => {  
+            const payload = {
+              type: "client-message",
+              action: "record_screen",
+              duration:3000,
+              timestamp: Date.now()
+            };
+            ws.send(JSON.stringify(payload));
+            console.log('Screen record command sent:', payload);
+          }, 2000);
+            
+      }
 
     };
 
@@ -129,26 +146,16 @@ export default function RemoteControlPage() {
         if (event.data instanceof Blob) {
           const text = await event.data.text();
           message = JSON.parse(text);
-        } 
-        else {
+        } else {
           message = JSON.parse(event.data);
         }
 
         console.log('WebSocket message received:', message);
 
-        if (!peerConnection) {
-          setupPeerConnection();
-        }
-    
-        const pc = peerConnection || setupPeerConnection();
-
          // Handle ICE candidate without type
          if (message && message.candidate && !message.type) {
           try {
-            const candidate = new RTCIceCandidate(message);
-            await pc.addIceCandidate(candidate);
-            setScreenShareStatus('Connected');
-            console.log('Remote candidate added');
+            handleIceCandidate(message);
             console.log("Added ICE candidate (no type).");
           } catch (err) {
             console.error("Error adding ICE candidate", err);
@@ -159,37 +166,10 @@ export default function RemoteControlPage() {
         // Handle different message types
         switch (message.type) {
           case 'offer':
-            //handleWebRTCOffer(message);
-              await pc.setRemoteDescription(new RTCSessionDescription(message));
-              const answer = await pc.createAnswer();
-              
-              const answerPayload = {
-                type: answer.type,
-                sdp: answer.sdp
-              };
-        
-              console.log('Answer created:', answerPayload);
-              await pc.setLocalDescription(answer);
-              ws.send(JSON.stringify(answerPayload));
-              setScreenShareStatus('Waiting for stream...');
+            handleWebRTCOffer(message);
             break;
           case 'candidate':
-            //handleIceCandidate(message);
-            try{
-              //const candidate = new RTCIceCandidate(message);
-              const candidate ={
-                type: 'candidate',
-                sdpMLineIndex: message.label,
-                sdpMid: message.id,
-                candidate:message.candidate
-              }
-              await pc.addIceCandidate(candidate);
-              setScreenShareStatus('Connected');
-              console.log('Remote candidate added');
-              console.log("Added ICE candidate (no type).");
-            } catch (err) {
-              console.error("Error adding ICE candidate", err);
-            }
+            handleIceCandidate(message);
             break;
           case 'command-response':
             // Handle command responses
@@ -200,8 +180,7 @@ export default function RemoteControlPage() {
             }));
             break;
         }
-      } 
-      catch (error) {
+      } catch (error) {
         console.error('Failed to parse WebSocket message:', error);
       }
     };
@@ -253,7 +232,14 @@ export default function RemoteControlPage() {
       setScreenShareStatus('Live');
       console.log('EVENT:', event);
        if (remoteVideo) {
+        // remoteVideo.srcObject = ev.streams[0];
+         // if (event.streams && event.streams[0]) {
             remoteVideo.srcObject = event.streams[0];
+          /*} else {
+            const inboundStream = new MediaStream();
+            inboundStream.addTrack(event.track);
+            remoteVideo.srcObject = inboundStream;
+          }*/
         }else{
           console.error('Remote video element not found for track received');
         }
@@ -266,29 +252,12 @@ export default function RemoteControlPage() {
       console.log('ICE candidate type:', event.candidate?.type);
 
       if (!event.candidate) return;
-
-      if (!event.candidate) return;
-      const iceCandidate ={
+      sendMessage({
         type: 'candidate',
         label: event.candidate.sdpMLineIndex,
         id: event.candidate.sdpMid,
         candidate: event.candidate.candidate
-      };
-      
-      wsConnection?.send(JSON.stringify(iceCandidate));
-
-      /*
-      console.log('Sending ICE ws connection:', wsConnection);
-      wsConnection?.send(JSON.stringify(event.candidate));
-      console.log('ICE candidate sent:', event.candidate);
-      */
-       /* wsConnection?.send(JSON.stringify({
-        type: 'candidate',
-        sdpMLineIndex: event.candidate.sdpMLineIndex,
-        sdpMid: event.candidate.sdpMid,
-        candidate: event.candidate.candidate
-      }));*/
-
+      });
     };
 
     pc.onconnectionstatechange = () => {
@@ -328,7 +297,7 @@ export default function RemoteControlPage() {
 
       console.log('Answer created:', answerPayload);
       await pc.setLocalDescription(answer);
-      wsConnection?.send(JSON.stringify(answerPayload));
+      sendMessage(answerPayload);
       setScreenShareStatus('Waiting for stream...');
     } catch (error) {
       console.error('Error handling offer:', error);
@@ -427,27 +396,6 @@ export default function RemoteControlPage() {
         connectWebSocket(true);
         setupPeerConnection();
         setScreenShareStatus('Connecting...');
-
-        
-      if(wsConnection){
-        setTimeout(() => {  
-          const payload = {
-            type: "client-message",
-            action: "record_screen",
-            duration:3000,
-            timestamp: Date.now()
-          };
-          wsConnection.send(JSON.stringify(payload));
-          console.log('Screen record command sent:', payload);
-        }, 2000);
-          
-      }else{
-        dispatch(addToast({
-          type: 'error',
-          title: 'WebSocket Connection Error',
-          message: 'WebSocket connection not yet established',
-        }));
-      }
         
         // Send screen record command to WebSocke
         

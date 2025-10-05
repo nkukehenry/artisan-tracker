@@ -33,8 +33,11 @@ export interface DeviceCommand {
 }
 
 export interface SendCommandData {
-  command: CommandType;
-  payload?: any;
+  action: string;
+  type: string;
+  deviceId: string;
+  duration?: number;
+  timestamp?: number;
 }
 
 export interface WebSocketMessage {

@@ -342,6 +342,349 @@ const swaggerDefinition: SwaggerDefinition = {
             maxLength: 20,
             example: '1.0.0',
           },
+          // Device Hardware Information
+          brand: {
+            type: 'string',
+            maxLength: 50,
+            example: 'Samsung',
+          },
+          manufacturer: {
+            type: 'string',
+            maxLength: 100,
+            example: 'Samsung Electronics',
+          },
+          deviceName: {
+            type: 'string',
+            maxLength: 100,
+            example: 'o1q',
+          },
+          product: {
+            type: 'string',
+            maxLength: 100,
+            example: 'o1quew',
+          },
+          board: {
+            type: 'string',
+            maxLength: 100,
+            example: 'exynos2100',
+          },
+          hardware: {
+            type: 'string',
+            maxLength: 100,
+            example: 'exynos2100',
+          },
+          // Android System Information
+          sdkVersion: {
+            type: 'integer',
+            minimum: 1,
+            maximum: 100,
+            example: 34,
+          },
+          androidVersion: {
+            type: 'string',
+            maxLength: 20,
+            example: '14',
+          },
+          release: {
+            type: 'string',
+            maxLength: 20,
+            example: '14',
+          },
+          codename: {
+            type: 'string',
+            maxLength: 50,
+            example: 'UpsideDownCake',
+          },
+          incremental: {
+            type: 'string',
+            maxLength: 50,
+            example: '123456789',
+          },
+          securityPatch: {
+            type: 'string',
+            maxLength: 20,
+            example: '2025-09-01',
+          },
+          // Memory and Storage
+          totalMemoryGB: {
+            type: 'number',
+            minimum: 0,
+            example: 8.0,
+          },
+          freeMemoryGB: {
+            type: 'number',
+            minimum: 0,
+            example: 3.2,
+          },
+          totalStorageGB: {
+            type: 'number',
+            minimum: 0,
+            example: 256.0,
+          },
+          freeStorageGB: {
+            type: 'number',
+            minimum: 0,
+            example: 128.5,
+          },
+          usedMemoryPercentage: {
+            type: 'integer',
+            minimum: 0,
+            maximum: 100,
+            example: 60,
+          },
+          // Device State
+          orientation: {
+            type: 'string',
+            enum: ['portrait', 'landscape'],
+            example: 'portrait',
+          },
+          isRooted: {
+            type: 'boolean',
+            example: false,
+          },
+          isEmulator: {
+            type: 'boolean',
+            example: false,
+          },
+          screenDensity: {
+            type: 'number',
+            minimum: 0,
+            example: 3.0,
+          },
+          screenResolution: {
+            type: 'string',
+            pattern: '^\\d+x\\d+$',
+            example: '1080x2400',
+          },
+          // Network Information
+          networkOperator: {
+            type: 'string',
+            maxLength: 100,
+            example: 'MTN',
+          },
+          simOperator: {
+            type: 'string',
+            maxLength: 100,
+            example: 'MTN UG',
+          },
+          simCountryISO: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 3,
+            example: 'UG',
+          },
+          // App Information
+          appVersionCode: {
+            type: 'integer',
+            minimum: 1,
+            example: 105,
+          },
+          appInstallTime: {
+            type: 'integer',
+            minimum: 0,
+            example: 1696320000000,
+          },
+          // Data Collection
+          collectedAt: {
+            type: 'integer',
+            minimum: 0,
+            example: 1696351200000,
+          },
+        },
+      },
+      CallHomeRequest: {
+        type: 'object',
+        required: ['deviceId', 'batteryLevel', 'location'],
+        properties: {
+          deviceId: {
+            type: 'string',
+            minLength: 3,
+            maxLength: 50,
+            example: '1234567890',
+          },
+          batteryLevel: {
+            type: 'integer',
+            minimum: 0,
+            maximum: 100,
+            example: 50,
+          },
+          location: {
+            type: 'object',
+            required: ['latitude', 'longitude'],
+            properties: {
+              latitude: {
+                type: 'number',
+                minimum: -90,
+                maximum: 90,
+                example: 40.7128,
+              },
+              longitude: {
+                type: 'number',
+                minimum: -180,
+                maximum: 180,
+                example: -74.006,
+              },
+              accuracy: {
+                type: 'number',
+                minimum: 0,
+                example: 10,
+              },
+              address: {
+                type: 'string',
+                maxLength: 255,
+                example: 'New York, NY, USA',
+              },
+            },
+          },
+          // Optional network information
+          networkOperator: {
+            type: 'string',
+            maxLength: 100,
+            example: 'MTN',
+          },
+          simOperator: {
+            type: 'string',
+            maxLength: 100,
+            example: 'MTN UG',
+          },
+          simCountryISO: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 3,
+            example: 'UG',
+          },
+          // Optional memory and storage
+          totalMemoryGB: {
+            type: 'number',
+            minimum: 0,
+            example: 8.0,
+          },
+          freeMemoryGB: {
+            type: 'number',
+            minimum: 0,
+            example: 3.2,
+          },
+          totalStorageGB: {
+            type: 'number',
+            minimum: 0,
+            example: 256.0,
+          },
+          freeStorageGB: {
+            type: 'number',
+            minimum: 0,
+            example: 128.5,
+          },
+          usedMemoryPercentage: {
+            type: 'integer',
+            minimum: 0,
+            maximum: 100,
+            example: 60,
+          },
+          // Optional device state
+          orientation: {
+            type: 'string',
+            enum: ['portrait', 'landscape'],
+            example: 'portrait',
+          },
+          isRooted: {
+            type: 'boolean',
+            example: false,
+          },
+          // Additional device attributes
+          brand: {
+            type: 'string',
+            maxLength: 50,
+            example: 'Samsung',
+          },
+          manufacturer: {
+            type: 'string',
+            maxLength: 100,
+            example: 'Samsung Electronics',
+          },
+          deviceName: {
+            type: 'string',
+            maxLength: 100,
+            example: 'o1q',
+          },
+          product: {
+            type: 'string',
+            maxLength: 100,
+            example: 'o1quew',
+          },
+          board: {
+            type: 'string',
+            maxLength: 100,
+            example: 'exynos2100',
+          },
+          hardware: {
+            type: 'string',
+            maxLength: 100,
+            example: 'exynos2100',
+          },
+          // Android System Information
+          sdkVersion: {
+            type: 'integer',
+            minimum: 1,
+            maximum: 100,
+            example: 34,
+          },
+          androidVersion: {
+            type: 'string',
+            maxLength: 20,
+            example: '14',
+          },
+          release: {
+            type: 'string',
+            maxLength: 20,
+            example: '14',
+          },
+          codename: {
+            type: 'string',
+            maxLength: 50,
+            example: 'UpsideDownCake',
+          },
+          incremental: {
+            type: 'string',
+            maxLength: 50,
+            example: '123456789',
+          },
+          securityPatch: {
+            type: 'string',
+            maxLength: 20,
+            example: '2025-09-01',
+          },
+          // Additional device state
+          isEmulator: {
+            type: 'boolean',
+            example: false,
+          },
+          screenDensity: {
+            type: 'number',
+            minimum: 0,
+            example: 3.0,
+          },
+          screenResolution: {
+            type: 'string',
+            pattern: '^\\d+x\\d+$',
+            example: '1080x2400',
+          },
+          // App Information
+          appVersionCode: {
+            type: 'integer',
+            minimum: 1,
+            example: 105,
+          },
+          appInstallTime: {
+            type: 'integer',
+            minimum: 0,
+            example: 1696320000000,
+          },
+          // Data Collection
+          collectedAt: {
+            type: 'integer',
+            minimum: 0,
+            example: 1696351200000,
+          },
         },
       },
       UpdateDeviceRequest: {

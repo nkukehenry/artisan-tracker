@@ -17,6 +17,48 @@ export interface Device {
   updatedAt: Date;
   tenantId: string;
   userId: string;
+  
+  // Device Hardware Information
+  brand: string | null;
+  manufacturer: string | null;
+  deviceName: string | null;
+  product: string | null;
+  board: string | null;
+  hardware: string | null;
+  
+  // Android System Information
+  sdkVersion: number | null;
+  androidVersion: string | null;
+  release: string | null;
+  codename: string | null;
+  incremental: string | null;
+  securityPatch: string | null;
+  
+  // Memory and Storage
+  totalMemoryGB: number | null;
+  freeMemoryGB: number | null;
+  totalStorageGB: number | null;
+  freeStorageGB: number | null;
+  usedMemoryPercentage: number | null;
+  
+  // Device State
+  orientation: string | null;
+  isRooted: boolean | null;
+  isEmulator: boolean | null;
+  screenDensity: number | null;
+  screenResolution: string | null;
+  
+  // Network Information
+  networkOperator: string | null;
+  simOperator: string | null;
+  simCountryISO: string | null;
+  
+  // App Information
+  appVersionCode: number | null;
+  appInstallTime: bigint | null;
+  
+  // Data Collection
+  collectedAt: bigint | null;
 }
 
 export interface CreateDeviceData {
@@ -31,6 +73,48 @@ export interface CreateDeviceData {
   isActive?: boolean;
   tenantId: string;
   userId: string;
+  
+  // Device Hardware Information
+  brand?: string | null;
+  manufacturer?: string | null;
+  deviceName?: string | null;
+  product?: string | null;
+  board?: string | null;
+  hardware?: string | null;
+  
+  // Android System Information
+  sdkVersion?: number | null;
+  androidVersion?: string | null;
+  release?: string | null;
+  codename?: string | null;
+  incremental?: string | null;
+  securityPatch?: string | null;
+  
+  // Memory and Storage
+  totalMemoryGB?: number | null;
+  freeMemoryGB?: number | null;
+  totalStorageGB?: number | null;
+  freeStorageGB?: number | null;
+  usedMemoryPercentage?: number | null;
+  
+  // Device State
+  orientation?: string | null;
+  isRooted?: boolean | null;
+  isEmulator?: boolean | null;
+  screenDensity?: number | null;
+  screenResolution?: string | null;
+  
+  // Network Information
+  networkOperator?: string | null;
+  simOperator?: string | null;
+  simCountryISO?: string | null;
+  
+  // App Information
+  appVersionCode?: number | null;
+  appInstallTime?: bigint | null;
+  
+  // Data Collection
+  collectedAt?: bigint | null;
 }
 
 export interface UpdateDeviceData {
@@ -43,6 +127,48 @@ export interface UpdateDeviceData {
   batteryLevel?: number | null;
   location?: any;
   isActive?: boolean;
+  
+  // Device Hardware Information
+  brand?: string | null;
+  manufacturer?: string | null;
+  deviceName?: string | null;
+  product?: string | null;
+  board?: string | null;
+  hardware?: string | null;
+  
+  // Android System Information
+  sdkVersion?: number | null;
+  androidVersion?: string | null;
+  release?: string | null;
+  codename?: string | null;
+  incremental?: string | null;
+  securityPatch?: string | null;
+  
+  // Memory and Storage
+  totalMemoryGB?: number | null;
+  freeMemoryGB?: number | null;
+  totalStorageGB?: number | null;
+  freeStorageGB?: number | null;
+  usedMemoryPercentage?: number | null;
+  
+  // Device State
+  orientation?: string | null;
+  isRooted?: boolean | null;
+  isEmulator?: boolean | null;
+  screenDensity?: number | null;
+  screenResolution?: string | null;
+  
+  // Network Information
+  networkOperator?: string | null;
+  simOperator?: string | null;
+  simCountryISO?: string | null;
+  
+  // App Information
+  appVersionCode?: number | null;
+  appInstallTime?: bigint | null;
+  
+  // Data Collection
+  collectedAt?: bigint | null;
 }
 
 export interface DeviceRepository extends BaseRepository<Device> {
@@ -62,6 +188,48 @@ export interface RegisterDeviceData {
   appVersion?: string | null;
   tenantId: string;
   userId: string;
+  
+  // Device Hardware Information
+  brand?: string | null;
+  manufacturer?: string | null;
+  deviceName?: string | null;
+  product?: string | null;
+  board?: string | null;
+  hardware?: string | null;
+  
+  // Android System Information
+  sdkVersion?: number | null;
+  androidVersion?: string | null;
+  release?: string | null;
+  codename?: string | null;
+  incremental?: string | null;
+  securityPatch?: string | null;
+  
+  // Memory and Storage
+  totalMemoryGB?: number | null;
+  freeMemoryGB?: number | null;
+  totalStorageGB?: number | null;
+  freeStorageGB?: number | null;
+  usedMemoryPercentage?: number | null;
+  
+  // Device State
+  orientation?: string | null;
+  isRooted?: boolean | null;
+  isEmulator?: boolean | null;
+  screenDensity?: number | null;
+  screenResolution?: string | null;
+  
+  // Network Information
+  networkOperator?: string | null;
+  simOperator?: string | null;
+  simCountryISO?: string | null;
+  
+  // App Information
+  appVersionCode?: number | null;
+  appInstallTime?: bigint | null;
+  
+  // Data Collection
+  collectedAt?: bigint | null;
 }
 
 export interface SendDeviceCommandData {

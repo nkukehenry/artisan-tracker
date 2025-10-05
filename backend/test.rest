@@ -615,3 +615,123 @@ GET {{baseUrl}}/health/firebase
 ###    - Super Admin: admin@mobiletracker.com / password123
 ###    - Tenant Admin: admin@acme.com / password123
 ###    - Regular User: user1@acme.com / password123
+
+### ===========================================
+### DEVICE CALL HOME TESTS
+### ===========================================
+
+### 72. Device call home - basic mandatory fields
+POST {{baseUrl}}/devices/call-home
+Content-Type: {{contentType}}
+Authorization: Bearer {{validToken}}
+
+{
+  "deviceId": "TEST-DEVICE-001",
+  "batteryLevel": 85,
+  "location": {
+    "latitude": 40.7128,
+    "longitude": -74.0060,
+    "accuracy": 10,
+    "address": "New York, NY, USA"
+  }
+}
+
+### 73. Device call home - with all optional fields
+POST {{baseUrl}}/devices/call-home
+Content-Type: {{contentType}}
+Authorization: Bearer {{validToken}}
+
+{
+  "deviceId": "TEST-DEVICE-001",
+  "batteryLevel": 50,
+  "location": {
+    "latitude": 40.7128,
+    "longitude": -74.006,
+    "accuracy": 10,
+    "address": "New York, NY, USA"
+  },
+  "networkOperator": "MTN",
+  "simOperator": "MTN UG",
+  "simCountryISO": "UG",
+  "totalMemoryGB": 8.0,
+  "freeMemoryGB": 3.2,
+  "totalStorageGB": 256.0,
+  "freeStorageGB": 128.5,
+  "usedMemoryPercentage": 60,
+  "orientation": "portrait",
+  "isRooted": false,
+  "brand": "Samsung",
+  "manufacturer": "Samsung Electronics",
+  "deviceName": "o1q",
+  "product": "o1quew",
+  "board": "exynos2100",
+  "hardware": "exynos2100",
+  "sdkVersion": 34,
+  "androidVersion": "14",
+  "release": "14",
+  "codename": "UpsideDownCake",
+  "incremental": "123456789",
+  "securityPatch": "2025-09-01",
+  "isEmulator": false,
+  "screenDensity": 3.0,
+  "screenResolution": "1080x2400",
+  "appVersionCode": 105,
+  "appInstallTime": 1696320000000,
+  "collectedAt": 1696351200000
+}
+
+### 74. Device call home - minimal location
+POST {{baseUrl}}/devices/call-home
+Content-Type: {{contentType}}
+Authorization: Bearer {{validToken}}
+
+{
+  "deviceId": "TEST-DEVICE-001",
+  "batteryLevel": 25,
+  "location": {
+    "latitude": 40.7589,
+    "longitude": -73.9851
+  }
+}
+
+### 75. Device call home - invalid device ID
+POST {{baseUrl}}/devices/call-home
+Content-Type: {{contentType}}
+Authorization: Bearer {{validToken}}
+
+{
+  "deviceId": "INVALID-DEVICE",
+  "batteryLevel": 75,
+  "location": {
+    "latitude": 40.7128,
+    "longitude": -74.0060
+  }
+}
+
+### 76. Device call home - invalid battery level
+POST {{baseUrl}}/devices/call-home
+Content-Type: {{contentType}}
+Authorization: Bearer {{validToken}}
+
+{
+  "deviceId": "TEST-DEVICE-001",
+  "batteryLevel": 150,
+  "location": {
+    "latitude": 40.7128,
+    "longitude": -74.0060
+  }
+}
+
+### 77. Device call home - invalid location coordinates
+POST {{baseUrl}}/devices/call-home
+Content-Type: {{contentType}}
+Authorization: Bearer {{validToken}}
+
+{
+  "deviceId": "TEST-DEVICE-001",
+  "batteryLevel": 60,
+  "location": {
+    "latitude": 200.0,
+    "longitude": -74.0060
+  }
+}

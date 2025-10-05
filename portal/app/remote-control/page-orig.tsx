@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AuthWrapper from '@/components/auth/AuthWrapper';
 import Layout from '@/components/layout/Layout';
 import { Device } from '@/types/device';
@@ -26,12 +26,10 @@ import {
   Download
 } from 'lucide-react';
 import ScreenShareModal from '@/components/devices/ScreenShareModal';
-import { log } from 'console';
 
 export default function RemoteControlPage() {
   const dispatch = useAppDispatch();
-  const wsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'ws://localhost:9090/signaling';
-  //const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  
   const [devices, setDevices] = useState<Device[]>([]);
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -39,7 +37,7 @@ export default function RemoteControlPage() {
   const [isScreenShareModalOpen, setIsScreenShareModalOpen] = useState(false);
   const [screenShareStatus, setScreenShareStatus] = useState('disconnected');
   const [peerConnection, setPeerConnection] = useState<RTCPeerConnection | null>(null);
-  const [wsConnection, setWsConnection] = useState<WebSocket | null>(new WebSocket(wsUrl));
+  const [wsConnection, setWsConnection] = useState<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [previousRecordings, setPreviousRecordings] = useState<Array<{
     id: string;
@@ -103,22 +101,29 @@ export default function RemoteControlPage() {
   }, [selectedDevice]);
 
   // WebSocket connection functions
-  const connectWebSocket = (isScreenShare: boolean=false) => {
-
-   
-    if ( !selectedDevice) { //wsConnection ||
+  const connectWebSocket = () => {
+    if (wsConnection || !selectedDevice) {
       return;
     }
-    const ws = wsConnection || new WebSocket(wsUrl);
+
+    const wsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'ws://localhost:9090/signaling';
     console.log('Attempting to connect to WebSocket:', wsUrl);
     
-    if(wsConnection)
-      setWsConnection(ws);
+    const ws = new WebSocket(wsUrl);
+    setWsConnection(ws);
 
     ws.onopen = () => {
       console.log('WebSocket connected for remote control');
       setIsConnected(true);
       setScreenShareStatus('connected - waiting for offer');
+
+      const payload = {
+        type: "client-message",
+        action: "record_screen",
+        duration:30,
+        timestamp: Date.now()
+      };
+      ws.send(JSON.stringify(payload));
 
     };
 
@@ -129,67 +134,19 @@ export default function RemoteControlPage() {
         if (event.data instanceof Blob) {
           const text = await event.data.text();
           message = JSON.parse(text);
-        } 
-        else {
+        } else {
           message = JSON.parse(event.data);
         }
 
         console.log('WebSocket message received:', message);
-
-        if (!peerConnection) {
-          setupPeerConnection();
-        }
-    
-        const pc = peerConnection || setupPeerConnection();
-
-         // Handle ICE candidate without type
-         if (message && message.candidate && !message.type) {
-          try {
-            const candidate = new RTCIceCandidate(message);
-            await pc.addIceCandidate(candidate);
-            setScreenShareStatus('Connected');
-            console.log('Remote candidate added');
-            console.log("Added ICE candidate (no type).");
-          } catch (err) {
-            console.error("Error adding ICE candidate", err);
-          }
-          return;
-        }
         
         // Handle different message types
         switch (message.type) {
           case 'offer':
-            //handleWebRTCOffer(message);
-              await pc.setRemoteDescription(new RTCSessionDescription(message));
-              const answer = await pc.createAnswer();
-              
-              const answerPayload = {
-                type: answer.type,
-                sdp: answer.sdp
-              };
-        
-              console.log('Answer created:', answerPayload);
-              await pc.setLocalDescription(answer);
-              ws.send(JSON.stringify(answerPayload));
-              setScreenShareStatus('Waiting for stream...');
+            handleWebRTCOffer(message);
             break;
           case 'candidate':
-            //handleIceCandidate(message);
-            try{
-              //const candidate = new RTCIceCandidate(message);
-              const candidate ={
-                type: 'candidate',
-                sdpMLineIndex: message.label,
-                sdpMid: message.id,
-                candidate:message.candidate
-              }
-              await pc.addIceCandidate(candidate);
-              setScreenShareStatus('Connected');
-              console.log('Remote candidate added');
-              console.log("Added ICE candidate (no type).");
-            } catch (err) {
-              console.error("Error adding ICE candidate", err);
-            }
+            handleIceCandidate(message);
             break;
           case 'command-response':
             // Handle command responses
@@ -200,8 +157,7 @@ export default function RemoteControlPage() {
             }));
             break;
         }
-      } 
-      catch (error) {
+      } catch (error) {
         console.error('Failed to parse WebSocket message:', error);
       }
     };
@@ -245,61 +201,30 @@ export default function RemoteControlPage() {
       iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
     });
 
-    
     pc.ontrack = (event) => {
-      const remoteVideo = document.getElementById('remoteVideo') as HTMLVideoElement;
-
       console.log('Remote track received');
-      setScreenShareStatus('Live');
+      setScreenShareStatus('connected');
       console.log('EVENT:', event);
-       if (remoteVideo) {
-            remoteVideo.srcObject = event.streams[0];
-        }else{
-          console.error('Remote video element not found for track received');
-        }
+      const remoteVideo = document.getElementById('remoteVideo') as HTMLVideoElement;
+      if (remoteVideo) {
+        remoteVideo.srcObject = event.streams[0];
+        remoteVideo.muted = true;
+        remoteVideo.play().catch(err => console.error('Video play error:', err));
+      }
     };
 
-
     pc.onicecandidate = (event) => {
-
-      console.log('ICE candidate received:', event.candidate);
-      console.log('ICE candidate type:', event.candidate?.type);
-
       if (!event.candidate) return;
-
-      if (!event.candidate) return;
-      const iceCandidate ={
+      sendMessage({
         type: 'candidate',
         label: event.candidate.sdpMLineIndex,
         id: event.candidate.sdpMid,
         candidate: event.candidate.candidate
-      };
-      
-      wsConnection?.send(JSON.stringify(iceCandidate));
-
-      /*
-      console.log('Sending ICE ws connection:', wsConnection);
-      wsConnection?.send(JSON.stringify(event.candidate));
-      console.log('ICE candidate sent:', event.candidate);
-      */
-       /* wsConnection?.send(JSON.stringify({
-        type: 'candidate',
-        sdpMLineIndex: event.candidate.sdpMLineIndex,
-        sdpMid: event.candidate.sdpMid,
-        candidate: event.candidate.candidate
-      }));*/
-
+      });
     };
 
     pc.onconnectionstatechange = () => {
       console.log('Peer connection state:', pc.connectionState);
-      console.log("pc state " + pc.connectionState);
-       const remoteVideo = document.getElementById('remoteVideo') as HTMLVideoElement;
-    
-      if (pc.connectionState == "connected") {
-          remoteVideo.muted = true; // mute the video
-          remoteVideo.play().catch(err => console.error('Video play error:', err));
-      }
       setScreenShareStatus(pc.connectionState);
     };
 
@@ -328,26 +253,20 @@ export default function RemoteControlPage() {
 
       console.log('Answer created:', answerPayload);
       await pc.setLocalDescription(answer);
-      wsConnection?.send(JSON.stringify(answerPayload));
-      setScreenShareStatus('Waiting for stream...');
+      sendMessage(answerPayload);
+      setScreenShareStatus('answer sent');
     } catch (error) {
       console.error('Error handling offer:', error);
       setScreenShareStatus('error');
     }
   };
 
-  const handleIceCandidate = async (message: RTCIceCandidateInit) => {
+  const handleIceCandidate = async (message: { type: string; candidate: RTCIceCandidateInit }) => {
     if (!peerConnection) return;
     
     try {
-      const candidate = new RTCIceCandidate({
-        sdpMLineIndex: message.sdpMLineIndex,
-        sdpMid: message.sdpMid,
-        candidate: message.candidate
-        });
-
+      const candidate = new RTCIceCandidate(message.candidate);
       await peerConnection.addIceCandidate(candidate);
-      setScreenShareStatus('Connected');
       console.log('Remote candidate added');
     } catch (error) {
       console.error('Error adding ICE candidate:', error);
@@ -424,33 +343,22 @@ export default function RemoteControlPage() {
       } else {
         // Open modal, connect WebSocket, and setup peer connection
         setIsScreenShareModalOpen(true);
-        connectWebSocket(true);
+        connectWebSocket();
         setupPeerConnection();
-        setScreenShareStatus('Connecting...');
-
+        setScreenShareStatus('connecting...');
         
-      if(wsConnection){
-        setTimeout(() => {  
-          const payload = {
-            type: "client-message",
-            action: "record_screen",
-            duration:3000,
-            timestamp: Date.now()
-          };
-          wsConnection.send(JSON.stringify(payload));
-          console.log('Screen record command sent:', payload);
-        }, 2000);
-          
-      }else{
-        dispatch(addToast({
-          type: 'error',
-          title: 'WebSocket Connection Error',
-          message: 'WebSocket connection not yet established',
-        }));
-      }
-        
-        // Send screen record command to WebSocke
-        
+        // Send screen record command to WebSocket
+        setTimeout(() => {
+          if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+            const payload = {
+              type: "client-message",
+              action: "screen-record",
+              timestamp: Date.now()
+            };
+            wsConnection.send(JSON.stringify(payload));
+            console.log('Screen record command sent:', payload);
+          }
+        }, 1000); // Wait 1 second for WebSocket to be ready
       }
     } catch (err) {
       dispatch(addToast({
@@ -460,7 +368,6 @@ export default function RemoteControlPage() {
       }));
     }
   };
-
 
   useEffect(() => {
     loadDevices();

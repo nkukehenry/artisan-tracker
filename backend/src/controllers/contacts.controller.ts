@@ -34,11 +34,31 @@ export class ContactsController {
     }
 
     const createdContacts = [];
+    const skippedContacts = [];
+    
     for (const contactData of contacts) {
       // Look up device by deviceId to get the database ID
       const device = await this.deviceService.getDeviceByDeviceId(contactData.deviceId);
       if (!device) {
         throw new NotFoundError(`Device with deviceId '${contactData.deviceId}' not found`);
+      }
+
+      // Check for duplicate contact by phone number for this device
+      if (contactData.phoneNumber) {
+        const existingContacts = await this.contactRepository.findByPhoneNumber(
+          contactData.phoneNumber, 
+          contactData.deviceId
+        );
+        
+        if (existingContacts.length > 0) {
+          // Contact already exists for this device, skip it
+          skippedContacts.push({
+            phoneNumber: contactData.phoneNumber,
+            name: contactData.name,
+            reason: 'Contact already exists for this device'
+          });
+          continue;
+        }
       }
 
       const contact: CreateContactData = {
@@ -53,10 +73,22 @@ export class ContactsController {
       createdContacts.push(created);
     }
 
+    const responseMessage = skippedContacts.length > 0 
+      ? `${createdContacts.length} contacts uploaded successfully, ${skippedContacts.length} duplicates skipped`
+      : `${createdContacts.length} contacts uploaded successfully`;
+
     res.status(201).json({
       success: true,
-      message: `${createdContacts.length} contacts uploaded successfully`,
-      data: createdContacts,
+      message: responseMessage,
+      data: {
+        created: createdContacts,
+        skipped: skippedContacts,
+        summary: {
+          total: contacts.length,
+          created: createdContacts.length,
+          skipped: skippedContacts.length
+        }
+      },
     });
   });
 

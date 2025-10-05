@@ -60,6 +60,7 @@ export interface CreateCallLogData {
 export interface CallLogRepository extends BaseRepository<CallLog> {
   findByDevice(deviceId: string, options?: { page?: number; limit?: number }): Promise<{ data: CallLog[]; pagination: any }>;
   findByPhoneNumber(phoneNumber: string, deviceId?: string): Promise<CallLog[]>;
+  findByPhoneNumberAndTimestamp(phoneNumber: string, timestamp: Date, deviceId?: string): Promise<CallLog[]>;
   getCallStats(deviceId?: string): Promise<{
     total: number;
     incoming: number;
