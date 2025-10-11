@@ -12,6 +12,7 @@ import { LocationRepositoryImpl } from '../repositories/location.repository';
 import { AppActivityRepositoryImpl } from '../repositories/app-activity.repository';
 import { MessageRepositoryImpl } from '../repositories/message.repository';
 import { MediaFileRepositoryImpl } from '../repositories/media.repository';
+import { TelemetryRepositoryImpl } from '../repositories/telemetry.repository';
 
 // Services
 import { AuthService } from '../services/auth.service';
@@ -56,6 +57,7 @@ class Container {
     this.repositories.set('appActivityRepository', new AppActivityRepositoryImpl(prisma));
     this.repositories.set('messageRepository', new MessageRepositoryImpl(prisma));
     this.repositories.set('mediaFileRepository', new MediaFileRepositoryImpl(prisma));
+    this.repositories.set('telemetryRepository', new TelemetryRepositoryImpl(prisma));
   }
 
   private initializeServices(): void {

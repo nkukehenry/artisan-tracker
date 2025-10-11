@@ -394,3 +394,79 @@ enum LogLevel {
   INFO
   DEBUG
 }
+
+// Telemetry Data - Device call-home information
+model Telemetry {
+  id          String   @id @default(cuid())
+  
+  // Device identifier (simple string, no foreign key)
+  deviceId    String
+  
+  // Device Info
+  orientation       String?
+  isRooted          Boolean?
+  isEmulator        Boolean?
+  screenDensity     Float?
+  screenResolution  String?
+  
+  // Memory Info
+  totalMemory           Float?
+  freeMemory            Float?
+  totalStorage          Float?
+  freeStorage           Float?
+  usedMemoryPercentage  Int?
+  
+  // System Info
+  brand         String?
+  manufacturer  String?
+  model         String?
+  deviceName    String?
+  product       String?
+  board         String?
+  hardware      String?
+  
+  // OS Info
+  sdkVersion      Int?
+  androidVersion  String?
+  osVersion       String?
+  codename        String?
+  incremental     String?
+  securityPatch   String?
+  
+  // Battery Info
+  batteryPercentage   String?
+  batteryTemperature  String?
+  batteryVoltage      String?
+  batteryCurrent      String?
+  batteryCapacity     String?
+  batteryStatus       String?
+  chargeCounter       String?
+  energyCounter       String?
+  
+  // App Version Info
+  appVersion      String?
+  appVersionCode  Int?
+  appInstallTime  BigInt?
+  
+  // Network Info
+  networkOperator String?
+  simOperator     String?
+  simCountryISO   String?
+  
+  // Location Info
+  latitude  Float?
+  longitude Float?
+  accuracy  Float?
+  altitude  Float?
+  speed     Float?
+  heading   Float?
+  address   String?
+  
+  // Timestamps
+  collectedAt DateTime
+  createdAt   DateTime @default(now())
+  
+  @@map("telemetry")
+  @@index([deviceId])
+  @@index([collectedAt])
+}

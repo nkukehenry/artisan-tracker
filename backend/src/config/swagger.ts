@@ -1547,6 +1547,310 @@ const swaggerDefinition: SwaggerDefinition = {
         },
       },
 
+      // Telemetry schemas
+      Telemetry: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            format: 'uuid',
+            example: '123e4567-e89b-12d3-a456-426614174000',
+          },
+          deviceId: {
+            type: 'string',
+            example: 'DEVICE-001',
+            description: 'Device identifier',
+          },
+          orientation: {
+            type: 'string',
+            example: 'portrait',
+          },
+          isRooted: {
+            type: 'boolean',
+            example: false,
+          },
+          isEmulator: {
+            type: 'boolean',
+            example: false,
+          },
+          screenDensity: {
+            type: 'number',
+            example: 3.0,
+          },
+          screenResolution: {
+            type: 'string',
+            example: '1080x2400',
+          },
+          totalMemory: {
+            type: 'number',
+            example: 8.0,
+          },
+          freeMemory: {
+            type: 'number',
+            example: 3.2,
+          },
+          totalStorage: {
+            type: 'number',
+            example: 256.0,
+          },
+          freeStorage: {
+            type: 'number',
+            example: 128.5,
+          },
+          usedMemoryPercentage: {
+            type: 'integer',
+            example: 60,
+          },
+          brand: {
+            type: 'string',
+            example: 'Samsung',
+          },
+          manufacturer: {
+            type: 'string',
+            example: 'Samsung Electronics',
+          },
+          model: {
+            type: 'string',
+            example: 'SM-G991B',
+          },
+          deviceName: {
+            type: 'string',
+            example: 'o1q',
+          },
+          product: {
+            type: 'string',
+            example: 'o1quew',
+          },
+          board: {
+            type: 'string',
+            example: 'exynos2100',
+          },
+          hardware: {
+            type: 'string',
+            example: 'exynos2100',
+          },
+          sdkVersion: {
+            type: 'integer',
+            example: 34,
+          },
+          androidVersion: {
+            type: 'string',
+            example: '14',
+          },
+          osVersion: {
+            type: 'string',
+            example: '14',
+          },
+          codename: {
+            type: 'string',
+            example: 'UpsideDownCake',
+          },
+          incremental: {
+            type: 'string',
+            example: '123456789',
+          },
+          securityPatch: {
+            type: 'string',
+            example: '2024-09-01',
+          },
+          batteryPercentage: {
+            type: 'string',
+            example: '85',
+          },
+          batteryTemperature: {
+            type: 'string',
+            example: '28.5',
+          },
+          batteryVoltage: {
+            type: 'string',
+            example: '4.2',
+          },
+          batteryCurrent: {
+            type: 'string',
+            example: '500',
+          },
+          batteryCapacity: {
+            type: 'string',
+            example: '4500',
+          },
+          batteryStatus: {
+            type: 'string',
+            example: 'Charging',
+          },
+          chargeCounter: {
+            type: 'string',
+            example: '3825',
+          },
+          energyCounter: {
+            type: 'string',
+            example: '16065000',
+          },
+          appVersion: {
+            type: 'string',
+            example: '1.0.5',
+          },
+          appVersionCode: {
+            type: 'integer',
+            example: 105,
+          },
+          appInstallTime: {
+            type: 'integer',
+            example: 1696320000000,
+          },
+          networkOperator: {
+            type: 'string',
+            example: 'MTN',
+          },
+          simOperator: {
+            type: 'string',
+            example: 'MTN UG',
+          },
+          simCountryISO: {
+            type: 'string',
+            example: 'UG',
+          },
+          latitude: {
+            type: 'number',
+            example: 40.7128,
+          },
+          longitude: {
+            type: 'number',
+            example: -74.0060,
+          },
+          accuracy: {
+            type: 'number',
+            example: 10.5,
+          },
+          altitude: {
+            type: 'number',
+            example: 100.0,
+          },
+          speed: {
+            type: 'number',
+            example: 5.2,
+          },
+          heading: {
+            type: 'number',
+            example: 45.0,
+          },
+          address: {
+            type: 'string',
+            example: 'New York, NY, USA',
+          },
+          collectedAt: {
+            type: 'string',
+            format: 'date-time',
+            example: '2024-01-15T10:30:00.000Z',
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+            example: '2024-01-15T10:30:05.000Z',
+          },
+        },
+      },
+      CreateTelemetryRequest: {
+        type: 'object',
+        required: ['deviceId', 'collectedAt'],
+        properties: {
+          deviceId: {
+            type: 'string',
+            example: 'DEVICE-001',
+            description: 'Device identifier',
+          },
+          deviceInfo: {
+            type: 'object',
+            properties: {
+              orientation: { type: 'string', example: 'portrait' },
+              isRooted: { type: 'boolean', example: false },
+              isEmulator: { type: 'boolean', example: false },
+              screenDensity: { type: 'number', example: 3.0 },
+              screenResolution: { type: 'string', example: '1080x2400' },
+            },
+          },
+          memoryInfo: {
+            type: 'object',
+            properties: {
+              totalMemory: { type: 'number', example: 8.0 },
+              freeMemory: { type: 'number', example: 3.2 },
+              totalStorage: { type: 'number', example: 256.0 },
+              freeStorage: { type: 'number', example: 128.5 },
+              usedMemoryPercentage: { type: 'integer', example: 60 },
+            },
+          },
+          systemInfo: {
+            type: 'object',
+            properties: {
+              brand: { type: 'string', example: 'Samsung' },
+              manufacturer: { type: 'string', example: 'Samsung Electronics' },
+              model: { type: 'string', example: 'SM-G991B' },
+              device: { type: 'string', example: 'o1q' },
+              product: { type: 'string', example: 'o1quew' },
+              board: { type: 'string', example: 'exynos2100' },
+              hardware: { type: 'string', example: 'exynos2100' },
+            },
+          },
+          osInfo: {
+            type: 'object',
+            properties: {
+              sdkVersion: { type: 'integer', example: 34 },
+              androidVersion: { type: 'string', example: '14' },
+              version: { type: 'string', example: '14' },
+              codename: { type: 'string', example: 'UpsideDownCake' },
+              incremental: { type: 'string', example: '123456789' },
+              securityPatch: { type: 'string', example: '2024-09-01' },
+            },
+          },
+          batteryInfo: {
+            type: 'object',
+            properties: {
+              percentage: { type: 'string', example: '85' },
+              temperature: { type: 'string', example: '28.5' },
+              voltage: { type: 'string', example: '4.2' },
+              current: { type: 'string', example: '500' },
+              capacity: { type: 'string', example: '4500' },
+              batteryStatus: { type: 'string', example: 'Charging' },
+              chargeCounter: { type: 'string', example: '3825' },
+              energyCounter: { type: 'string', example: '16065000' },
+            },
+          },
+          appVersionInfo: {
+            type: 'object',
+            properties: {
+              appVersion: { type: 'string', example: '1.0.5' },
+              appVersionCode: { type: 'integer', example: 105 },
+              appInstallTime: { type: 'integer', example: 1696320000000 },
+            },
+          },
+          networkInfo: {
+            type: 'object',
+            properties: {
+              networkOperator: { type: 'string', example: 'MTN' },
+              simOperator: { type: 'string', example: 'MTN UG' },
+              simCountryISO: { type: 'string', example: 'UG' },
+            },
+          },
+          locationInfo: {
+            type: 'object',
+            description: 'Optional GPS location (updates device location)',
+            properties: {
+              latitude: { type: 'number', example: 40.7128, minimum: -90, maximum: 90 },
+              longitude: { type: 'number', example: -74.0060, minimum: -180, maximum: 180 },
+              accuracy: { type: 'number', example: 10.5 },
+              altitude: { type: 'number', example: 100.0 },
+              speed: { type: 'number', example: 5.2 },
+              heading: { type: 'number', example: 45.0 },
+              address: { type: 'string', example: 'New York, NY, USA' },
+            },
+          },
+          collectedAt: {
+            type: 'integer',
+            example: 1705315800000,
+            description: 'Timestamp in milliseconds when data was collected',
+          },
+        },
+      },
+
       // WebSocket Signaling schemas
       WebSocketConnectedMessage: {
         type: 'object',
@@ -1726,6 +2030,10 @@ const swaggerDefinition: SwaggerDefinition = {
     {
       name: 'Messages',
       description: 'Messages upload and management endpoints',
+    },
+    {
+      name: 'Telemetry',
+      description: 'Device telemetry and call-home endpoints',
     },
     {
       name: 'Health',

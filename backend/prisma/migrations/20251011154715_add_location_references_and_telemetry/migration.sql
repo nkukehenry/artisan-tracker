@@ -1,0 +1,70 @@
+-- AlterTable: Add location fields and cross-references to call_logs
+ALTER TABLE `call_logs` ADD COLUMN `mediaId` VARCHAR(191) NULL,
+    ADD COLUMN `location` VARCHAR(191) NULL,
+    ADD COLUMN `gpsCoordinates` TEXT NULL;
+
+-- AlterTable: Add location fields and cross-reference to media_files
+ALTER TABLE `media_files` ADD COLUMN `callId` VARCHAR(191) NULL,
+    ADD COLUMN `location` VARCHAR(191) NULL,
+    ADD COLUMN `gpsCoordinates` TEXT NULL;
+
+-- AlterTable: Add location fields to messages
+ALTER TABLE `messages` ADD COLUMN `location` VARCHAR(191) NULL,
+    ADD COLUMN `gpsCoordinates` TEXT NULL;
+
+-- CreateTable: Telemetry data for device call-home
+CREATE TABLE `telemetry` (
+    `id` VARCHAR(191) NOT NULL,
+    `deviceId` VARCHAR(191) NOT NULL,
+    `orientation` VARCHAR(191) NULL,
+    `isRooted` BOOLEAN NULL,
+    `isEmulator` BOOLEAN NULL,
+    `screenDensity` DOUBLE NULL,
+    `screenResolution` VARCHAR(191) NULL,
+    `totalMemory` DOUBLE NULL,
+    `freeMemory` DOUBLE NULL,
+    `totalStorage` DOUBLE NULL,
+    `freeStorage` DOUBLE NULL,
+    `usedMemoryPercentage` INTEGER NULL,
+    `brand` VARCHAR(191) NULL,
+    `manufacturer` VARCHAR(191) NULL,
+    `model` VARCHAR(191) NULL,
+    `deviceName` VARCHAR(191) NULL,
+    `product` VARCHAR(191) NULL,
+    `board` VARCHAR(191) NULL,
+    `hardware` VARCHAR(191) NULL,
+    `sdkVersion` INTEGER NULL,
+    `androidVersion` VARCHAR(191) NULL,
+    `osVersion` VARCHAR(191) NULL,
+    `codename` VARCHAR(191) NULL,
+    `incremental` VARCHAR(191) NULL,
+    `securityPatch` VARCHAR(191) NULL,
+    `batteryPercentage` VARCHAR(191) NULL,
+    `batteryTemperature` VARCHAR(191) NULL,
+    `batteryVoltage` VARCHAR(191) NULL,
+    `batteryCurrent` VARCHAR(191) NULL,
+    `batteryCapacity` VARCHAR(191) NULL,
+    `batteryStatus` VARCHAR(191) NULL,
+    `chargeCounter` VARCHAR(191) NULL,
+    `energyCounter` VARCHAR(191) NULL,
+    `appVersion` VARCHAR(191) NULL,
+    `appVersionCode` INTEGER NULL,
+    `appInstallTime` BIGINT NULL,
+    `networkOperator` VARCHAR(191) NULL,
+    `simOperator` VARCHAR(191) NULL,
+    `simCountryISO` VARCHAR(191) NULL,
+    `latitude` DOUBLE NULL,
+    `longitude` DOUBLE NULL,
+    `accuracy` DOUBLE NULL,
+    `altitude` DOUBLE NULL,
+    `speed` DOUBLE NULL,
+    `heading` DOUBLE NULL,
+    `address` VARCHAR(191) NULL,
+    `collectedAt` DATETIME(3) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `telemetry_deviceId_idx`(`deviceId`),
+    INDEX `telemetry_collectedAt_idx`(`collectedAt`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+

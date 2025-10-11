@@ -28,6 +28,7 @@ import contactsRoutes from './routes/contacts';
 import locationRoutes from './routes/location';
 import appActivitiesRoutes from './routes/app-activities';
 import messagesRoutes from './routes/messages';
+import telemetryRoutes from './routes/telemetry';
 
 // Import WebSocket signaling service
 import { SignalingService } from './services/signaling.service';
@@ -229,6 +230,7 @@ app.use('/api/contacts', contactsRoutes);
 app.use('/api/location', locationRoutes);
 app.use('/api/app-activities', appActivitiesRoutes);
 app.use('/api/messages', messagesRoutes);
+app.use('/api/telemetry', telemetryRoutes);
 
 // 404 handler
 app.use((req, res) => {
