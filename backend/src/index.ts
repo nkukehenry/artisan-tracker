@@ -11,7 +11,6 @@ import swaggerUi from 'swagger-ui-express';
 // Import configurations
 import { prisma } from './config/database';
 import { redis } from './config/redis';
-import { firebase } from './config/firebase';
 import { logger, morganStream } from './config/logger';
 import { swaggerSpec } from './config/swagger';
 
@@ -186,7 +185,6 @@ app.get('/health', async (req, res) => {
     }
 
     const redisHealth = await redis.healthCheck();
-    const firebaseHealth = await firebase.healthCheck();
 
     const health = {
       status: 'ok',
@@ -194,11 +192,10 @@ app.get('/health', async (req, res) => {
       services: {
         database: dbHealth ? 'healthy' : 'unhealthy',
         redis: redisHealth ? 'healthy' : 'unhealthy',
-        firebase: firebaseHealth ? 'healthy' : 'unhealthy',
       },
     };
 
-    const isHealthy = dbHealth && redisHealth && firebaseHealth;
+    const isHealthy = dbHealth && redisHealth;
     res.status(isHealthy ? 200 : 503).json(health);
   } catch (error) {
     logger.error('Health check failed', error);

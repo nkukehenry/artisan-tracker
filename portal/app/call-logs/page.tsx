@@ -8,11 +8,17 @@ import { useDevices } from '@/hooks/useDevices';
 import DataTable from '@/components/ui/DataTable';
 import SearchFilter from '@/components/ui/SearchFilter';
 import Select from '@/components/ui/Select';
+import LocationBadge from '@/components/ui/LocationBadge';
+import MediaBadge from '@/components/ui/MediaBadge';
+import CallLogDetailModal from '@/components/call-logs/CallLogDetailModal';
 import { CallLog } from '@/types/callLog';
+import { Eye } from 'lucide-react';
 
 export default function CallLogsPage() {
   const { devices } = useDevices();
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
+  const [selectedCallLog, setSelectedCallLog] = useState<CallLog | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   
   const {
     callLogs,
@@ -30,6 +36,11 @@ export default function CallLogsPage() {
     updateFilters(newFilters);
   };
 
+  const handleViewDetails = (callLog: CallLog) => {
+    setSelectedCallLog(callLog);
+    setIsDetailModalOpen(true);
+  };
+
   const columns = [
     {
       key: 'phoneNumber',
@@ -40,6 +51,14 @@ export default function CallLogsPage() {
       key: 'contactName',
       label: 'Contact Name',
       sortable: true,
+      render: (item: CallLog, value: unknown) => (
+        <div className="space-y-1">
+          <div>{value as string || 'Unknown'}</div>
+          {(item.location || item.gpsCoordinates) && (
+            <LocationBadge location={item.location} gpsCoordinates={item.gpsCoordinates} />
+          )}
+        </div>
+      ),
     },
     {
       key: 'callType',
@@ -69,7 +88,28 @@ export default function CallLogsPage() {
       key: 'timestamp',
       label: 'Date & Time',
       sortable: true,
-      render: (item: CallLog, value: unknown) => new Date(value as string).toLocaleString(),
+      render: (item: CallLog, value: unknown) => (
+        <div className="space-y-1">
+          <div>{new Date(value as string).toLocaleString()}</div>
+          {item.media && (
+            <MediaBadge media={item.media} showSize={false} />
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'actions',
+      label: 'Actions',
+      sortable: false,
+      render: (item: CallLog) => (
+        <button
+          onClick={() => handleViewDetails(item)}
+          className="flex items-center gap-1 px-3 py-1.5 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
+        >
+          <Eye className="h-4 w-4" />
+          View
+        </button>
+      ),
     },
   ];
 
@@ -155,6 +195,13 @@ export default function CallLogsPage() {
               emptyMessage="No call logs found"
             />
           )}
+
+          {/* Call Log Detail Modal */}
+          <CallLogDetailModal
+            callLog={selectedCallLog}
+            isOpen={isDetailModalOpen}
+            onClose={() => setIsDetailModalOpen(false)}
+          />
         </div>
       </Layout>
     </AuthWrapper>

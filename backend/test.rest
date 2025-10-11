@@ -594,9 +594,6 @@ GET {{baseUrl}}/health/database
 ### 81. Redis health check
 GET {{baseUrl}}/health/redis
 
-### 82. Firebase health check
-GET {{baseUrl}}/health/firebase
-
 ### ===========================================
 ### NOTES
 ### ===========================================

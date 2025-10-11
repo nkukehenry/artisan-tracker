@@ -39,7 +39,7 @@ export default function RemoteControlPage() {
   const [isScreenShareModalOpen, setIsScreenShareModalOpen] = useState(false);
   const [screenShareStatus, setScreenShareStatus] = useState('disconnected');
   const [peerConnection, setPeerConnection] = useState<RTCPeerConnection | null>(null);
-  const [wsConnection, setWsConnection] = useState<WebSocket | null>(new WebSocket(wsUrl));
+  const [wsConnection, setWsConnection] = useState<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [previousRecordings, setPreviousRecordings] = useState<Array<{
     id: string;
@@ -105,23 +105,19 @@ export default function RemoteControlPage() {
   // WebSocket connection functions
   const connectWebSocket = (isScreenShare: boolean=false) => {
 
-   
     if ( !selectedDevice) { //wsConnection ||
       return;
     }
     const ws = wsConnection || new WebSocket(wsUrl);
     console.log('Attempting to connect to WebSocket:', wsUrl);
     
-    if(wsConnection)
-      setWsConnection(ws);
+    setWsConnection(ws);
 
     ws.onopen = () => {
       console.log('WebSocket connected for remote control');
       setIsConnected(true);
       setScreenShareStatus('connected - waiting for offer');
-
       setWsConnection(ws);
-
       if(isScreenShare){
           setTimeout(() => {  
             const payload = {
@@ -152,10 +148,7 @@ export default function RemoteControlPage() {
 
         console.log('WebSocket message received:', message);
 
-        if (!peerConnection) {
-          setupPeerConnection();
-        }
-    
+       
         const pc = peerConnection || setupPeerConnection();
 
          // Handle ICE candidate without type
@@ -192,7 +185,14 @@ export default function RemoteControlPage() {
           case 'candidate':
             //handleIceCandidate(message);
             try{
-              const candidate = new RTCIceCandidate(message);
+
+              const candidate_message = {
+                sdpMLineIndex: message.label,
+                sdpMid: message.id,
+                candidate: message.candidate
+              };
+
+              const candidate = new RTCIceCandidate(candidate_message);
               await pc.addIceCandidate(candidate);
               setScreenShareStatus('Connected');
               console.log('Remote candidate added');
@@ -277,13 +277,18 @@ export default function RemoteControlPage() {
 
       if (!event.candidate) return;
 
+      if(!wsConnection)
+        connectWebSocket();
+
       console.log('Sending ICE ws connection:', wsConnection);
       
         wsConnection?.send(JSON.stringify({
         type: 'candidate',
         sdpMLineIndex: event.candidate.sdpMLineIndex,
         sdpMid: event.candidate.sdpMid,
-        candidate: event.candidate.candidate
+        candidate: event.candidate.candidate,
+        label: event.candidate.sdpMLineIndex,
+        id: event.candidate.sdpMid
       }));
 
     };
@@ -449,13 +454,13 @@ export default function RemoteControlPage() {
   }, [selectedDevice, loadPreviousRecordings]);
 
   // Cleanup WebSocket connection on unmount
-  useEffect(() => {
-    return () => {
-      if (wsConnection) {
-        wsConnection.close();
-      }
-    };
-  }, [wsConnection]);
+  // useEffect(() => {
+  //   return () => {
+  //     if (wsConnection) {
+  //       wsConnection.close();
+  //     }
+  //   };
+  // }, [wsConnection]);
 
   const commandButtons = [
     { command: 'TAKE_PHOTO' as CommandType, deviceId: selectedDevice?.deviceId,action: 'take_photo',type: 'client-message', icon: Camera, label: 'Take Photo', iconColor: 'text-blue-500' },

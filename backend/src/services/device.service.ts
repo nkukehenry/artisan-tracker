@@ -1,6 +1,5 @@
 import { DeviceRepository } from '../interfaces/device.interface';
 import { DeviceCommandRepository, CreateDeviceCommandData } from '../interfaces/command.interface';
-import { firebase } from '../config/firebase';
 import { redis } from '../config/redis';
 import { logger } from '../config/logger';
 import { createError } from '../middleware/errorHandler';
@@ -275,12 +274,8 @@ export class DeviceService implements IDeviceService {
 
       const commandRecord = await this.deviceCommandRepository.create(commandData);
 
-      // TODO: Send command via Firebase
-      // For now, just mark as sent
+      // Mark as sent
       await this.deviceCommandRepository.updateCommandStatus(commandRecord.id, 'SENT');
-
-      // Store in Firebase for device to pick up
-      await firebase.storeDeviceCommand(deviceId, command, payload, 'pending');
 
       logger.info('Device command sent successfully', { deviceId, command, commandId: commandRecord.id });
 

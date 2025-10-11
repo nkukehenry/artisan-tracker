@@ -12,6 +12,8 @@ export interface Message extends BaseEntity {
   timestamp: Date;
   isRead: boolean;
   metadata?: Record<string, any>;
+  location?: string;
+  gpsCoordinates?: string;
   // isEncrypted: boolean; // Removed as not in Prisma schema
   createdAt: Date;
   updatedAt: Date;
@@ -28,6 +30,8 @@ export interface CreateMessageData {
   timestamp: Date;
   isRead: boolean;
   metadata?: Record<string, any>;
+  location?: string;
+  gpsCoordinates?: string;
   // isEncrypted: boolean; // Removed as not in Prisma schema
 }
 

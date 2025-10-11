@@ -376,13 +376,13 @@ export class DeviceController {
       } = req.body;
 
       // Find device by deviceId
-      const device = await this.deviceService.getDeviceByDeviceId(deviceId);
-      if (!device) {
+      const dbDevice = await this.deviceService.getDeviceByDeviceId(deviceId);
+      if (!dbDevice) {
         throw createError('Device not found', 404);
       }
 
       // Update device with call home data
-      const updatedDevice = await this.deviceService.updateDevice(device.id, {
+      const updatedDevice = await this.deviceService.updateDevice(dbDevice.id, {
         batteryLevel,
         location,
         // Device hardware information

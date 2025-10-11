@@ -6,6 +6,8 @@ export interface Message {
   content: string;
   timestamp: string;
   isRead: boolean;
+  location?: string;
+  gpsCoordinates?: string;
   metadata?: string;
   createdAt: string;
   [key: string]: unknown;

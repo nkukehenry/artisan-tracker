@@ -42,12 +42,15 @@ export class CallLogsController {
       }
 
       const callLog: CreateCallLogData = {
+        mediaId: callLogData.mediaId,
         phoneNumber: callLogData.phoneNumber,
         contactName: callLogData.contactName,
         callType: callLogData.callType,
         duration: callLogData.duration,
         timestamp: new Date(callLogData.timestamp),
         isIncoming: callLogData.callType === 'INCOMING',
+        location: callLogData.location,
+        gpsCoordinates: callLogData.gpsCoordinates,
         deviceId: device.id, // Use the database ID from the lookup
       };
       

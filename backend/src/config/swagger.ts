@@ -853,6 +853,11 @@ const swaggerDefinition: SwaggerDefinition = {
             format: 'uuid',
             example: '123e4567-e89b-12d3-a456-426614174000',
           },
+          callId: {
+            type: 'string',
+            description: 'Optional reference to associated call log',
+            example: '123e4567-e89b-12d3-a456-426614174001',
+          },
           fileName: {
             type: 'string',
             example: 'photo_20230101_120000.jpg',
@@ -886,6 +891,57 @@ const swaggerDefinition: SwaggerDefinition = {
             type: 'boolean',
             example: false,
           },
+          location: {
+            type: 'string',
+            description: 'Location where media was captured',
+            example: 'New York, NY, USA',
+          },
+          gpsCoordinates: {
+            type: 'string',
+            description: 'GPS coordinates as JSON string',
+            example: '{"latitude": 40.7128, "longitude": -74.0060, "accuracy": 10}',
+          },
+          call: {
+            type: 'object',
+            description: 'Associated call log (if available)',
+            properties: {
+              id: {
+                type: 'string',
+                format: 'uuid',
+                example: '123e4567-e89b-12d3-a456-426614174001',
+              },
+              phoneNumber: {
+                type: 'string',
+                example: '+1234567890',
+              },
+              contactName: {
+                type: 'string',
+                example: 'John Doe',
+              },
+              callType: {
+                type: 'string',
+                enum: ['INCOMING', 'OUTGOING', 'MISSED', 'REJECTED'],
+                example: 'INCOMING',
+              },
+              duration: {
+                type: 'integer',
+                example: 120,
+              },
+              timestamp: {
+                type: 'string',
+                format: 'date-time',
+                example: '2023-01-01T12:00:00Z',
+              },
+              location: {
+                type: 'string',
+                example: 'New York, NY, USA',
+              },
+              gpsCoordinates: {
+                type: 'string',
+                example: '{"latitude": 40.7128, "longitude": -74.0060}',
+              },
+            },
+          },
           createdAt: {
             type: 'string',
             format: 'date-time',
@@ -913,6 +969,21 @@ const swaggerDefinition: SwaggerDefinition = {
             enum: ['PHOTO', 'VIDEO', 'AUDIO', 'DOCUMENT', 'OTHER'],
             example: 'PHOTO',
           },
+          callId: {
+            type: 'string',
+            description: 'Optional reference to associated call log',
+            example: '123e4567-e89b-12d3-a456-426614174001',
+          },
+          location: {
+            type: 'string',
+            description: 'Location where media was captured',
+            example: 'New York, NY, USA',
+          },
+          gpsCoordinates: {
+            type: 'string',
+            description: 'GPS coordinates as JSON string',
+            example: '{"latitude": 40.7128, "longitude": -74.0060, "accuracy": 10}',
+          },
           file: {
             type: 'string',
             format: 'binary',
@@ -929,6 +1000,11 @@ const swaggerDefinition: SwaggerDefinition = {
             type: 'string',
             format: 'uuid',
             example: '123e4567-e89b-12d3-a456-426614174000',
+          },
+          mediaId: {
+            type: 'string',
+            description: 'Optional reference to associated media file',
+            example: '123e4567-e89b-12d3-a456-426614174001',
           },
           deviceId: {
             type: 'string',
@@ -962,6 +1038,56 @@ const swaggerDefinition: SwaggerDefinition = {
             type: 'boolean',
             example: false,
           },
+          location: {
+            type: 'string',
+            description: 'Location where call was made',
+            example: 'New York, NY, USA',
+          },
+          gpsCoordinates: {
+            type: 'string',
+            description: 'GPS coordinates as JSON string',
+            example: '{"latitude": 40.7128, "longitude": -74.0060, "accuracy": 10}',
+          },
+          media: {
+            type: 'object',
+            description: 'Associated media file (if available)',
+            properties: {
+              id: {
+                type: 'string',
+                format: 'uuid',
+                example: '123e4567-e89b-12d3-a456-426614174001',
+              },
+              fileName: {
+                type: 'string',
+                example: 'call_recording.mp3',
+              },
+              filePath: {
+                type: 'string',
+                example: '/uploads/audio/call_recording.mp3',
+              },
+              fileSize: {
+                type: 'integer',
+                example: 1024000,
+              },
+              mimeType: {
+                type: 'string',
+                example: 'audio/mpeg',
+              },
+              fileType: {
+                type: 'string',
+                enum: ['PHOTO', 'VIDEO', 'AUDIO', 'SCREEN_RECORDING'],
+                example: 'AUDIO',
+              },
+              location: {
+                type: 'string',
+                example: 'New York, NY, USA',
+              },
+              gpsCoordinates: {
+                type: 'string',
+                example: '{"latitude": 40.7128, "longitude": -74.0060}',
+              },
+            },
+          },
           createdAt: {
             type: 'string',
             format: 'date-time',
@@ -983,6 +1109,11 @@ const swaggerDefinition: SwaggerDefinition = {
             minLength: 1,
             maxLength: 50,
             example: 'DEVICE-001',
+          },
+          mediaId: {
+            type: 'string',
+            description: 'Optional reference to associated media file',
+            example: '123e4567-e89b-12d3-a456-426614174001',
           },
           phoneNumber: {
             type: 'string',
@@ -1009,6 +1140,16 @@ const swaggerDefinition: SwaggerDefinition = {
             type: 'string',
             format: 'date-time',
             example: '2023-01-01T12:00:00Z',
+          },
+          location: {
+            type: 'string',
+            description: 'Location where call was made',
+            example: 'New York, NY, USA',
+          },
+          gpsCoordinates: {
+            type: 'string',
+            description: 'GPS coordinates as JSON string',
+            example: '{"latitude": 40.7128, "longitude": -74.0060, "accuracy": 10}',
           },
         },
       },
@@ -1131,6 +1272,16 @@ const swaggerDefinition: SwaggerDefinition = {
             type: 'object',
             example: {},
           },
+          location: {
+            type: 'string',
+            description: 'Location where message was sent',
+            example: 'New York, NY, USA',
+          },
+          gpsCoordinates: {
+            type: 'string',
+            description: 'GPS coordinates as JSON string',
+            example: '{"latitude": 40.7128, "longitude": -74.0060, "accuracy": 10}',
+          },
           createdAt: {
             type: 'string',
             format: 'date-time',
@@ -1184,6 +1335,16 @@ const swaggerDefinition: SwaggerDefinition = {
           metadata: {
             type: 'object',
             example: {},
+          },
+          location: {
+            type: 'string',
+            description: 'Location where message was sent',
+            example: 'New York, NY, USA',
+          },
+          gpsCoordinates: {
+            type: 'string',
+            description: 'GPS coordinates as JSON string',
+            example: '{"latitude": 40.7128, "longitude": -74.0060, "accuracy": 10}',
           },
         },
       },

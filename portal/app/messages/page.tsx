@@ -8,6 +8,7 @@ import { useDevices } from '@/hooks/useDevices';
 import DataTable from '@/components/ui/DataTable';
 import SearchFilter from '@/components/ui/SearchFilter';
 import Select from '@/components/ui/Select';
+import LocationBadge from '@/components/ui/LocationBadge';
 import { Message } from '@/types/message';
 
 export default function MessagesPage() {
@@ -60,8 +61,13 @@ export default function MessagesPage() {
       label: 'Message',
       sortable: false,
       render: (item: Message, value: unknown) => (
-        <div className="max-w-xs truncate" title={value as string}>
-          {value as string}
+        <div className="space-y-1">
+          <div className="max-w-xs truncate" title={value as string}>
+            {value as string}
+          </div>
+          {(item.location || item.gpsCoordinates) && (
+            <LocationBadge location={item.location} gpsCoordinates={item.gpsCoordinates} />
+          )}
         </div>
       ),
     },

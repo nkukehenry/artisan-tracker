@@ -16,20 +16,45 @@ export class CallLogRepositoryImpl extends BaseRepositoryImpl<CallLog> implement
       const result = await this.prisma.callLog.create({
         data: prismaData,
       });
+
+      // Fetch related media if available
+      let media = null;
+      if (result.mediaId) {
+        try {
+          media = await this.prisma.mediaFile.findUnique({
+            where: { id: result.mediaId },
+          });
+        } catch (error) {
+          logger.warn('Failed to fetch related media', { mediaId: result.mediaId, error });
+        }
+      }
       
       // Map the result back to the interface format
       const mappedResult: CallLog = {
         id: result.id,
+        mediaId: result.mediaId || undefined,
         phoneNumber: result.phoneNumber,
         contactName: result.contactName || undefined,
         callType: result.callType,
         duration: result.duration || undefined,
         timestamp: result.timestamp,
         isIncoming: result.isIncoming,
+        location: result.location || undefined,
+        gpsCoordinates: result.gpsCoordinates || undefined,
         createdAt: result.createdAt,
         updatedAt: result.createdAt, // Use createdAt as fallback
         deviceId: result.deviceId,
-      };
+        media: media ? {
+          id: media.id,
+          fileName: media.fileName,
+          filePath: media.filePath,
+          fileSize: media.fileSize,
+          mimeType: media.mimeType,
+          fileType: media.fileType,
+          location: media.location || undefined,
+          gpsCoordinates: media.gpsCoordinates || undefined,
+        } : undefined,
+      } as any;
       
       logger.info('CallLog created successfully', { id: result.id });
       return mappedResult;
@@ -63,19 +88,47 @@ export class CallLogRepositoryImpl extends BaseRepositoryImpl<CallLog> implement
         this.prisma.callLog.count({ where: { deviceId: device.id } }),
       ]);
 
-      // Map Prisma data to interface format
-      const mappedData: CallLog[] = data.map(item => ({
-        id: item.id,
-        phoneNumber: item.phoneNumber,
-        contactName: item.contactName || undefined,
-        callType: item.callType,
-        duration: item.duration || undefined,
-        timestamp: item.timestamp,
-        isIncoming: item.isIncoming,
-        createdAt: item.createdAt,
-        updatedAt: item.createdAt, // Use createdAt as fallback since updatedAt not in schema
-        deviceId: item.deviceId,
-      }));
+      // Map Prisma data to interface format and fetch related media if available
+      const mappedData: CallLog[] = await Promise.all(
+        data.map(async (item) => {
+          let media = null;
+          if (item.mediaId) {
+            try {
+              media = await this.prisma.mediaFile.findUnique({
+                where: { id: item.mediaId },
+              });
+            } catch (error) {
+              logger.warn('Failed to fetch related media', { mediaId: item.mediaId, error });
+            }
+          }
+
+          return {
+            id: item.id,
+            mediaId: item.mediaId || undefined,
+            phoneNumber: item.phoneNumber,
+            contactName: item.contactName || undefined,
+            callType: item.callType,
+            duration: item.duration || undefined,
+            timestamp: item.timestamp,
+            isIncoming: item.isIncoming,
+            location: item.location || undefined,
+            gpsCoordinates: item.gpsCoordinates || undefined,
+            createdAt: item.createdAt,
+            updatedAt: item.createdAt, // Use createdAt as fallback since updatedAt not in schema
+            deviceId: item.deviceId,
+            media: media ? {
+              id: media.id,
+              fileName: media.fileName,
+              filePath: media.filePath,
+              fileSize: media.fileSize,
+              mimeType: media.mimeType,
+              fileType: media.fileType,
+              location: media.location || undefined,
+              gpsCoordinates: media.gpsCoordinates || undefined,
+            } : undefined,
+          } as any;
+        })
+      );
 
       const totalPages = Math.ceil(total / limit);
 

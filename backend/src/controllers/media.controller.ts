@@ -31,7 +31,7 @@ export class MediaController {
       }
 
       const user = (req as any).user;
-      const { deviceId, fileType } = req.body;
+      const { deviceId, fileType, callId, location, gpsCoordinates } = req.body;
       const file = req.file;
 
       if (!file) {
@@ -51,6 +51,7 @@ export class MediaController {
       // Create media file record (this would be implemented in a MediaService)
       const mediaFile = {
         id: uuidv4(),
+        callId: callId || undefined,
         fileName: file.filename,
         filePath: file.path,
         fileSize: file.size,
@@ -62,6 +63,8 @@ export class MediaController {
           uploadedBy: user.id,
         },
         isEncrypted: false,
+        location: location || undefined,
+        gpsCoordinates: gpsCoordinates || undefined,
         deviceId: device.id,
         createdAt: new Date(),
         updatedAt: new Date(),

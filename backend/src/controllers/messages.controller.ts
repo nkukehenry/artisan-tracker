@@ -51,6 +51,8 @@ export class MessagesController {
         timestamp: messageData.timestamp,
         isRead: messageData.isRead ?? false,
         metadata: messageData.metadata,
+        location: messageData.location,
+        gpsCoordinates: messageData.gpsCoordinates,
         // isEncrypted: messageData.isEncrypted ?? false, // Removed as not in schema
       };
       

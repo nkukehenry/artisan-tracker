@@ -137,15 +137,18 @@ model Device {
 
 // Media Files (Photos, Videos, Audio)
 model MediaFile {
-  id          String      @id @default(cuid())
-  fileName    String
-  filePath    String
-  fileSize    BigInt
-  mimeType    String
-  fileType    MediaType
-  metadata    Json?       // EXIF data, duration, etc.
-  isEncrypted Boolean     @default(true)
-  createdAt   DateTime    @default(now())
+  id             String      @id @default(cuid())
+  callId         String?     // Optional reference to associated call
+  fileName       String
+  filePath       String
+  fileSize       BigInt
+  mimeType       String
+  fileType       MediaType
+  metadata       Json?       // EXIF data, duration, etc.
+  isEncrypted    Boolean     @default(true)
+  location       String?     // Location where media was captured
+  gpsCoordinates String?     // GPS coordinates as JSON string
+  createdAt      DateTime    @default(now())
   
   // Device relation
   deviceId    String
@@ -163,14 +166,17 @@ enum MediaType {
 
 // Call Logs
 model CallLog {
-  id          String      @id @default(cuid())
-  phoneNumber String
-  contactName String?
-  callType    CallType
-  duration    Int?        // in seconds
-  timestamp   DateTime
-  isIncoming  Boolean
-  createdAt   DateTime    @default(now())
+  id             String      @id @default(cuid())
+  mediaId        String?     // Optional reference to associated media
+  phoneNumber    String
+  contactName    String?
+  callType       CallType
+  duration       Int?        // in seconds
+  timestamp      DateTime
+  isIncoming     Boolean
+  location       String?     // Location where call was made
+  gpsCoordinates String?     // GPS coordinates as JSON string
+  createdAt      DateTime    @default(now())
   
   // Device relation
   deviceId    String
@@ -205,15 +211,17 @@ model Contact {
 
 // Messages (SMS, Social Media)
 model Message {
-  id          String      @id @default(cuid())
-  content     String
-  messageType MessageType
-  sender      String?
-  recipient   String?
-  timestamp   DateTime
-  isRead      Boolean     @default(false)
-  metadata    Json?       // Platform-specific data
-  createdAt   DateTime    @default(now())
+  id             String      @id @default(cuid())
+  content        String
+  messageType    MessageType
+  sender         String?
+  recipient      String?
+  timestamp      DateTime
+  isRead         Boolean     @default(false)
+  metadata       Json?       // Platform-specific data
+  location       String?     // Location where message was sent
+  gpsCoordinates String?     // GPS coordinates as JSON string
+  createdAt      DateTime    @default(now())
   
   // Device relation
   deviceId    String
@@ -270,7 +278,7 @@ model AppActivity {
   @@map("app_activities")
 }
 
-// Device Commands (Firebase integration)
+// Device Commands
 model DeviceCommand {
   id          String        @id @default(cuid())
   command     CommandType

@@ -4,6 +4,7 @@ export type MediaType = 'PHOTO' | 'VIDEO' | 'AUDIO' | 'SCREEN_RECORDING' | 'DOCU
 
 export interface MediaFile {
   id: string;
+  callId?: string;
   fileName: string;
   filePath: string;
   fileSize: bigint;
@@ -11,19 +12,34 @@ export interface MediaFile {
   fileType: MediaType;
   metadata?: any;
   isEncrypted: boolean;
+  location?: string;
+  gpsCoordinates?: string;
   createdAt: Date;
   updatedAt: Date;
   deviceId: string;
+  call?: {
+    id: string;
+    phoneNumber: string;
+    contactName?: string;
+    callType: 'INCOMING' | 'OUTGOING' | 'MISSED' | 'REJECTED';
+    duration?: number;
+    timestamp: Date;
+    location?: string;
+    gpsCoordinates?: string;
+  };
 }
 
 export interface CreateMediaFileData {
+  callId?: string;
   fileName: string;
   filePath: string;
   fileSize: bigint;
   mimeType: string;
-  fileType: 'PHOTO' | 'VIDEO' | 'AUDIO' | 'SCREEN_RECORDING';
+  fileType: MediaType;
   metadata?: any;
   isEncrypted?: boolean;
+  location?: string;
+  gpsCoordinates?: string;
   deviceId: string;
 }
 
@@ -36,24 +52,40 @@ export interface MediaFileRepository extends BaseRepository<MediaFile> {
 
 export interface CallLog {
   id: string;
+  mediaId?: string;
   phoneNumber: string;
   contactName?: string;
   callType: 'INCOMING' | 'OUTGOING' | 'MISSED' | 'REJECTED';
   duration?: number;
   timestamp: Date;
   isIncoming: boolean;
+  location?: string;
+  gpsCoordinates?: string;
   createdAt: Date;
   updatedAt: Date;
   deviceId: string;
+  media?: {
+    id: string;
+    fileName: string;
+    filePath: string;
+    fileSize: bigint;
+    mimeType: string;
+    fileType: MediaType;
+    location?: string;
+    gpsCoordinates?: string;
+  };
 }
 
 export interface CreateCallLogData {
+  mediaId?: string;
   phoneNumber: string;
   contactName?: string;
   callType: 'INCOMING' | 'OUTGOING' | 'MISSED' | 'REJECTED';
   duration?: number;
   timestamp: Date;
   isIncoming: boolean;
+  location?: string;
+  gpsCoordinates?: string;
   deviceId: string;
 }
 

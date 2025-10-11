@@ -77,6 +77,8 @@ export class MessageRepositoryImpl extends BaseRepositoryImpl<Message> implement
         timestamp: item.timestamp,
         isRead: item.isRead,
         metadata: (item.metadata as Record<string, any>) || {},
+        location: item.location || undefined,
+        gpsCoordinates: item.gpsCoordinates || undefined,
         // isEncrypted removed - not in Prisma schema
         createdAt: item.createdAt,
         updatedAt: item.createdAt, // Use createdAt as fallback

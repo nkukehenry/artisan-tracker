@@ -13,6 +13,7 @@ import {
   Plus,
   X,
   Monitor,
+  FileImage,
 } from 'lucide-react';
 
 interface NavItem {
@@ -29,6 +30,7 @@ const navigation: NavItem[] = [
   { name: 'Call Logs', href: '/call-logs', icon: Phone },
   { name: 'Contacts', href: '/contacts', icon: Users },
   { name: 'Location', href: '/location', icon: MapPin },
+  { name: 'Media Files', href: '/media', icon: FileImage },
   { name: 'App Activities', href: '/app-activities', icon: Grid3X3 },
 ];
 

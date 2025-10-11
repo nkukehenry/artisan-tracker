@@ -1,3 +1,18 @@
+export interface Media {
+  id: string;
+  fileName: string;
+  filePath: string;
+  fileSize: number;
+  mimeType: string;
+  fileType: 'PHOTO' | 'VIDEO' | 'AUDIO' | 'DOCUMENT';
+  location?: string;
+  gpsCoordinates?: string;
+  metadata?: Record<string, unknown>;
+  isEncrypted?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface CallLog {
   id: string;
   phoneNumber: string;
@@ -6,6 +21,10 @@ export interface CallLog {
   duration: number;
   timestamp: string;
   isIncoming: boolean;
+  location?: string;
+  gpsCoordinates?: string;
+  mediaId?: string;
+  media?: Media;
   createdAt: string;
   updatedAt: string;
   [key: string]: unknown;
