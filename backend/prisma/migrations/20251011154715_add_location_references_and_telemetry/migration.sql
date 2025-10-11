@@ -1,16 +1,4 @@
--- AlterTable: Add location fields and cross-references to call_logs
-ALTER TABLE `call_logs` ADD COLUMN `mediaId` VARCHAR(191) NULL,
-    ADD COLUMN `location` VARCHAR(191) NULL,
-    ADD COLUMN `gpsCoordinates` TEXT NULL;
 
--- AlterTable: Add location fields and cross-reference to media_files
-ALTER TABLE `media_files` ADD COLUMN `callId` VARCHAR(191) NULL,
-    ADD COLUMN `location` VARCHAR(191) NULL,
-    ADD COLUMN `gpsCoordinates` TEXT NULL;
-
--- AlterTable: Add location fields to messages
-ALTER TABLE `messages` ADD COLUMN `location` VARCHAR(191) NULL,
-    ADD COLUMN `gpsCoordinates` TEXT NULL;
 
 -- CreateTable: Telemetry data for device call-home
 CREATE TABLE `telemetry` (
