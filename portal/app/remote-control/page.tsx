@@ -4,11 +4,10 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import AuthWrapper from '@/components/auth/AuthWrapper';
 import Layout from '@/components/layout/Layout';
 import { Device } from '@/types/device';
-import { CommandType, SendCommandData } from '@/types/command';
+import { CommandType } from '@/types/command';
 import { deviceApi } from '@/lib/deviceApi';
-import { commandApi } from '@/lib/commandApi';
 import { useAppDispatch } from '@/lib/hooks';
-import { addToast } from '@/store/slices/appSlice';
+import { addToast, setLoading } from '@/store/slices/appSlice';
 import {
   Monitor,
   Square,
@@ -26,7 +25,6 @@ import {
   Download
 } from 'lucide-react';
 import ScreenShareModal from '@/components/devices/ScreenShareModal';
-import { log } from 'console';
 
 export default function RemoteControlPage() {
   const dispatch = useAppDispatch();
@@ -356,8 +354,8 @@ export default function RemoteControlPage() {
     }
   };
 
-  // Send command to device
-  const sendCommand = async (command: CommandType, payload?: Record<string, unknown>) => {
+  // Send command to device via WebSocket
+  const sendCommand = async (command: string, payload?: Record<string, unknown>) => {
     if (!selectedDevice) {
       dispatch(addToast({
         type: 'error',
@@ -367,39 +365,53 @@ export default function RemoteControlPage() {
       return;
     }
 
+    setLoading({ isLoading: true, message: 'Sending command...' });
+
+    if (!wsConnection || wsConnection.readyState !== WebSocket.OPEN) {
+      const wsConn = new WebSocket(wsUrl);
+
+      console.log('WebSocket connection not active. Device may be offline. Trying to reconnect...');
+      setTimeout(() => {
+        setWsConnection(wsConn);
+        console.log('WebSocket connection reconnected.');
+        if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+          console.log('WebSocket connection active. Sending command...');
+          sendCommand(command, payload);
+        }
+      }, 2000);
+      return;
+    }
+
     setIsSendingCommand(true);
     try {
-      const commandData: SendCommandData = {
-        action: command,
+      const commandPayload = {
         type: 'client-message',
-        deviceId: selectedDevice.id,
-        duration: payload?.duration as number,
-        timestamp: payload?.timestamp as number,
+        action: command,
+        deviceId: selectedDevice.deviceId,
+        timestamp: Date.now()
       };
-      const result = await commandApi.sendCommand(selectedDevice.id, commandData);
 
-      if (result.success) {
-        dispatch(addToast({
-          type: 'success',
-          title: 'Command Sent',
-          message: `${command.replace('_', ' ')} command sent successfully`,
-        }));
-      } else {
-        dispatch(addToast({
-          type: 'error',
-          title: 'Failed to send command',
-          message: result.error?.message || 'Command failed',
-        }));
-      }
-    } catch {
+      console.log('Sending command via WebSocket:', commandPayload);
+      wsConnection?.send(JSON.stringify(commandPayload));
+
+      dispatch(addToast({
+        type: 'success',
+        title: 'Command Sent',
+        message: `${command.replace(/_/g, ' ')} command sent successfully`,
+      }));
+    } catch (error) {
+      console.error('Error sending command:', error);
       dispatch(addToast({
         type: 'error',
         title: 'Failed to send command',
-        message: 'An unexpected error occurred',
+        message: error instanceof Error ? error.message : 'An unexpected error occurred',
       }));
-    } finally {
-      setIsSendingCommand(false);
     }
+    finally {
+      setIsSendingCommand(false);
+      setLoading({ isLoading: false, message: 'Command sent successfully' });
+    }
+
   };
 
   // Handle screen share
@@ -559,8 +571,8 @@ export default function RemoteControlPage() {
                   <button
                     onClick={handleScreenShare}
                     className={`flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium transition-colors ${isScreenShareModalOpen
-                        ? 'bg-red-500 hover:bg-red-600'
-                        : 'bg-indigo-500 hover:bg-indigo-600'
+                      ? 'bg-red-500 hover:bg-red-600'
+                      : 'bg-indigo-500 hover:bg-indigo-600'
                       }`}
                   >
                     {isScreenShareModalOpen ? (
@@ -589,10 +601,10 @@ export default function RemoteControlPage() {
                 </div>
                 <div className="p-6">
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-8 gap-4">
-                    {commandButtons.map(({ command, icon: Icon, label, iconColor }) => (
+                    {commandButtons.map(({ command, icon: Icon, label, iconColor, action }) => (
                       <button
                         key={command}
-                        onClick={() => sendCommand(command)}
+                        onClick={() => sendCommand(action)}
                         disabled={isSendingCommand}
                         className={`flex flex-col items-center gap-3 p-4 rounded-lg bg-white border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all ${isSendingCommand ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                           }`}
