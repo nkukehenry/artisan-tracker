@@ -19,7 +19,7 @@ export default function CallLogsPage() {
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
   const [selectedCallLog, setSelectedCallLog] = useState<CallLog | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  
+
   const {
     callLogs,
     isLoading,
@@ -65,11 +65,10 @@ export default function CallLogsPage() {
       label: 'Type',
       sortable: true,
       render: (item: CallLog, value: unknown) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-          (value as string) === 'INCOMING' ? 'bg-green-100 text-green-800' :
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${(value as string) === 'INCOMING' ? 'bg-green-100 text-green-800' :
           (value as string) === 'OUTGOING' ? 'bg-blue-100 text-blue-800' :
-          'bg-red-100 text-red-800'
-        }`}>
+            'bg-red-100 text-red-800'
+          }`}>
           {value as string}
         </span>
       ),
@@ -79,6 +78,8 @@ export default function CallLogsPage() {
       label: 'Duration',
       sortable: true,
       render: (item: CallLog, value: unknown) => {
+        if (item.duration === null || item.duration === undefined) return '0:00';
+
         const minutes = Math.floor((value as number) / 60);
         const seconds = (value as number) % 60;
         return `${minutes}:${seconds.toString().padStart(2, '0')}`;
@@ -158,7 +159,7 @@ export default function CallLogsPage() {
           {selectedDeviceId && (
             <SearchFilter
               searchValue=""
-              onSearchChange={() => {}}
+              onSearchChange={() => { }}
               searchPlaceholder="Search call logs..."
               filterValue={filters.callType || ''}
               onFilterChange={(value) => handleFilterChange({ callType: value as 'INCOMING' | 'OUTGOING' | 'MISSED' })}
