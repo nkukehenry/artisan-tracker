@@ -66,11 +66,12 @@ class Container {
     const userRepository = this.repositories.get('userRepository') as UserRepository;
     const deviceRepository = this.repositories.get('deviceRepository') as DeviceRepository;
     const deviceCommandRepository = this.repositories.get('deviceCommandRepository') as DeviceCommandRepository;
+    const mediaFileRepository = this.repositories.get('mediaFileRepository');
 
     // Initialize services with dependencies
     this.services.set('authService', new AuthService(userRepository, tenantRepository));
     this.services.set('deviceService', new DeviceService(deviceRepository, deviceCommandRepository));
-    this.services.set('mediaService', new MediaService());
+    this.services.set('mediaService', new MediaService(mediaFileRepository));
   }
 
   // Repository getters

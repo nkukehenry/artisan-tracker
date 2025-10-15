@@ -75,7 +75,13 @@ export class TelemetryController {
     res.status(201).json({
       success: true,
       message: 'Telemetry data received successfully',
-      data: { telemetry },
+      data: { 
+        telemetry: JSON.parse(
+          JSON.stringify(telemetry, (key, value) =>
+            typeof value === 'bigint' ? value.toString() : value
+          )
+        )
+      },
     });
   });
 
@@ -99,7 +105,11 @@ export class TelemetryController {
     res.status(200).json({
       success: true,
       message: 'Telemetry data retrieved successfully',
-      data: result,
+      data: JSON.parse(
+        JSON.stringify(result, (key, value) =>
+          typeof value === 'bigint' ? value.toString() : value
+        )
+      ),
     });
   });
 
@@ -121,7 +131,13 @@ export class TelemetryController {
     res.status(200).json({
       success: true,
       message: 'Latest telemetry retrieved successfully',
-      data: { telemetry },
+      data: { 
+        telemetry: JSON.parse(
+          JSON.stringify(telemetry, (key, value) =>
+            typeof value === 'bigint' ? value.toString() : value
+          )
+        )
+      },
     });
   });
 

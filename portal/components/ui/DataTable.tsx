@@ -27,7 +27,10 @@ export default function DataTable<T extends Record<string, unknown> = Record<str
   emptyAction,
   className = '',
 }: DataTableProps<T>) {
-  if (data.length === 0) {
+  // Ensure data is always an array
+  const safeData = Array.isArray(data) ? data : [];
+  
+  if (safeData.length === 0) {
     return (
       <div className="text-center py-12">
         <div className="text-gray-400 mb-4">
@@ -60,7 +63,7 @@ export default function DataTable<T extends Record<string, unknown> = Record<str
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {data.map((item, rowIndex) => (
+            {safeData.map((item, rowIndex) => (
               <tr
                 key={rowIndex}
                 className={`${
