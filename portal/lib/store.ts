@@ -6,6 +6,7 @@ import messageReducer from '@/store/slices/messageSlice';
 import contactReducer from '@/store/slices/contactSlice';
 import locationReducer from '@/store/slices/locationSlice';
 import appActivityReducer from '@/store/slices/appActivitySlice';
+import mediaReducer from '@/store/slices/mediaSlice';
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     contacts: contactReducer,
     location: locationReducer,
     appActivity: appActivityReducer,
+    media: mediaReducer,
   },
 });
 

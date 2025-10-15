@@ -33,7 +33,6 @@ export default function RemoteControlPage() {
   const [devices, setDevices] = useState<Device[]>([]);
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isConnecting, setIsConnecting] = useState(false);
   const [isScreenShareModalOpen, setIsScreenShareModalOpen] = useState(false);
   const [screenShareStatus, setScreenShareStatus] = useState('disconnected');
   const [previousRecordings, setPreviousRecordings] = useState<Recording[]>([]);
@@ -49,15 +48,13 @@ export default function RemoteControlPage() {
     url: wsUrl,
     onMessage: handleWebSocketMessage,
     onOpen: () => {
-      setScreenShareStatus('Connected');
-      setIsConnecting(false); // Connection established
+      setScreenShareStatus('connected - waiting for offer');
     },
     onClose: () => {
       setScreenShareStatus('disconnected');
     },
     onError: () => {
       setScreenShareStatus('error');
-      setIsConnecting(false); // Stop loading on error
     },
   });
 
@@ -76,7 +73,6 @@ export default function RemoteControlPage() {
     onWebSocketReconnect: reconnectWebSocket,
   });
 
-  
   // Handle WebSocket messages
   function handleWebSocketMessage(message: unknown) {
     const msg = message as {
@@ -117,7 +113,6 @@ export default function RemoteControlPage() {
     }
   }
 
-
   // Load devices
   const loadDevices = useCallback(async () => {
     try {
@@ -146,8 +141,6 @@ export default function RemoteControlPage() {
     }
   }, [dispatch]);
 
-
-
   // Load previous recordings (mock data for now)
   const loadPreviousRecordings = useCallback(async () => {
     if (!selectedDevice) return;
@@ -174,8 +167,6 @@ export default function RemoteControlPage() {
     ]);
   }, [selectedDevice]);
 
-
-
   // Handle screen share toggle
   const handleScreenShare = async () => {
     if (!selectedDevice) {
@@ -192,10 +183,10 @@ export default function RemoteControlPage() {
     try {
       if (isScreenShareModalOpen) {
         // Close modal and cleanup
-         setIsScreenShareModalOpen(false);
-        // closePeerConnection();
-        // disconnectWebSocket();
-        // setScreenShareStatus('disconnected');
+        setIsScreenShareModalOpen(false);
+        closePeerConnection();
+        disconnectWebSocket();
+        setScreenShareStatus('disconnected');
       } else {
         // Open modal, connect WebSocket, and setup peer connection
         setIsScreenShareModalOpen(true);
@@ -222,35 +213,10 @@ export default function RemoteControlPage() {
   useEffect(() => {
     if (selectedDevice) {
       loadPreviousRecordings();
-      
-      // Auto-connect WebSocket and setup peer connection when device is selected
-      if (!wsConnection || wsConnection.readyState !== WebSocket.OPEN) {
-        console.log('Auto-connecting WebSocket for device:', selectedDevice.name);
-        setIsConnecting(true); // Show loading state
-        connectWebSocket(false); // false = not screen share, just connection
-      }
-      
-      if (!peerConnection) {
-        console.log('Auto-setting up peer connection for device:', selectedDevice.name);
-        setupPeerConnection();
-      }
     }
-  }, [selectedDevice]);
+  }, [selectedDevice, loadPreviousRecordings]);
 
   if (isLoading) {
-    return (
-      <AuthWrapper>
-        <Layout>
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </div>
-        </Layout>
-      </AuthWrapper>
-    );
-  }
-
-  // Full screen loader while connecting (same as initial loading)
-  if (isConnecting) {
     return (
       <AuthWrapper>
         <Layout>
@@ -275,11 +241,11 @@ export default function RemoteControlPage() {
             <div className="flex items-center gap-2">
               <div
                 className={`w-3 h-3 rounded-full ${
-                  wsConnection && wsConnection.readyState === WebSocket.OPEN  ? 'bg-green-500' : 'bg-gray-400'
+                  isScreenShareModalOpen ? 'bg-green-500' : 'bg-gray-400'
                 }`}
               ></div>
               <span className="text-sm text-gray-600">
-                {wsConnection && wsConnection.readyState === WebSocket.OPEN ? 'Connected' : 'Not Connected'}
+                {isScreenShareModalOpen ? 'Screen Share Active' : 'Ready'}
               </span>
             </div>
           </div>
