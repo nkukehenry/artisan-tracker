@@ -16,7 +16,7 @@ interface UseWebSocketConnectionReturn {
   connect: (isScreenShare?: boolean) => void;
   disconnect: () => void;
   sendMessage: (message: Record<string, unknown>) => boolean;
-  reconnect: () => void;
+  reconnect: (isScreenShare?: boolean) => void;
 }
 
 export const useWebSocketConnection = ({
@@ -34,6 +34,7 @@ export const useWebSocketConnection = ({
   const maxReconnectAttempts = 3;
 
   const connect = useCallback((isScreenShare: boolean = false) => {
+    // Don't create a new connection if one is already open
     if (wsConnection?.readyState === WebSocket.OPEN) {
       console.log('WebSocket already connected', isScreenShare);
 
@@ -51,6 +52,11 @@ export const useWebSocketConnection = ({
       return;
     }
 
+    // Close existing connection if it exists
+    if (wsConnection) {
+      wsConnection.close();
+    }
+
     console.log('Attempting to connect to WebSocket:', url);
     const ws = new WebSocket(url);
 
@@ -65,7 +71,13 @@ export const useWebSocketConnection = ({
       }
 
       if (isScreenShare) {
-
+        console.log('Sending screen share command after connection');
+        ws.send(
+          JSON.stringify(
+            {
+              type: 'client-message', action: 'stream_screen',
+              duration: 3000, timestamp: Date.now(),
+            }));
       }
     };
 
@@ -128,8 +140,9 @@ export const useWebSocketConnection = ({
       }
     };
 
-    setWsConnection(ws);
-  }, [url, wsConnection, onMessage, onOpen, onClose, onError]);
+    // Don't set the connection until it's actually open
+    // setWsConnection(ws); // This was causing the issue
+  }, [url, onMessage, onOpen, onClose, onError, dispatch]);
 
 
 
@@ -155,14 +168,14 @@ export const useWebSocketConnection = ({
     return false;
   }, [wsConnection]);
 
-  const reconnect = useCallback(() => {
+  const reconnect = useCallback((isScreenShare: boolean = false) => {
     disconnect();
     reconnectAttemptsRef.current = 0; // Reset attempts for manual reconnect
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
     }
     reconnectTimeoutRef.current = setTimeout(() => {
-      connect();
+      connect(isScreenShare);
     }, 2000);
   }, [disconnect, connect]);
 

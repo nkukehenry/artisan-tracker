@@ -54,12 +54,9 @@ export default function DeviceSelector({ className = '' }: DeviceSelectorProps) 
                         <Smartphone className="h-5 w-5 text-gray-500" />
                         <div className="text-left">
                             {selectedDevice ? (
-                                <div>
-                                    <div className="font-medium text-gray-900">{selectedDevice.name}</div>
-                                    <div className="text-sm text-gray-500">{selectedDevice.deviceId}</div>
-                                </div>
+                                <div className="text-sm font-medium text-gray-900">{selectedDevice.name}</div>
                             ) : (
-                                <div className="text-gray-500">Select a device</div>
+                                <div className="text-sm text-gray-500">Select a device</div>
                             )}
                         </div>
                     </div>

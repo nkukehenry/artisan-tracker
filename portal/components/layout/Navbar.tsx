@@ -2,7 +2,6 @@
 
 import {
   Menu,
-  Search,
 } from 'lucide-react';
 import NotificationDropdown from './NotificationDropdown';
 import ProfileDropdown from './ProfileDropdown';
@@ -16,7 +15,7 @@ interface NavbarProps {
 export default function Navbar({ onMenuClick }: NavbarProps) {
   return (
     <div className="flex h-16 items-center justify-between border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-dark-background px-6">
-      {/* Left section - Mobile menu button and Search */}
+      {/* Left section - Mobile menu button and Device Selector */}
       <div className="flex items-center gap-4">
         <button
           type="button"
@@ -27,21 +26,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
           <Menu className="h-6 w-6" />
         </button>
 
-        {/* Search Bar */}
-        <div className="hidden md:block">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
-            <input
-              type="text"
-              placeholder="Search any Information"
-              className="w-64 rounded-lg border-0 bg-gray-100 dark:bg-search-dark-bg pl-10 pr-4 py-2 text-sm placeholder-gray-500 dark:placeholder-search-dark-text text-gray-900 dark:text-dark-foreground focus:bg-white dark:focus:bg-dark-background-secondary focus:ring-2 focus:ring-blue-500/20"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Center section - Device Selector */}
-      <div className="flex-1 flex justify-center px-4">
+        {/* Device Selector */}
         <DeviceSelector className="max-w-md w-full" />
       </div>
 
