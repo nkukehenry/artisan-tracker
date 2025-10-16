@@ -302,7 +302,7 @@ export default function RemoteControlPage() {
 
               {/* Remote Commands */}
               <CommandButtons
-                onCommandClick={sendCommand}
+                onCommandClick={(action, duration) => sendCommand(action, duration ? { duration } : undefined)}
                 disabled={isSendingCommand}
               />
 
