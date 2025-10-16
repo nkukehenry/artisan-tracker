@@ -20,6 +20,7 @@ export class DeviceController {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
+        console.log(errors.array());
         throw createError('Validation failed', 400, errors.array());
       }
 
@@ -73,13 +74,19 @@ export class DeviceController {
       });
 
       logger.info('Device registered successfully', { deviceId, userId: user.id });
+      console.log('Device registered successfully', { device});
 
       res.status(201).json({
         success: true,
         message: 'Device registered successfully',
-        data: { device },
+        data: { device: JSON.parse(
+          JSON.stringify(device, (key, value) =>
+            typeof value === 'bigint' ? value.toString() : value
+          )
+        ) },
       });
     } catch (error) {
+      console.log('Error in registerDevice', error);
       logger.error('Device registration failed', { error, body: req.body });
       next(error);
     }
@@ -106,7 +113,11 @@ export class DeviceController {
       res.status(200).json({
         success: true,
         message: 'Devices retrieved successfully',
-        data: devices,
+        data: JSON.parse(
+          JSON.stringify(devices, (key, value) =>
+            typeof value === 'bigint' ? value.toString() : value
+          )
+        ),
       });
     } catch (error) {
       logger.error('Get devices failed', { error, userId: (req as any).user?.id });
@@ -141,7 +152,13 @@ export class DeviceController {
       res.status(200).json({
         success: true,
         message: 'Device retrieved successfully',
-        data: { device },
+        data: { 
+          device: JSON.parse(
+            JSON.stringify(device, (key, value) =>
+              typeof value === 'bigint' ? value.toString() : value
+            )
+          )
+        },
       });
     } catch (error) {
       logger.error('Get device by ID failed', { error, deviceId: req.params.id });
@@ -180,7 +197,13 @@ export class DeviceController {
       res.status(200).json({
         success: true,
         message: 'Device updated successfully',
-        data: { device },
+        data: { 
+          device: JSON.parse(
+            JSON.stringify(device, (key, value) =>
+              typeof value === 'bigint' ? value.toString() : value
+            )
+          )
+        },
       });
     } catch (error) {
       logger.error('Update device failed', { error, deviceId: req.params.id });
@@ -339,7 +362,13 @@ export class DeviceController {
       res.status(200).json({
         success: true,
         message: 'Device status updated successfully',
-        data: { device: updatedDevice },
+        data: { 
+          device: JSON.parse(
+            JSON.stringify(updatedDevice, (key, value) =>
+              typeof value === 'bigint' ? value.toString() : value
+            )
+          )
+        },
       });
     } catch (error) {
       logger.error('Update device status failed', { error, deviceId: req.params.id });

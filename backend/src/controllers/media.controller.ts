@@ -48,13 +48,12 @@ export class MediaController {
         throw createError('Access denied', 403);
       }
 
-      // Create media file record (this would be implemented in a MediaService)
-      const mediaFile = {
-        id: uuidv4(),
+      // Create media file record using MediaService
+      const mediaFileData = {
         callId: callId || undefined,
         fileName: file.filename,
         filePath: file.path,
-        fileSize: file.size,
+        fileSize: BigInt(file.size),
         mimeType: file.mimetype,
         fileType: fileType as MediaType,
         metadata: {
@@ -66,9 +65,9 @@ export class MediaController {
         location: location || undefined,
         gpsCoordinates: gpsCoordinates || undefined,
         deviceId: device.id,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
+
+      const mediaFile = await this.mediaService.uploadMedia(mediaFileData, user.tenantId, user.id);
 
       logger.info('Media file uploaded successfully', { 
         fileName: file.filename, 
@@ -80,7 +79,13 @@ export class MediaController {
       res.status(201).json({
         success: true,
         message: 'Media file uploaded successfully',
-        data: { mediaFile },
+        data: { 
+          mediaFile: JSON.parse(
+            JSON.stringify(mediaFile, (key, value) =>
+              typeof value === 'bigint' ? value.toString() : value
+            )
+          )
+        },
       });
     } catch (error) {
       logger.error('Media upload failed', { error, body: req.body });
@@ -107,22 +112,23 @@ export class MediaController {
         throw createError('Access denied', 403);
       }
 
-      // This would be implemented in a MediaService
-      // For now, return mock data structure
-      const mockMediaFiles = {
-        data: [],
-        pagination: {
-          total: 0,
-          page: parseInt(page as string),
-          limit: parseInt(limit as string),
-          totalPages: 0,
-        },
+      // Get media files using MediaService
+      const options = {
+        page: parseInt(page as string),
+        limit: parseInt(limit as string),
+        fileType: fileType as string,
       };
+
+      const mediaFiles = await this.mediaService.getMediaByDevice(deviceId, user.tenantId, options);
 
       res.status(200).json({
         success: true,
         message: 'Media files retrieved successfully',
-        data: mockMediaFiles,
+        data: JSON.parse(
+          JSON.stringify(mediaFiles, (key, value) =>
+            typeof value === 'bigint' ? value.toString() : value
+          )
+        ),
       });
     } catch (error) {
       logger.error('Get device media failed', { error, deviceId: req.params.deviceId });
