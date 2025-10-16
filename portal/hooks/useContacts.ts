@@ -1,49 +1,47 @@
+'use client';
+
+import { useDeviceContext } from '@/contexts/DeviceContext';
 import { useCallback, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/lib/hooks';
-import { loadContacts, setSelectedDevice, updateFilters, clearContacts } from '@/store/slices/contactSlice';
+import { loadContacts, updateFilters, clearContacts } from '@/store/slices/contactSlice';
 
-export const useContacts = (deviceId?: string) => {
+export const useContacts = () => {
+  const { selectedDevice } = useDeviceContext();
   const dispatch = useAppDispatch();
-  const { contacts, isLoading, error, pagination, filters, selectedDeviceId } = useAppSelector(
+  const { contacts, isLoading, error, pagination, filters } = useAppSelector(
     (state) => state.contacts
   );
 
   const loadData = useCallback(
     (newFilters?: typeof filters) => {
-      if (!deviceId) return;
-      dispatch(loadContacts({ deviceId, filters: newFilters || filters }));
+      if (!selectedDevice) return;
+      dispatch(loadContacts({ deviceId: selectedDevice.deviceId, filters: newFilters || filters }));
     },
-    [deviceId, dispatch, filters]
+    [selectedDevice, dispatch, filters]
   );
 
   const updateFiltersAndLoad = useCallback(
     (newFilters: Partial<typeof filters>) => {
       dispatch(updateFilters(newFilters));
-      if (deviceId) {
-        dispatch(loadContacts({ deviceId, filters: { ...filters, ...newFilters } }));
+      if (selectedDevice) {
+        dispatch(loadContacts({ deviceId: selectedDevice.deviceId, filters: { ...filters, ...newFilters } }));
       }
     },
-    [deviceId, dispatch, filters]
-  );
-
-  const setDevice = useCallback(
-    (newDeviceId: string) => {
-      dispatch(setSelectedDevice(newDeviceId));
-      dispatch(loadContacts({ deviceId: newDeviceId, filters }));
-    },
-    [dispatch, filters]
+    [selectedDevice, dispatch, filters]
   );
 
   const clearData = useCallback(() => {
     dispatch(clearContacts());
   }, [dispatch]);
 
-  // Load data when deviceId changes
+  // Load data when selected device changes
   useEffect(() => {
-    if (deviceId && deviceId !== selectedDeviceId) {
-      setDevice(deviceId);
+    if (selectedDevice) {
+      loadData();
+    } else {
+      clearData();
     }
-  }, [deviceId, selectedDeviceId, setDevice]);
+  }, [selectedDevice, loadData, clearData]);
 
   return {
     contacts,
@@ -51,10 +49,9 @@ export const useContacts = (deviceId?: string) => {
     error,
     pagination,
     filters,
-    selectedDeviceId,
+    selectedDevice,
     loadData,
     updateFilters: updateFiltersAndLoad,
-    setDevice,
     clearData,
   };
 };

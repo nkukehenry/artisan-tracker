@@ -1,62 +1,59 @@
+'use client';
+
+import { useDeviceContext } from '@/contexts/DeviceContext';
 import { useCallback, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/lib/hooks';
-import { loadMessages, loadMessageConversations, setSelectedDevice, updateFilters, clearMessages } from '@/store/slices/messageSlice';
+import { loadMessages, loadMessageConversations, updateFilters, clearMessages } from '@/store/slices/messageSlice';
 
-export const useMessages = (deviceId?: string) => {
+export const useMessages = () => {
+  const { selectedDevice } = useDeviceContext();
   const dispatch = useAppDispatch();
-  const { 
-    messages, 
+  const {
+    messages,
     conversations,
-    isLoading, 
+    isLoading,
     conversationsLoading,
-    error, 
-    pagination, 
-    filters, 
-    selectedDeviceId 
+    error,
+    pagination,
+    filters
   } = useAppSelector((state) => state.messages);
 
   const loadData = useCallback(
     (newFilters?: typeof filters) => {
-      if (!deviceId) return;
-      dispatch(loadMessages({ deviceId, filters: newFilters || filters }));
+      if (!selectedDevice) return;
+      dispatch(loadMessages({ deviceId: selectedDevice.deviceId, filters: newFilters || filters }));
     },
-    [deviceId, dispatch, filters]
+    [selectedDevice, dispatch, filters]
   );
 
   const loadConversations = useCallback(() => {
-    if (!deviceId) return;
-    dispatch(loadMessageConversations(deviceId));
-  }, [deviceId, dispatch]);
+    if (!selectedDevice) return;
+    dispatch(loadMessageConversations(selectedDevice.deviceId));
+  }, [selectedDevice, dispatch]);
 
   const updateFiltersAndLoad = useCallback(
     (newFilters: Partial<typeof filters>) => {
       dispatch(updateFilters(newFilters));
-      if (deviceId) {
-        dispatch(loadMessages({ deviceId, filters: { ...filters, ...newFilters } }));
+      if (selectedDevice) {
+        dispatch(loadMessages({ deviceId: selectedDevice.deviceId, filters: { ...filters, ...newFilters } }));
       }
     },
-    [deviceId, dispatch, filters]
-  );
-
-  const setDevice = useCallback(
-    (newDeviceId: string) => {
-      dispatch(setSelectedDevice(newDeviceId));
-      dispatch(loadMessages({ deviceId: newDeviceId, filters }));
-      dispatch(loadMessageConversations(newDeviceId));
-    },
-    [dispatch, filters]
+    [selectedDevice, dispatch, filters]
   );
 
   const clearData = useCallback(() => {
     dispatch(clearMessages());
   }, [dispatch]);
 
-  // Load data when deviceId changes
+  // Load data when selected device changes
   useEffect(() => {
-    if (deviceId && deviceId !== selectedDeviceId) {
-      setDevice(deviceId);
+    if (selectedDevice) {
+      loadData();
+      loadConversations();
+    } else {
+      clearData();
     }
-  }, [deviceId, selectedDeviceId, setDevice]);
+  }, [selectedDevice, loadData, loadConversations, clearData]);
 
   return {
     messages,
@@ -66,11 +63,10 @@ export const useMessages = (deviceId?: string) => {
     error,
     pagination,
     filters,
-    selectedDeviceId,
+    selectedDevice,
     loadData,
     loadConversations,
     updateFilters: updateFiltersAndLoad,
-    setDevice,
     clearData,
   };
 };

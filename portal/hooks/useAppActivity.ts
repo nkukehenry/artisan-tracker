@@ -1,62 +1,59 @@
+'use client';
+
+import { useDeviceContext } from '@/contexts/DeviceContext';
 import { useCallback, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/lib/hooks';
-import { loadAppActivities, loadAppUsageSummary, setSelectedDevice, updateFilters, clearAppActivityData } from '@/store/slices/appActivitySlice';
+import { loadAppActivities, loadAppUsageSummary, updateFilters, clearAppActivityData } from '@/store/slices/appActivitySlice';
 
-export const useAppActivity = (deviceId?: string) => {
+export const useAppActivity = () => {
+  const { selectedDevice } = useDeviceContext();
   const dispatch = useAppDispatch();
-  const { 
-    appActivities, 
+  const {
+    appActivities,
     usageSummary,
-    isLoading, 
+    isLoading,
     summaryLoading,
-    error, 
-    pagination, 
-    filters, 
-    selectedDeviceId 
+    error,
+    pagination,
+    filters
   } = useAppSelector((state) => state.appActivity);
 
   const loadActivities = useCallback(
     (newFilters?: typeof filters) => {
-      if (!deviceId) return;
-      dispatch(loadAppActivities({ deviceId, filters: newFilters || filters }));
+      if (!selectedDevice) return;
+      dispatch(loadAppActivities({ deviceId: selectedDevice.deviceId, filters: newFilters || filters }));
     },
-    [deviceId, dispatch, filters]
+    [selectedDevice, dispatch, filters]
   );
 
   const loadSummary = useCallback(() => {
-    if (!deviceId) return;
-    dispatch(loadAppUsageSummary(deviceId));
-  }, [deviceId, dispatch]);
+    if (!selectedDevice) return;
+    dispatch(loadAppUsageSummary(selectedDevice.deviceId));
+  }, [selectedDevice, dispatch]);
 
   const updateFiltersAndLoad = useCallback(
     (newFilters: Partial<typeof filters>) => {
       dispatch(updateFilters(newFilters));
-      if (deviceId) {
-        dispatch(loadAppActivities({ deviceId, filters: { ...filters, ...newFilters } }));
+      if (selectedDevice) {
+        dispatch(loadAppActivities({ deviceId: selectedDevice.deviceId, filters: { ...filters, ...newFilters } }));
       }
     },
-    [deviceId, dispatch, filters]
-  );
-
-  const setDevice = useCallback(
-    (newDeviceId: string) => {
-      dispatch(setSelectedDevice(newDeviceId));
-      dispatch(loadAppActivities({ deviceId: newDeviceId, filters }));
-      dispatch(loadAppUsageSummary(newDeviceId));
-    },
-    [dispatch, filters]
+    [selectedDevice, dispatch, filters]
   );
 
   const clearData = useCallback(() => {
     dispatch(clearAppActivityData());
   }, [dispatch]);
 
-  // Load data when deviceId changes
+  // Load data when selected device changes
   useEffect(() => {
-    if (deviceId && deviceId !== selectedDeviceId) {
-      setDevice(deviceId);
+    if (selectedDevice) {
+      loadActivities();
+      loadSummary();
+    } else {
+      clearData();
     }
-  }, [deviceId, selectedDeviceId, setDevice]);
+  }, [selectedDevice, loadActivities, loadSummary, clearData]);
 
   return {
     appActivities,
@@ -66,11 +63,10 @@ export const useAppActivity = (deviceId?: string) => {
     error,
     pagination,
     filters,
-    selectedDeviceId,
+    selectedDevice,
     loadActivities,
     loadSummary,
     updateFilters: updateFiltersAndLoad,
-    setDevice,
     clearData,
   };
 };

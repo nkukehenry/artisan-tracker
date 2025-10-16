@@ -4,19 +4,17 @@ import { useState } from 'react';
 import AuthWrapper from '@/components/auth/AuthWrapper';
 import Layout from '@/components/layout/Layout';
 import { useCallLogs } from '@/hooks/useCallLogs';
-import { useDevices } from '@/hooks/useDevices';
+import { useDeviceContext } from '@/contexts/DeviceContext';
 import DataTable from '@/components/ui/DataTable';
 import SearchFilter from '@/components/ui/SearchFilter';
-import Select from '@/components/ui/Select';
 import LocationBadge from '@/components/ui/LocationBadge';
 import MediaBadge from '@/components/ui/MediaBadge';
 import CallLogDetailModal from '@/components/call-logs/CallLogDetailModal';
 import { CallLog } from '@/types/callLog';
-import { Eye } from 'lucide-react';
+import { Eye, Phone } from 'lucide-react';
 
 export default function CallLogsPage() {
-  const { devices } = useDevices();
-  const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
+  const { selectedDevice } = useDeviceContext();
   const [selectedCallLog, setSelectedCallLog] = useState<CallLog | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
@@ -26,11 +24,7 @@ export default function CallLogsPage() {
     error,
     filters,
     updateFilters,
-  } = useCallLogs(selectedDeviceId);
-
-  const handleDeviceChange = (deviceId: string) => {
-    setSelectedDeviceId(deviceId);
-  };
+  } = useCallLogs();
 
   const handleFilterChange = (newFilters: Partial<typeof filters>) => {
     updateFilters(newFilters);
@@ -121,13 +115,21 @@ export default function CallLogsPage() {
     { value: 'MISSED', label: 'Missed' },
   ];
 
-  const deviceOptions = [
-    { value: '', label: 'Select a device' },
-    ...devices.map(device => ({
-      value: device.deviceId,
-      label: device.name,
-    })),
-  ];
+  if (!selectedDevice) {
+    return (
+      <AuthWrapper>
+        <Layout>
+          <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+            <Phone className="h-16 w-16 text-gray-300 mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">No Device Selected</h2>
+            <p className="text-gray-600 mb-6">
+              Please select a device from the dropdown in the header to view call logs.
+            </p>
+          </div>
+        </Layout>
+      </AuthWrapper>
+    );
+  }
 
   return (
     <AuthWrapper>
@@ -137,36 +139,31 @@ export default function CallLogsPage() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Call Logs</h1>
-              <p className="text-gray-600">View call history for your devices</p>
+              <p className="text-gray-600">View call history for {selectedDevice.name}</p>
             </div>
           </div>
 
-          {/* Device Selection */}
+          {/* Selected Device Info */}
           <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="flex items-center gap-4">
-              <label className="text-sm font-medium text-gray-700">Device:</label>
-              <Select
-                options={deviceOptions}
-                value={selectedDeviceId}
-                onChange={handleDeviceChange}
-                placeholder="Select a device"
-                className="min-w-[200px]"
-              />
+            <div className="flex items-center gap-3">
+              <div className={`w-3 h-3 rounded-full ${selectedDevice.isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
+              <div>
+                <div className="font-medium text-gray-900">{selectedDevice.name}</div>
+                <div className="text-sm text-gray-500">{selectedDevice.deviceId} • {selectedDevice.model}</div>
+              </div>
             </div>
           </div>
 
           {/* Filters */}
-          {selectedDeviceId && (
-            <SearchFilter
-              searchValue=""
-              onSearchChange={() => { }}
-              searchPlaceholder="Search call logs..."
-              filterValue={filters.callType || ''}
-              onFilterChange={(value) => handleFilterChange({ callType: value as 'INCOMING' | 'OUTGOING' | 'MISSED' })}
-              filterOptions={callTypeOptions}
-              filterLabel="Call Type"
-            />
-          )}
+          <SearchFilter
+            searchValue=""
+            onSearchChange={() => { }}
+            searchPlaceholder="Search call logs..."
+            filterValue={filters.callType || ''}
+            onFilterChange={(value) => handleFilterChange({ callType: value as 'INCOMING' | 'OUTGOING' | 'MISSED' })}
+            filterOptions={callTypeOptions}
+            filterLabel="Call Type"
+          />
 
           {/* Loading State */}
           {isLoading && callLogs.length === 0 ? (
@@ -180,12 +177,6 @@ export default function CallLogsPage() {
             <div className="bg-white rounded-lg border border-gray-200 p-12">
               <div className="text-center">
                 <p className="text-red-600">{error}</p>
-              </div>
-            </div>
-          ) : !selectedDeviceId ? (
-            <div className="bg-white rounded-lg border border-gray-200 p-12">
-              <div className="text-center">
-                <p className="text-gray-600">Please select a device to view call logs</p>
               </div>
             </div>
           ) : (

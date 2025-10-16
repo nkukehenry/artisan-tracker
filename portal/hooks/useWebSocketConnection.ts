@@ -30,18 +30,21 @@ export const useWebSocketConnection = ({
   const [wsConnection, setWsConnection] = useState<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectAttemptsRef = useRef(0);
+  const maxReconnectAttempts = 3;
 
   const connect = useCallback((isScreenShare: boolean = false) => {
     if (wsConnection?.readyState === WebSocket.OPEN) {
-      console.log('WebSocket already connected',isScreenShare);
-     
+      console.log('WebSocket already connected', isScreenShare);
+
       if (isScreenShare) {
         console.log('Sending screen share command');
         wsConnection.send(
           JSON.stringify(
-            { type: 'client-message',action: 'stream_screen',
+            {
+              type: 'client-message', action: 'stream_screen',
               duration: 3000, timestamp: Date.now(),
-        }));
+            }));
 
       }
 
@@ -55,13 +58,14 @@ export const useWebSocketConnection = ({
       console.log('WebSocket connected');
       setIsConnected(true);
       setWsConnection(ws);
-      
+      reconnectAttemptsRef.current = 0; // Reset reconnect attempts on successful connection
+
       if (onOpen) {
         onOpen();
       }
 
       if (isScreenShare) {
-       
+
       }
     };
 
@@ -90,7 +94,23 @@ export const useWebSocketConnection = ({
       console.log('WebSocket closed:', event.code, event.reason);
       setIsConnected(false);
       setWsConnection(null);
-      
+
+      // Only attempt to reconnect if it wasn't a manual close and we haven't exceeded max attempts
+      if (event.code !== 1000 && reconnectAttemptsRef.current < maxReconnectAttempts) {
+        console.log(`Attempting to reconnect (attempt ${reconnectAttemptsRef.current + 1}/${maxReconnectAttempts})`);
+        reconnectAttemptsRef.current += 1;
+        reconnectTimeoutRef.current = setTimeout(() => {
+          connect(isScreenShare);
+        }, 2000 * reconnectAttemptsRef.current); // Exponential backoff
+      } else if (reconnectAttemptsRef.current >= maxReconnectAttempts) {
+        console.log('Max reconnection attempts reached. Stopping reconnection attempts.');
+        dispatch(addToast({
+          type: 'error',
+          title: 'Connection Failed',
+          message: 'Unable to establish WebSocket connection after multiple attempts',
+        }));
+      }
+
       if (onClose) {
         onClose();
       }
@@ -101,7 +121,8 @@ export const useWebSocketConnection = ({
       console.error('WebSocket readyState:', ws.readyState);
       console.error('WebSocket URL:', ws.url);
       setIsConnected(false);
-      
+
+      // Don't show error toast immediately, let onclose handle reconnection logic
       if (onError) {
         onError(error);
       }
@@ -110,9 +131,15 @@ export const useWebSocketConnection = ({
     setWsConnection(ws);
   }, [url, wsConnection, onMessage, onOpen, onClose, onError]);
 
- 
+
 
   const disconnect = useCallback(() => {
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+    reconnectAttemptsRef.current = 0; // Reset reconnect attempts on manual disconnect
+
     if (wsConnection) {
       wsConnection.close(1000, 'Manual disconnect');
       setWsConnection(null);
@@ -130,6 +157,7 @@ export const useWebSocketConnection = ({
 
   const reconnect = useCallback(() => {
     disconnect();
+    reconnectAttemptsRef.current = 0; // Reset attempts for manual reconnect
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
     }
