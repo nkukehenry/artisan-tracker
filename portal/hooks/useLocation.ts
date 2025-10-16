@@ -1,62 +1,59 @@
+'use client';
+
+import { useDeviceContext } from '@/contexts/DeviceContext';
 import { useCallback, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/lib/hooks';
-import { loadLocationHistory, loadCurrentLocation, setSelectedDevice, updateFilters, clearLocationData } from '@/store/slices/locationSlice';
+import { loadLocationHistory, loadCurrentLocation, updateFilters, clearLocationData } from '@/store/slices/locationSlice';
 
-export const useLocation = (deviceId?: string) => {
+export const useLocation = () => {
+  const { selectedDevice } = useDeviceContext();
   const dispatch = useAppDispatch();
-  const { 
-    locationHistory, 
+  const {
+    locationHistory,
     currentLocation,
-    isLoading, 
+    isLoading,
     currentLocationLoading,
-    error, 
-    pagination, 
-    filters, 
-    selectedDeviceId 
+    error,
+    pagination,
+    filters
   } = useAppSelector((state) => state.location);
 
   const loadHistory = useCallback(
     (newFilters?: typeof filters) => {
-      if (!deviceId) return;
-      dispatch(loadLocationHistory({ deviceId, filters: newFilters || filters }));
+      if (!selectedDevice) return;
+      dispatch(loadLocationHistory({ deviceId: selectedDevice.deviceId, filters: newFilters || filters }));
     },
-    [deviceId, dispatch, filters]
+    [selectedDevice, dispatch, filters]
   );
 
   const loadCurrent = useCallback(() => {
-    if (!deviceId) return;
-    dispatch(loadCurrentLocation(deviceId));
-  }, [deviceId, dispatch]);
+    if (!selectedDevice) return;
+    dispatch(loadCurrentLocation(selectedDevice.deviceId));
+  }, [selectedDevice, dispatch]);
 
   const updateFiltersAndLoad = useCallback(
     (newFilters: Partial<typeof filters>) => {
       dispatch(updateFilters(newFilters));
-      if (deviceId) {
-        dispatch(loadLocationHistory({ deviceId, filters: { ...filters, ...newFilters } }));
+      if (selectedDevice) {
+        dispatch(loadLocationHistory({ deviceId: selectedDevice.deviceId, filters: { ...filters, ...newFilters } }));
       }
     },
-    [deviceId, dispatch, filters]
-  );
-
-  const setDevice = useCallback(
-    (newDeviceId: string) => {
-      dispatch(setSelectedDevice(newDeviceId));
-      dispatch(loadLocationHistory({ deviceId: newDeviceId, filters }));
-      dispatch(loadCurrentLocation(newDeviceId));
-    },
-    [dispatch, filters]
+    [selectedDevice, dispatch, filters]
   );
 
   const clearData = useCallback(() => {
     dispatch(clearLocationData());
   }, [dispatch]);
 
-  // Load data when deviceId changes
+  // Load data when selected device changes
   useEffect(() => {
-    if (deviceId && deviceId !== selectedDeviceId) {
-      setDevice(deviceId);
+    if (selectedDevice) {
+      loadHistory();
+      loadCurrent();
+    } else {
+      clearData();
     }
-  }, [deviceId, selectedDeviceId, setDevice]);
+  }, [selectedDevice, loadHistory, loadCurrent, clearData]);
 
   return {
     locationHistory,
@@ -66,11 +63,10 @@ export const useLocation = (deviceId?: string) => {
     error,
     pagination,
     filters,
-    selectedDeviceId,
+    selectedDevice,
     loadHistory,
     loadCurrent,
     updateFilters: updateFiltersAndLoad,
-    setDevice,
     clearData,
   };
 };

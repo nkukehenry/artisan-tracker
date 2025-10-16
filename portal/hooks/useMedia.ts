@@ -1,20 +1,22 @@
+'use client';
+
+import { useDeviceContext } from '@/contexts/DeviceContext';
 import { useCallback, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/lib/hooks';
 import {
   loadMediaFiles,
   deleteMedia,
   downloadMedia,
-  setSelectedDevice,
   updateFilters,
   clearMediaData,
 } from '@/store/slices/mediaSlice';
 import { MediaFilters } from '@/types/media';
 
-export const useMedia = (deviceId?: string) => {
+export const useMedia = () => {
+  const { selectedDevice } = useDeviceContext();
   const dispatch = useAppDispatch();
   const {
     mediaFiles,
-    selectedDeviceId,
     filters,
     pagination,
     isLoading,
@@ -23,11 +25,10 @@ export const useMedia = (deviceId?: string) => {
 
   // Load media files
   const loadMedia = useCallback(async () => {
-    const targetDeviceId = deviceId || selectedDeviceId;
-    if (targetDeviceId) {
-      await dispatch(loadMediaFiles({ deviceId: targetDeviceId, filters }));
+    if (selectedDevice) {
+      await dispatch(loadMediaFiles({ deviceId: selectedDevice.deviceId, filters }));
     }
-  }, [dispatch, deviceId, selectedDeviceId, filters]);
+  }, [dispatch, selectedDevice, filters]);
 
   // Delete media file
   const handleDeleteMedia = useCallback(
@@ -55,39 +56,31 @@ export const useMedia = (deviceId?: string) => {
     [dispatch]
   );
 
-  // Set selected device
-  const handleSetSelectedDevice = useCallback(
-    (newDeviceId: string | null) => {
-      dispatch(setSelectedDevice(newDeviceId));
-    },
-    [dispatch]
-  );
-
   // Clear media data
   const handleClearMediaData = useCallback(() => {
     dispatch(clearMediaData());
   }, [dispatch]);
 
-  // Load media files when device or filters change
+  // Load media files when selected device changes
   useEffect(() => {
-    if (deviceId || selectedDeviceId) {
+    if (selectedDevice) {
       loadMedia();
+    } else {
+      clearMediaData();
     }
-  }, [deviceId, selectedDeviceId, filters.page, filters.limit, filters.fileType, loadMedia]);
+  }, [selectedDevice, loadMedia, clearMediaData]);
 
   return {
     mediaFiles,
-    selectedDeviceId,
     filters,
     pagination,
     isLoading,
     error,
+    selectedDevice,
     loadMedia,
     deleteMedia: handleDeleteMedia,
     downloadMedia: handleDownloadMedia,
     updateFilters: handleUpdateFilters,
-    setSelectedDevice: handleSetSelectedDevice,
     clearMediaData: handleClearMediaData,
   };
 };
-

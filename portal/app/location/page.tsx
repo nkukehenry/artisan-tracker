@@ -4,16 +4,14 @@ import { useState } from 'react';
 import AuthWrapper from '@/components/auth/AuthWrapper';
 import Layout from '@/components/layout/Layout';
 import { useLocation } from '@/hooks/useLocation';
-import { useDevices } from '@/hooks/useDevices';
+import { useDeviceContext } from '@/contexts/DeviceContext';
 import DataTable from '@/components/ui/DataTable';
-import Select from '@/components/ui/Select';
 import { Location } from '@/types/location';
 import { MapPin, Clock, Navigation } from 'lucide-react';
 
 export default function LocationPage() {
-  const { devices } = useDevices();
-  const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
-  
+  const { selectedDevice } = useDeviceContext();
+
   const {
     locationHistory,
     currentLocation,
@@ -21,11 +19,7 @@ export default function LocationPage() {
     currentLocationLoading,
     error,
     loadCurrent,
-  } = useLocation(selectedDeviceId);
-
-  const handleDeviceChange = (deviceId: string) => {
-    setSelectedDeviceId(deviceId);
-  };
+  } = useLocation();
 
   const handleRefreshCurrentLocation = () => {
     loadCurrent();
@@ -83,13 +77,21 @@ export default function LocationPage() {
     },
   ];
 
-  const deviceOptions = [
-    { value: '', label: 'Select a device' },
-    ...devices.map(device => ({
-      value: device.deviceId,
-      label: device.name,
-    })),
-  ];
+  if (!selectedDevice) {
+    return (
+      <AuthWrapper>
+        <Layout>
+          <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+            <MapPin className="h-16 w-16 text-gray-300 mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">No Device Selected</h2>
+            <p className="text-gray-600 mb-6">
+              Please select a device from the dropdown in the header to view location data.
+            </p>
+          </div>
+        </Layout>
+      </AuthWrapper>
+    );
+  }
 
   return (
     <AuthWrapper>
@@ -99,79 +101,74 @@ export default function LocationPage() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Location History</h1>
-              <p className="text-gray-600">View location data for your devices</p>
+              <p className="text-gray-600">View location data for {selectedDevice.name}</p>
             </div>
           </div>
 
-          {/* Device Selection */}
+          {/* Selected Device Info */}
           <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="flex items-center gap-4">
-              <label className="text-sm font-medium text-gray-700">Device:</label>
-              <Select
-                options={deviceOptions}
-                value={selectedDeviceId}
-                onChange={handleDeviceChange}
-                placeholder="Select a device"
-                className="min-w-[200px]"
-              />
+            <div className="flex items-center gap-3">
+              <div className={`w-3 h-3 rounded-full ${selectedDevice.isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
+              <div>
+                <div className="font-medium text-gray-900">{selectedDevice.name}</div>
+                <div className="text-sm text-gray-500">{selectedDevice.deviceId} • {selectedDevice.model}</div>
+              </div>
             </div>
           </div>
 
           {/* Current Location */}
-          {selectedDeviceId && (
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <Navigation className="h-5 w-5" />
-                  Current Location
-                </h3>
-                <button
-                  onClick={handleRefreshCurrentLocation}
-                  disabled={currentLocationLoading}
-                  className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {currentLocationLoading ? 'Refreshing...' : 'Refresh'}
-                </button>
-              </div>
-              
-              {currentLocationLoading ? (
-                <div className="flex items-center gap-2 text-gray-600">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                  Loading current location...
-                </div>
-              ) : currentLocation ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-gray-400" />
-                    <div>
-                      <p className="text-sm text-gray-600">Address</p>
-                      <p className="font-medium">
-                        {currentLocation.address || `${currentLocation.latitude}, ${currentLocation.longitude}`}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-gray-400" />
-                    <div>
-                      <p className="text-sm text-gray-600">Last Updated</p>
-                      <p className="font-medium">
-                        {new Date(currentLocation.timestamp).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="h-4 w-4 bg-green-500 rounded-full"></div>
-                    <div>
-                      <p className="text-sm text-gray-600">Accuracy</p>
-                      <p className="font-medium">{currentLocation.accuracy.toFixed(1)}m</p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-gray-600">No current location data available</p>
-              )}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <Navigation className="h-5 w-5" />
+                Current Location
+              </h3>
+              <button
+                onClick={handleRefreshCurrentLocation}
+                disabled={currentLocationLoading}
+                className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+              >
+                {currentLocationLoading ? 'Refreshing...' : 'Refresh'}
+              </button>
             </div>
-          )}
+
+            {currentLocationLoading ? (
+              <div className="flex items-center gap-2 text-gray-600">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                Loading current location...
+              </div>
+            ) : currentLocation ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-gray-400" />
+                  <div>
+                    <p className="text-sm text-gray-600">Address</p>
+                    <p className="font-medium">
+                      {currentLocation.address || `${currentLocation.latitude}, ${currentLocation.longitude}`}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-gray-400" />
+                  <div>
+                    <p className="text-sm text-gray-600">Last Updated</p>
+                    <p className="font-medium">
+                      {new Date(currentLocation.timestamp).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 bg-green-500 rounded-full"></div>
+                  <div>
+                    <p className="text-sm text-gray-600">Accuracy</p>
+                    <p className="font-medium">{currentLocation.accuracy.toFixed(1)}m</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <p className="text-gray-600">No current location data available</p>
+            )}
+          </div>
 
           {/* Loading State */}
           {isLoading && locationHistory.length === 0 ? (
@@ -185,12 +182,6 @@ export default function LocationPage() {
             <div className="bg-white rounded-lg border border-gray-200 p-12">
               <div className="text-center">
                 <p className="text-red-600">{error}</p>
-              </div>
-            </div>
-          ) : !selectedDeviceId ? (
-            <div className="bg-white rounded-lg border border-gray-200 p-12">
-              <div className="text-center">
-                <p className="text-gray-600">Please select a device to view location history</p>
               </div>
             </div>
           ) : (

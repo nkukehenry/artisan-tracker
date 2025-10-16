@@ -24,7 +24,7 @@ interface NavItem {
 
 const navigation: NavItem[] = [
   { name: 'Dashboard', href: '/', icon: Home },
-  { name: 'Devices', href: '/devices', icon: Smartphone },
+  { name: 'Device Information', href: '/devices', icon: Smartphone },
   { name: 'Remote Control', href: '/remote-control', icon: Monitor },
   { name: 'Messages', href: '/messages', icon: MessageSquare },
   { name: 'Call Logs', href: '/call-logs', icon: Phone },
@@ -71,16 +71,14 @@ export default function Sidebar({ onClose }: SidebarProps) {
               onClick={onClose}
               className={`
                 group flex items-center rounded-lg px-3 py-4 text-sm font-medium transition-colors
-                ${
-                  isActive
-                    ? 'bg-gray-800 text-blue-300'
-                    : 'text-white hover:bg-gray-800'
+                ${isActive
+                  ? 'bg-gray-800 text-blue-300'
+                  : 'text-white hover:bg-gray-800'
                 }
               `}
             >
               <item.icon
-                className={`mr-3 h-5 w-5 flex-shrink-0 ${
-                  isActive ? 'text-blue-300' : 'text-white'}`}
+                className={`mr-3 h-5 w-5 flex-shrink-0 ${isActive ? 'text-blue-300' : 'text-white'}`}
               />
               {item.name}
             </Link>

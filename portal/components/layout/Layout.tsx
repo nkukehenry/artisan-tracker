@@ -12,10 +12,10 @@ export default function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-gray-200">
+    <div className="flex h-screen bg-gray-200 dark:bg-dark-background">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-40 bg-gray-600 bg-opacity-75 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
@@ -29,13 +29,13 @@ export default function Layout({ children }: LayoutProps) {
         <Sidebar onClose={() => setSidebarOpen(false)} />
       </div>
 
-          {/* Main content */}
-          <div className="flex flex-1 flex-col overflow-hidden">
-            <Navbar onMenuClick={() => setSidebarOpen(true)} />
-            <main className="flex-1 overflow-y-auto bg-white p-6">
-              {children}
-            </main>
-          </div>
-        </div>
-      );
-    }
+      {/* Main content */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Navbar onMenuClick={() => setSidebarOpen(true)} />
+        <main className="flex-1 overflow-y-auto bg-white dark:bg-dark-background p-6">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
