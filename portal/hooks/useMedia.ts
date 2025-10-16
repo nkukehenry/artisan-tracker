@@ -42,7 +42,7 @@ export const useMedia = () => {
 
   // Download media file
   const handleDownloadMedia = useCallback(
-    async (mediaId: string, fileName: string) => {
+    async (mediaId: string, fileName?: string) => {
       await dispatch(downloadMedia({ mediaId, fileName }));
     },
     [dispatch]

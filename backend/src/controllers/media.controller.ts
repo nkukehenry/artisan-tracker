@@ -69,17 +69,17 @@ export class MediaController {
 
       const mediaFile = await this.mediaService.uploadMedia(mediaFileData, user.tenantId, user.id);
 
-      logger.info('Media file uploaded successfully', { 
-        fileName: file.filename, 
-        deviceId, 
+      logger.info('Media file uploaded successfully', {
+        fileName: file.filename,
+        deviceId,
         userId: user.id,
-        fileSize: file.size 
+        fileSize: file.size
       });
 
       res.status(201).json({
         success: true,
         message: 'Media file uploaded successfully',
-        data: { 
+        data: {
           mediaFile: JSON.parse(
             JSON.stringify(mediaFile, (key, value) =>
               typeof value === 'bigint' ? value.toString() : value
@@ -279,12 +279,12 @@ export const upload = multer({
       const uploadPath = process.env.UPLOAD_PATH || './uploads';
       const mediaType = req.body.fileType || 'OTHER';
       const fullPath = path.join(uploadPath, mediaType.toLowerCase());
-      
+
       // Create directory if it doesn't exist
       if (!fs.existsSync(fullPath)) {
         fs.mkdirSync(fullPath, { recursive: true });
       }
-      
+
       cb(null, fullPath);
     },
     filename: (req, file, cb) => {
@@ -303,9 +303,20 @@ export const upload = multer({
       'video/mp4': ['.mp4'],
       'video/avi': ['.avi'],
       'video/mov': ['.mov'],
+      'video/webm': ['.webm'],
+      'video/3gpp': ['.3gp'],
+      'video/3gpp2': ['.3g2'],
+      'video/mjpeg': ['.mjpeg'],
+      'video/mpeg': ['.mpeg'],
+      'video/mp2t': ['.mp2t'],
+      'video/mpg': ['.mpg'],
       'audio/mp3': ['.mp3'],
-      'audio/wav': ['.wav'],
+      'audio/mpeg': ['.mp3'],
+      'audio/ogg': ['.ogg'],
+      'audio/opus': ['.opus'],
+      'audio/aac': ['.aac'],
       'audio/m4a': ['.m4a'],
+      'audio/wav': ['.wav']
     };
 
     const fileType = file.mimetype;
