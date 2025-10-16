@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { Device } from '@/types/device';
 import { deviceApi } from '@/lib/deviceApi';
 import { useAppDispatch } from '@/lib/hooks';
@@ -25,14 +25,32 @@ export function DeviceProvider({ children }: DeviceProviderProps) {
     const [devices, setDevices] = useState<Device[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const dispatch = useAppDispatch();
+    const hasInitialized = useRef(false);
 
     // Load devices from API
     const loadDevices = async () => {
         setIsLoading(true);
         try {
             const result = await deviceApi.getDevices();
+            console.log('DeviceContext - API result:', result);
+            console.log('DeviceContext - result.data:', result.data);
+            console.log('DeviceContext - result.data type:', typeof result.data);
+            console.log('DeviceContext - result.data isArray:', Array.isArray(result.data));
+
             if (result.success) {
-                setDevices(result.data.data || []);
+                // Handle different possible response structures
+                let devicesData = result.data;
+
+                // If result.data is an object with a data property, extract it
+                if (devicesData && typeof devicesData === 'object' && 'data' in devicesData) {
+                    devicesData = (devicesData as any).data;
+                }
+
+                // Ensure we have an array
+                const finalDevices = Array.isArray(devicesData) ? devicesData : [];
+                console.log('DeviceContext - final devices:', finalDevices);
+
+                setDevices(finalDevices);
             } else {
                 dispatch(addToast({
                     type: 'error',
@@ -41,6 +59,7 @@ export function DeviceProvider({ children }: DeviceProviderProps) {
                 }));
             }
         } catch (error) {
+            console.error('DeviceContext - Error loading devices:', error);
             dispatch(addToast({
                 type: 'error',
                 title: 'Failed to load devices',
@@ -56,14 +75,25 @@ export function DeviceProvider({ children }: DeviceProviderProps) {
         loadDevices();
     }, []);
 
-    // Load selected device from localStorage on mount
+    // Load selected device from localStorage on mount and auto-select first device if none selected
     useEffect(() => {
-        const savedDeviceId = localStorage.getItem('selectedDeviceId');
-        if (savedDeviceId && devices.length > 0) {
-            const device = devices.find(d => d.deviceId === savedDeviceId);
-            if (device) {
-                setSelectedDevice(device);
+        // Only run this logic once when devices are first loaded
+        if (!hasInitialized.current && devices.length > 0) {
+            hasInitialized.current = true;
+
+            const savedDeviceId = localStorage.getItem('selectedDeviceId');
+
+            if (savedDeviceId) {
+                // Try to restore previously selected device
+                const device = devices.find(d => d.deviceId === savedDeviceId);
+                if (device) {
+                    setSelectedDevice(device);
+                    return;
+                }
             }
+
+            // If no saved device found or saved device doesn't exist, select first device
+            setSelectedDevice(devices[0]);
         }
     }, [devices]);
 
@@ -81,12 +111,14 @@ export function DeviceProvider({ children }: DeviceProviderProps) {
     };
 
     const refreshDevices = async () => {
+        hasInitialized.current = false; // Reset initialization flag
         await loadDevices();
+        // After refreshing devices, the useEffect will handle auto-selection
     };
 
     const value: DeviceContextType = {
         selectedDevice,
-        devices,
+        devices: devices || [],
         isLoading,
         selectDevice,
         refreshDevices,

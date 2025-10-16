@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { mediaApi } from '@/lib/mediaApi';
 import { Media, MediaFilters } from '@/types/media';
+import { downloadFile } from '@/lib/downloadUtils';
 
 interface MediaState {
   mediaFiles: Media[];
@@ -62,23 +63,19 @@ export const deleteMedia = createAsyncThunk(
 
 export const downloadMedia = createAsyncThunk(
   'media/downloadMedia',
-  async ({ mediaId, fileName }: { mediaId: string; fileName: string }) => {
+  async ({ mediaId, fileName }: { mediaId: string; fileName?: string }) => {
     const result = await mediaApi.downloadMediaFile(mediaId);
     if (!result.success || !result.data) {
       throw new Error(result.error?.message || 'Failed to download media file');
     }
-    
-    // Create download link
-    const url = window.URL.createObjectURL(result.data);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-    
-    return fileName;
+
+    // Use filename from API response or fallback to provided fileName or mediaId
+    const downloadFileName = result.filename || fileName || `media_${mediaId}`;
+
+    // Use the enhanced download utility
+    await downloadFile(result.data, downloadFileName);
+
+    return { fileName: downloadFileName, mediaId };
   }
 );
 
@@ -111,14 +108,14 @@ const mediaSlice = createSlice({
     builder.addCase(loadMediaFiles.fulfilled, (state, action) => {
       state.isLoading = false;
       if (action.payload) {
-        state.mediaFiles = action.payload.data || [];
+        state.mediaFiles = action.payload.data?.data || [];
         state.pagination = {
-          page: action.payload.pagination?.page || 1,
-          limit: action.payload.pagination?.limit || 20,
-          total: action.payload.pagination?.total || 0,
-          totalPages: action.payload.pagination?.totalPages || 0,
-          hasNext: action.payload.pagination?.hasNext || false,
-          hasPrev: action.payload.pagination?.hasPrev || false,
+          page: action.payload.data?.pagination?.page || 1,
+          limit: action.payload.data?.pagination?.limit || 20,
+          total: action.payload.data?.pagination?.total || 0,
+          totalPages: action.payload.data?.pagination?.totalPages || 0,
+          hasNext: action.payload.data?.pagination?.hasNext || false,
+          hasPrev: action.payload.data?.pagination?.hasPrev || false,
         };
       }
     });

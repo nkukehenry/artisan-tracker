@@ -13,15 +13,16 @@ export interface Media {
   id: string;
   fileName: string;
   filePath: string;
-  fileSize: number;
+  fileSize: string; // Changed to string to match API response
   mimeType: string;
   fileType: 'PHOTO' | 'VIDEO' | 'AUDIO' | 'DOCUMENT';
-  location?: string;
-  gpsCoordinates?: string;
-  callId?: string;
-  call?: CallLog;
-  metadata?: Record<string, unknown>;
-  isEncrypted?: boolean;
+  metadata?: {
+    uploadedAt: string;
+    uploadedBy: string;
+    originalName: string;
+    [key: string]: unknown;
+  };
+  isEncrypted: boolean;
   deviceId: string;
   createdAt: string;
   updatedAt: string;
@@ -30,14 +31,17 @@ export interface Media {
 
 export interface MediaResponse {
   success: boolean;
-  data: Media[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-    hasNext: boolean;
-    hasPrev: boolean;
+  message: string;
+  data: {
+    data: Media[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
   };
   error?: {
     message: string;
@@ -70,11 +74,12 @@ export const parseGPSCoordinates = (gpsString?: string): GPSCoordinates | null =
   }
 };
 
-export const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0 Bytes';
+export const formatFileSize = (bytes: string | number): string => {
+  const numBytes = typeof bytes === 'string' ? parseInt(bytes, 10) : bytes;
+  if (numBytes === 0) return '0 Bytes';
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  const i = Math.floor(Math.log(numBytes) / Math.log(k));
+  return Math.round(numBytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 };
 

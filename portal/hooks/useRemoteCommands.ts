@@ -7,7 +7,7 @@ interface UseRemoteCommandsProps {
   selectedDevice: Device | null;
   wsConnection: WebSocket | null;
   wsUrl: string;
-  onWebSocketReconnect: () => void;
+  onWebSocketReconnect: (isScreenShare?: boolean) => void;
 }
 
 interface UseRemoteCommandsReturn {
@@ -41,7 +41,7 @@ export const useRemoteCommands = ({
 
       if (!wsConnection || wsConnection.readyState !== WebSocket.OPEN) {
         console.log('WebSocket connection not active. Attempting to reconnect...');
-        
+
         setTimeout(() => {
           if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
             console.log('WebSocket reconnected. Resending command...');

@@ -14,7 +14,12 @@ export default function DeviceSelector({ className = '' }: DeviceSelectorProps) 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
 
-    const filteredDevices = devices.filter(device =>
+    // Debug: Log the devices value to understand its structure
+    console.log('DeviceSelector - devices value:', devices, 'type:', typeof devices, 'isArray:', Array.isArray(devices));
+
+    // Ensure devices is an array before filtering
+    const devicesArray = Array.isArray(devices) ? devices : [];
+    const filteredDevices = devicesArray.filter(device =>
         device.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         device.deviceId.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (device.owner && device.owner.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -54,12 +59,9 @@ export default function DeviceSelector({ className = '' }: DeviceSelectorProps) 
                         <Smartphone className="h-5 w-5 text-gray-500" />
                         <div className="text-left">
                             {selectedDevice ? (
-                                <div>
-                                    <div className="font-medium text-gray-900">{selectedDevice.name}</div>
-                                    <div className="text-sm text-gray-500">{selectedDevice.deviceId}</div>
-                                </div>
+                                <div className="text-sm font-medium text-gray-900">{selectedDevice.name}</div>
                             ) : (
-                                <div className="text-gray-500">Select a device</div>
+                                <div className="text-sm text-gray-500">Select a device</div>
                             )}
                         </div>
                     </div>
