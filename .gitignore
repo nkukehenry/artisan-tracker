@@ -101,7 +101,6 @@ Thumbs.db
 
 # Uploads
 uploads/
-media/
 
 # Prisma
 prisma/migrations/
