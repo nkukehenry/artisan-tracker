@@ -405,20 +405,23 @@ export const mediaValidation = {
 
   downloadMedia: [
     param('mediaId')
-      .isUUID()
-      .withMessage('Media ID must be a valid UUID'),
+      .trim()
+      .isLength({ min: 1 })
+      .withMessage('Media ID is required'),
   ],
 
   deleteMedia: [
     param('mediaId')
-      .isUUID()
-      .withMessage('Media ID must be a valid UUID'),
+      .trim()
+      .isLength({ min: 1 })
+      .withMessage('Media ID is required'),
   ],
 
   getMediaMetadata: [
     param('mediaId')
-      .isUUID()
-      .withMessage('Media ID must be a valid UUID'),
+      .trim()
+      .isLength({ min: 1 })
+      .withMessage('Media ID is required'),
   ],
 };
 
