@@ -140,7 +140,7 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
 
   return (
     <div className="fixed inset-0 bg-blue-900/20 backdrop-blur-md flex items-center justify-center z-50">
-      <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-xl w-[70vw] h-[60vh] mx-4 border border-white/20 flex flex-col" style={{ maxHeight: '80vh' }}>
+      <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-xl w-[70vw] h-[80vh] mx-4 border border-white/20 flex flex-col" style={{ maxHeight: '80vh' }}>
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
             {getMediaIcon(media.fileType)}
