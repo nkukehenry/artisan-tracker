@@ -8,11 +8,15 @@ import { useDeviceContext } from '@/contexts/DeviceContext';
 import DataTable from '@/components/ui/DataTable';
 import SearchFilter from '@/components/ui/SearchFilter';
 import LocationBadge from '@/components/ui/LocationBadge';
+import MessageDetailModal from '@/components/messages/MessageDetailModal';
 import { Message } from '@/types/message';
-import { Smartphone } from 'lucide-react';
+import { Smartphone, Eye } from 'lucide-react';
 
 export default function MessagesPage() {
   const { selectedDevice } = useDeviceContext();
+  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFiltering, setIsFiltering] = useState(false);
 
   const {
     messages,
@@ -23,7 +27,20 @@ export default function MessagesPage() {
   } = useMessages();
 
   const handleFilterChange = (newFilters: Partial<typeof filters>) => {
+    setIsFiltering(true);
     updateFilters(newFilters);
+    // Simulate filtering delay
+    setTimeout(() => setIsFiltering(false), 500);
+  };
+
+  const handleViewMessage = (message: Message) => {
+    setSelectedMessage(message);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedMessage(null);
   };
 
   const columns = [
@@ -80,6 +97,20 @@ export default function MessagesPage() {
           }`}>
           {(value as boolean) ? 'Read' : 'Unread'}
         </span>
+      ),
+    },
+    {
+      key: 'actions',
+      label: 'Actions',
+      sortable: false,
+      render: (item: Message) => (
+        <button
+          onClick={() => handleViewMessage(item)}
+          className="flex items-center gap-1 px-3 py-1 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors"
+        >
+          <Eye className="h-4 w-4" />
+          View Details
+        </button>
       ),
     },
   ];
@@ -157,13 +188,30 @@ export default function MessagesPage() {
             </div>
           ) : (
             /* Messages Table */
-            <DataTable
-              data={messages}
-              columns={columns}
-              emptyMessage="No messages found"
-            />
+            <div className="relative">
+              {isFiltering && (
+                <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                    <p className="text-sm text-gray-600">Filtering messages...</p>
+                  </div>
+                </div>
+              )}
+              <DataTable
+                data={messages}
+                columns={columns}
+                emptyMessage="No messages found"
+              />
+            </div>
           )}
         </div>
+
+        {/* Message Detail Modal */}
+        <MessageDetailModal
+          message={selectedMessage}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+        />
       </Layout>
     </AuthWrapper>
   );

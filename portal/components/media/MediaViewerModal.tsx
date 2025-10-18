@@ -62,31 +62,25 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
 
     try {
       const result = await mediaApi.downloadMediaFile(media.id);
-      
-      if (result.success && result.data) {
-        // Create download link
-        const url = window.URL.createObjectURL(result.data);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = media.fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-
+      if (result.success) {
         dispatch(addToast({
           type: 'success',
-          title: 'Download Started',
-          message: 'Media file download started',
+          title: 'Download Success',
+          message: 'Media file downloaded successfully'
         }));
       } else {
-        throw new Error(result.error?.message || 'Failed to download media file');
+        dispatch(addToast({
+          type: 'error',
+          title: 'Download Failed',
+          message: result.error?.message || 'Failed to download media file'
+        }));
       }
     } catch (err) {
+      console.error('Error downloading media file:', err);
       dispatch(addToast({
         type: 'error',
         title: 'Download Failed',
-        message: err instanceof Error ? err.message : 'Failed to download media file',
+        message: 'Failed to download media file'
       }));
     }
   };
@@ -94,226 +88,267 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
   const handleDelete = async () => {
     if (!media || !onDelete) return;
 
-    if (window.confirm('Are you sure you want to delete this media file?')) {
-      try {
-        await mediaApi.deleteMediaFile(media.id);
-        dispatch(addToast({
-          type: 'success',
-          title: 'Media Deleted',
-          message: 'Media file deleted successfully',
-        }));
-        onDelete(media.id);
-        onClose();
-      } catch (err) {
-        dispatch(addToast({
-          type: 'error',
-          title: 'Delete Failed',
-          message: err instanceof Error ? err.message : 'Failed to delete media file',
-        }));
-      }
+    try {
+      await mediaApi.deleteMediaFile(media.id);
+      dispatch(addToast({
+        type: 'success',
+        title: 'Delete Success',
+        message: 'Media file deleted successfully'
+      }));
+      onDelete(media.id);
+      onClose();
+    } catch (err) {
+      console.error('Error deleting media file:', err);
+      dispatch(addToast({
+        type: 'error',
+        title: 'Delete Failed',
+        message: 'Failed to delete media file'
+      }));
     }
   };
 
   const getMediaIcon = (fileType: string) => {
     switch (fileType) {
-      case 'AUDIO':
-        return <FileAudio className="h-6 w-6 text-green-600" />;
       case 'PHOTO':
-        return <FileImage className="h-6 w-6 text-purple-600" />;
+        return <FileImage className="h-5 w-5 text-green-600" />;
       case 'VIDEO':
-        return <FileVideo className="h-6 w-6 text-red-600" />;
+        return <FileVideo className="h-5 w-5 text-purple-600" />;
+      case 'AUDIO':
+        return <FileAudio className="h-5 w-5 text-blue-600" />;
       default:
-        return <FileText className="h-6 w-6 text-gray-600" />;
+        return <FileText className="h-5 w-5 text-gray-600" />;
     }
   };
 
-  const formatFileSize = (bytes: string | number): string => {
-    const numBytes = typeof bytes === 'string' ? parseInt(bytes, 10) : bytes;
-    if (numBytes === 0) return '0 Bytes';
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(numBytes) / Math.log(k));
-    return Math.round(numBytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
   };
 
   if (!isOpen || !media) return null;
 
   return (
-    <div className="fixed inset-0 bg-blue-900/20 backdrop-blur-md flex items-center justify-center z-50">
-      <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-xl w-[70vw] h-[80vh] mx-4 border border-white/20 flex flex-col" style={{ maxHeight: '80vh' }}>
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <div className="flex items-center gap-3">
-            {getMediaIcon(media.fileType)}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900">{media.fileName}</h2>
-              <p className="text-sm text-gray-600">
-                {formatFileSize(media.fileSize)} • {media.fileType}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex min-h-screen items-center justify-center p-4">
+        {/* Backdrop */}
+        <div
+          className="fixed inset-0 bg-blue-900/20 backdrop-blur-md transition-opacity"
+          onClick={onClose}
+        />
 
-        <div className="p-6 flex-1 overflow-y-auto">
-          {/* Media Content */}
-          <div className="mb-6">
-            {isLoading ? (
-              <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                  <p className="text-gray-600">Loading media file...</p>
+        {/* Modal */}
+        <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          {/* Header */}
+          <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-lg ${
+                media.fileType === 'PHOTO' ? 'bg-green-100' :
+                media.fileType === 'VIDEO' ? 'bg-purple-100' :
+                media.fileType === 'AUDIO' ? 'bg-blue-100' :
+                'bg-gray-100'
+              }`}>
+                {getMediaIcon(media.fileType)}
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Media Details</h2>
+                <p className="text-sm text-gray-600">
+                  {media.fileType} • {formatFileSize(Number(media.fileSize))}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="p-6 space-y-6">
+            {/* Basic Information */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-500 mb-1">File Name</p>
+                <p className="text-base font-medium text-gray-900">{media.fileName}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 mb-1">File Type</p>
+                <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${
+                  media.fileType === 'PHOTO' ? 'bg-green-100 text-green-800' :
+                  media.fileType === 'VIDEO' ? 'bg-purple-100 text-purple-800' :
+                  media.fileType === 'AUDIO' ? 'bg-blue-100 text-blue-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {media.fileType}
+                </span>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 mb-1">File Size</p>
+                <p className="text-base font-medium text-gray-900">{formatFileSize(Number(media.fileSize))}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 mb-1">MIME Type</p>
+                <p className="text-base font-medium text-gray-900">{media.mimeType}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Security</p>
+                <div className="flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-gray-400" />
+                  <p className="text-base font-medium text-gray-900">
+                    {media.isEncrypted ? 'Encrypted' : 'Not Encrypted'}
+                  </p>
                 </div>
               </div>
-            ) : error ? (
-              <div className="flex items-center justify-center h-64 bg-red-50 rounded-lg">
-                <div className="text-center">
-                  <p className="text-red-600">{error}</p>
-                  <button
-                    onClick={loadMediaFile}
-                    className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                  >
-                    Retry
-                  </button>
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Created At</p>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-gray-400" />
+                  <p className="text-base font-medium text-gray-900">
+                    {new Date(media.createdAt).toLocaleString()}
+                  </p>
                 </div>
               </div>
-            ) : mediaUrl ? (
-              <div className="bg-gray-50 rounded-lg p-4">
-                {media.fileType === 'PHOTO' && (
-                  <img
-                    src={mediaUrl}
-                    alt={media.fileName}
-                    className="max-w-full h-auto max-h-96 mx-auto rounded-lg shadow-sm"
-                  />
-                )}
-                {media.fileType === 'VIDEO' && (
-                  <video
-                    src={mediaUrl}
-                    controls
-                    className="max-w-full h-auto max-h-96 mx-auto rounded-lg shadow-sm"
-                  />
-                )}
-                {media.fileType === 'AUDIO' && (
+            </div>
+
+            {/* Media Content */}
+            <div className="border-t border-gray-200 pt-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Media Preview</h3>
+              {isLoading ? (
+                <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
                   <div className="text-center">
-                    <audio
-                      src={mediaUrl}
-                      controls
-                      className="w-full max-w-md mx-auto"
-                    />
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading media file...</p>
                   </div>
-                )}
-                {media.fileType === 'DOCUMENT' && (
-                  <div className="text-center py-8">
-                    <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 mb-4">Document preview not available</p>
+                </div>
+              ) : error ? (
+                <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+                  <div className="text-center">
+                    <p className="text-red-600">{error}</p>
                     <button
-                      onClick={handleDownload}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      onClick={loadMediaFile}
+                      className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
-                      Download Document
+                      Retry
                     </button>
                   </div>
-                )}
+                </div>
+              ) : mediaUrl ? (
+                <div className="space-y-4">
+                  {media.fileType === 'PHOTO' && (
+                    <div className="flex justify-center">
+                      <img
+                        src={mediaUrl}
+                        alt={media.fileName}
+                        className="max-w-full max-h-96 rounded-lg shadow-lg"
+                      />
+                    </div>
+                  )}
+                  {media.fileType === 'VIDEO' && (
+                    <div className="flex justify-center">
+                      <video
+                        src={mediaUrl}
+                        controls
+                        className="max-w-full max-h-96 rounded-lg shadow-lg"
+                      >
+                        Your browser does not support the video tag.
+                      </video>
+                    </div>
+                  )}
+                  {media.fileType === 'AUDIO' && (
+                    <div className="flex justify-center">
+                      <audio
+                        src={mediaUrl}
+                        controls
+                        className="w-full max-w-md"
+                      >
+                        Your browser does not support the audio tag.
+                      </audio>
+                    </div>
+                  )}
+                  {media.fileType === 'DOCUMENT' && (
+                    <div className="flex flex-col items-center justify-center h-64 bg-gray-50 rounded-lg">
+                      <FileText className="h-16 w-16 text-gray-400 mb-4" />
+                      <p className="text-gray-600 mb-4">Document preview not available</p>
+                      <button
+                        onClick={handleDownload}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        <Download className="h-4 w-4" />
+                        Download Document
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : null}
+            </div>
+
+            {/* Location Information */}
+            {((media.location && typeof media.location === 'string') || (media.gpsCoordinates && typeof media.gpsCoordinates === 'string')) && (
+              <div className="border-t border-gray-200 pt-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-gray-600" />
+                  Location
+                </h3>
+                <LocationBadge 
+                  location={typeof media.location === 'string' ? media.location : undefined} 
+                  gpsCoordinates={typeof media.gpsCoordinates === 'string' ? media.gpsCoordinates : undefined} 
+                />
               </div>
-            ) : null}
+            )}
+
+            {/* Related Call Information */}
+            {media.call && (
+              <div className="border-t border-gray-200 pt-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Related Call</h3>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium">{media.call.contactName || media.call.phoneNumber}</span>
+                    <span className="text-sm text-gray-600">{media.call.callType}</span>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      <span>{Math.floor(media.call.duration / 60)}:{(media.call.duration % 60).toString().padStart(2, '0')}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      <span>{new Date(media.call.timestamp).toLocaleString()}</span>
+                    </div>
+                  </div>
+                  {((media.call.location && typeof media.call.location === 'string') || (media.call.gpsCoordinates && typeof media.call.gpsCoordinates === 'string')) && (
+                    <div className="mt-2">
+                      <LocationBadge 
+                        location={typeof media.call.location === 'string' ? media.call.location : undefined} 
+                        gpsCoordinates={typeof media.call.gpsCoordinates === 'string' ? media.call.gpsCoordinates : undefined} 
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Timestamps */}
+            <div className="border-t border-gray-200 pt-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Record Information</h3>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-500">Created At:</p>
+                  <p className="font-medium">{new Date(media.createdAt).toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Updated At:</p>
+                  <p className="font-medium">{new Date(media.updatedAt).toLocaleString()}</p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Media Details */}
-          <div className="grid grid-cols-2 gap-6 mb-6">
-            <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-2">File Information</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">File Name:</span>
-                  <span className="text-sm font-medium">{media.fileName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">File Size:</span>
-                  <span className="text-sm font-medium">{formatFileSize(media.fileSize)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">MIME Type:</span>
-                  <span className="text-sm font-medium">{media.mimeType}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Security:</span>
-                  <div className="flex items-center gap-1">
-                    <Shield className="h-4 w-4 text-green-600" />
-                    <span className="text-sm font-medium">
-                      {media.isEncrypted ? 'Encrypted' : 'Plain'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Timestamps</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Created:</span>
-                  <span className="text-sm font-medium">
-                    {new Date(media.createdAt).toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Updated:</span>
-                  <span className="text-sm font-medium">
-                    {new Date(media.updatedAt).toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Location Information */}
-          {((media.location && typeof media.location === 'string') || (media.gpsCoordinates && typeof media.gpsCoordinates === 'string')) && (
-            <div className="mb-6">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Location</h3>
-              <LocationBadge 
-                location={typeof media.location === 'string' ? media.location : undefined} 
-                gpsCoordinates={typeof media.gpsCoordinates === 'string' ? media.gpsCoordinates : undefined} 
-              />
-            </div>
-          )}
-
-          {/* Related Call Information */}
-          {media.call && (
-            <div className="mb-6">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Related Call</h3>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium">{media.call.contactName || media.call.phoneNumber}</span>
-                  <span className="text-sm text-gray-600">{media.call.callType}</span>
-                </div>
-                <div className="flex items-center gap-4 text-sm text-gray-600">
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    <span>{Math.floor(media.call.duration / 60)}:{(media.call.duration % 60).toString().padStart(2, '0')}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    <span>{new Date(media.call.timestamp).toLocaleString()}</span>
-                  </div>
-                </div>
-                {((media.call.location && typeof media.call.location === 'string') || (media.call.gpsCoordinates && typeof media.call.gpsCoordinates === 'string')) && (
-                  <div className="mt-2">
-                    <LocationBadge 
-                      location={typeof media.call.location === 'string' ? media.call.location : undefined} 
-                      gpsCoordinates={typeof media.call.gpsCoordinates === 'string' ? media.call.gpsCoordinates : undefined} 
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Action Buttons */}
-          <div className="flex gap-3">
+          {/* Footer */}
+          <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
             <button
               onClick={handleDownload}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -332,7 +367,7 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
             )}
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
             >
               Close
             </button>

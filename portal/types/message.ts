@@ -9,7 +9,12 @@ export interface Message {
   location?: string;
   gpsCoordinates?: string;
   metadata?: string;
+  conversation?: {
+    name: string;
+    participantCount?: number;
+  };
   createdAt: string;
+  updatedAt: string;
   [key: string]: unknown;
 }
 

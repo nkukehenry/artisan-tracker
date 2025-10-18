@@ -273,20 +273,6 @@ export default function MediaPage() {
             </div>
           </div>
 
-          {/* Device Selection */}
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="flex items-center gap-4">
-              <label className="text-sm font-medium text-gray-700">Device:</label>
-              <Select
-                options={deviceOptions}
-                value={selectedDeviceId}
-                onChange={handleDeviceChange}
-                placeholder="Select a device"
-                className="min-w-[200px]"
-              />
-            </div>
-          </div>
-
           {/* Filters */}
           {selectedDevice && (
             <SearchFilter

@@ -361,11 +361,11 @@ export const upload = multer({
       'video/mp2t': ['.mp2t'],
       'video/mpg': ['.mpg'],
       'audio/mp3': ['.mp3'],
-      'audio/mpeg': ['.mp3'],
       'audio/ogg': ['.ogg'],
       'audio/opus': ['.opus'],
       'audio/aac': ['.aac'],
       'audio/m4a': ['.m4a'],
+      'audio/mpeg': ['.m4a'],
       'audio/wav': ['.wav']
     };
 

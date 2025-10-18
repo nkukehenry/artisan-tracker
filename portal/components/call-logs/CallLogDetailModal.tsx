@@ -38,7 +38,7 @@ export default function CallLogDetailModal({ callLog, isOpen, onClose }: CallLog
       <div className="flex min-h-screen items-center justify-center p-4">
         {/* Backdrop */}
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+          className="fixed inset-0 bg-blue-900/20 backdrop-blur-md transition-opacity"
           onClick={onClose}
         />
 
