@@ -220,6 +220,49 @@ router.get('/download/:mediaId', mediaValidation.downloadMedia, asyncHandler(med
 
 /**
  * @swagger
+ * /media/view/{mediaId}:
+ *   get:
+ *     summary: View media file (inline display)
+ *     tags: [Media]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: mediaId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Media file ID
+ *     responses:
+ *       200:
+ *         description: File displayed inline
+ *         content:
+ *           image/*:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *           video/*:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *           audio/*:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ */
+router.get('/view/:mediaId', mediaValidation.downloadMedia, asyncHandler(mediaController.viewMedia));
+
+/**
+ * @swagger
  * /media/{mediaId}:
  *   delete:
  *     summary: Delete media file

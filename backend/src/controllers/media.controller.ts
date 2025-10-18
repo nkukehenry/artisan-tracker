@@ -149,33 +149,83 @@ export class MediaController {
       const { mediaId } = req.params;
       const user = (req as any).user;
 
-      // This would be implemented in a MediaService
-      // For now, return error as media service is not implemented
-      throw createError('Media service not implemented', 501);
+      // Get media file from database
+      const mediaFile = await this.mediaService.getMediaById(mediaId, user.tenantId);
+      if (!mediaFile) {
+        throw createError('Media file not found', 404);
+      }
 
-      // Mock implementation structure:
-      // const mediaFile = await mediaService.getMediaById(mediaId);
-      // if (!mediaFile) {
-      //   throw createError('Media file not found', 404);
-      // }
-      // 
-      // // Check access permissions
-      // const device = await deviceService.getDeviceById(mediaFile.deviceId);
-      // if (device.userId !== user.id && user.role !== 'SUPER_ADMIN') {
-      //   throw createError('Access denied', 403);
-      // }
-      // 
-      // // Check if file exists
-      // if (!fs.existsSync(mediaFile.filePath)) {
-      //   throw createError('File not found on disk', 404);
-      // }
-      // 
-      // res.setHeader('Content-Type', mediaFile.mimeType);
-      // res.setHeader('Content-Disposition', `attachment; filename="${mediaFile.fileName}"`);
-      // res.sendFile(path.resolve(mediaFile.filePath));
+      // Check access permissions
+      const device = await this.deviceService.getDeviceById(mediaFile.deviceId);
+      if (!device) {
+        throw createError('Device not found', 404);
+      }
+
+      if (device.userId !== user.id && user.role !== 'SUPER_ADMIN') {
+        throw createError('Access denied', 403);
+      }
+
+      // Check if file exists on disk
+      if (!fs.existsSync(mediaFile.filePath)) {
+        throw createError('File not found on disk', 404);
+      }
+
+      // Set headers and send file
+      res.setHeader('Content-Type', mediaFile.mimeType);
+      res.setHeader('Content-Disposition', `attachment; filename="${mediaFile.fileName}"`);
+      res.sendFile(path.resolve(mediaFile.filePath));
+
+      logger.info('Media file downloaded successfully', { mediaId, userId: user.id });
 
     } catch (error) {
       logger.error('Download media failed', { error, mediaId: req.params.mediaId });
+      next(error);
+    }
+  };
+
+  /**
+   * View media file (inline display)
+   */
+  public viewMedia = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        throw createError('Validation failed', 400, errors.array());
+      }
+
+      const { mediaId } = req.params;
+      const user = (req as any).user;
+
+      // Get media file from database
+      const mediaFile = await this.mediaService.getMediaById(mediaId, user.tenantId);
+      if (!mediaFile) {
+        throw createError('Media file not found', 404);
+      }
+
+      // Check access permissions
+      const device = await this.deviceService.getDeviceById(mediaFile.deviceId);
+      if (!device) {
+        throw createError('Device not found', 404);
+      }
+
+      if (device.userId !== user.id && user.role !== 'SUPER_ADMIN') {
+        throw createError('Access denied', 403);
+      }
+
+      // Check if file exists on disk
+      if (!fs.existsSync(mediaFile.filePath)) {
+        throw createError('File not found on disk', 404);
+      }
+
+      // Set headers for inline display
+      res.setHeader('Content-Type', mediaFile.mimeType);
+      res.setHeader('Content-Disposition', 'inline');
+      res.sendFile(path.resolve(mediaFile.filePath));
+
+      logger.info('Media file viewed successfully', { mediaId, userId: user.id });
+
+    } catch (error) {
+      logger.error('View media failed', { error, mediaId: req.params.mediaId });
       next(error);
     }
   };

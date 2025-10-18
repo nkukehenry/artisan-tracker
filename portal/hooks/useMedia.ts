@@ -56,6 +56,16 @@ export const useMedia = () => {
     [dispatch]
   );
 
+  // Set selected device
+  const handleSetSelectedDevice = useCallback(
+    (deviceId: string | null) => {
+      // This function is not needed since we're using useDeviceContext
+      // The device selection is handled by the parent component
+      console.log('Device selection handled by parent component');
+    },
+    []
+  );
+
   // Clear media data
   const handleClearMediaData = useCallback(() => {
     dispatch(clearMediaData());
@@ -72,15 +82,16 @@ export const useMedia = () => {
 
   return {
     mediaFiles,
+    selectedDevice,
     filters,
     pagination,
     isLoading,
     error,
-    selectedDevice,
     loadMedia,
     deleteMedia: handleDeleteMedia,
     downloadMedia: handleDownloadMedia,
     updateFilters: handleUpdateFilters,
+    setSelectedDevice: handleSetSelectedDevice,
     clearMediaData: handleClearMediaData,
   };
 };

@@ -26,6 +26,18 @@ export interface Media {
   deviceId: string;
   createdAt: string;
   updatedAt: string;
+  call?: {
+    id: string;
+    phoneNumber: string;
+    contactName?: string;
+    callType: 'INCOMING' | 'OUTGOING' | 'MISSED';
+    duration: number;
+    timestamp: string;
+    location?: string;
+    gpsCoordinates?: string;
+  };
+  location?: string;
+  gpsCoordinates?: string;
   [key: string]: unknown;
 }
 

@@ -2,7 +2,7 @@
 ### Base URL: http://localhost:3001/api
 
 ### Variables
-@baseUrl = http://localhost:83/api
+@baseUrl = http://localhost:9090/api
 @validToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWc1anpveXAwMDA2a2hwOHh1eno2MDRhIiwiZW1haWwiOiJhZG1pbkBhY21lLmNvbSIsInJvbGUiOiJURU5BTlRfQURNSU4iLCJ0ZW5hbnRJZCI6ImNtZzVqem8wNDAwMDBraHA4MW5xMG54ZHUiLCJpYXQiOjE3NTk1NzUzOTcsImV4cCI6MTc2MDE4MDE5N30.Nun_NKfvXCajbuf0-okWYq8twVjGeUJvWDmUhjEEZ3Q
 @contentType = application/json
 

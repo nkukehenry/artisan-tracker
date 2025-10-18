@@ -73,6 +73,12 @@ export default function RemoteControlPage() {
     onWebSocketReconnect: reconnectWebSocket,
   });
 
+  // Wrapper function to adapt sendCommand for CommandButtons component
+  const handleCommandClick = (action: string, duration?: number) => {
+    const payload = duration ? { duration } : undefined;
+    sendCommand(action, payload);
+  };
+
   // Handle WebSocket messages
   function handleWebSocketMessage(message: unknown) {
     const msg = message as {
@@ -268,7 +274,7 @@ export default function RemoteControlPage() {
 
               {/* Remote Commands */}
               <CommandButtons
-                onCommandClick={sendCommand}
+                onCommandClick={handleCommandClick}
                 disabled={isSendingCommand}
               />
 
