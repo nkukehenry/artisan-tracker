@@ -147,7 +147,7 @@ model MediaFile {
   metadata       Json?       // EXIF data, duration, etc.
   isEncrypted    Boolean     @default(true)
   location       String?     // Location where media was captured
-  gpsCoordinates String?     // GPS coordinates as JSON string
+  gpsCoordinates String?    @db.Text // GPS coordinates as JSON string
   createdAt      DateTime    @default(now())
   
   // Device relation
@@ -175,7 +175,7 @@ model CallLog {
   timestamp      DateTime
   isIncoming     Boolean
   location       String?     // Location where call was made
-  gpsCoordinates String?     // GPS coordinates as JSON string
+  gpsCoordinates String?    @db.Text // GPS coordinates as JSON string
   createdAt      DateTime    @default(now())
   
   // Device relation
@@ -220,7 +220,7 @@ model Message {
   isRead         Boolean     @default(false)
   metadata       Json?       // Platform-specific data
   location       String?     // Location where message was sent
-  gpsCoordinates String?     // GPS coordinates as JSON string
+  gpsCoordinates String?    @db.Text // GPS coordinates as JSON string
   createdAt      DateTime    @default(now())
   
   // Device relation

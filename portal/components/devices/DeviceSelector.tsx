@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronDown, Smartphone, Check, Search, X } from 'lucide-react';
+import { ChevronDown, Smartphone, Check, Search, X, RefreshCw } from 'lucide-react';
 import { Device } from '@/types/device';
 import { useDeviceContext } from '@/contexts/DeviceContext';
 
@@ -10,7 +10,7 @@ interface DeviceSelectorProps {
 }
 
 export default function DeviceSelector({ className = '' }: DeviceSelectorProps) {
-    const { selectedDevice, devices, isLoading, selectDevice } = useDeviceContext();
+    const { selectedDevice, devices, isLoading, selectDevice, refreshDevices } = useDeviceContext();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -33,6 +33,10 @@ export default function DeviceSelector({ className = '' }: DeviceSelectorProps) 
 
     const handleClearSelection = () => {
         selectDevice(null);
+    };
+
+    const handleRefreshDevices = async () => {
+        await refreshDevices();
     };
 
     const getStatusColor = (device: Device) => {
@@ -98,15 +102,25 @@ export default function DeviceSelector({ className = '' }: DeviceSelectorProps) 
                         {/* Modal Header */}
                         <div className="flex items-center justify-between p-6 border-b border-gray-200">
                             <h2 className="text-lg font-semibold text-gray-900">Select Device</h2>
-                            <button
-                                onClick={() => {
-                                    setIsModalOpen(false);
-                                    setSearchTerm('');
-                                }}
-                                className="text-gray-400 hover:text-gray-600 transition-colors"
-                            >
-                                <X className="h-5 w-5" />
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={handleRefreshDevices}
+                                    disabled={isLoading}
+                                    className="p-1 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    title="Refresh devices"
+                                >
+                                    <RefreshCw className={`h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} />
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setIsModalOpen(false);
+                                        setSearchTerm('');
+                                    }}
+                                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                                >
+                                    <X className="h-5 w-5" />
+                                </button>
+                            </div>
                         </div>
 
                         {/* Search Bar */}
