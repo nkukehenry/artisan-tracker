@@ -8,13 +8,20 @@ interface LocationBadgeProps {
   className?: string;
 }
 
-export default function LocationBadge({ 
-  location, 
-  gpsCoordinates, 
+export default function LocationBadge({
+  location,
+  gpsCoordinates,
   showCoordinates = false,
-  className = '' 
+  className = ''
 }: LocationBadgeProps) {
-  if (!location && !gpsCoordinates) return null;
+  if (!location || !gpsCoordinates) return (
+    <div className={`inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs ${className}`}>
+      <MapPin className="h-3 w-3" />
+      <span className="truncate max-w-[200px]" title="Unknown Location">
+        Unknown Location
+      </span>
+    </div>
+  )
 
   const coords = parseGPSCoordinates(gpsCoordinates);
   const displayText = location || (coords ? `${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)}` : null);

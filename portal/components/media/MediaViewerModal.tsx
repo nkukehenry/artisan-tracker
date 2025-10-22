@@ -8,6 +8,7 @@ import { addToast } from '@/store/slices/appSlice';
 import { mediaApi } from '@/lib/mediaApi';
 import apiClient from '@/lib/api';
 import LocationBadge from '@/components/ui/LocationBadge';
+import GPSMapViewer from '../ui/GPSMapViewer';
 
 export interface MediaViewerModalProps {
   isOpen: boolean;
@@ -144,12 +145,11 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
           {/* Header */}
           <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-lg ${
-                media.fileType === 'PHOTO' ? 'bg-green-100' :
+              <div className={`p-2 rounded-lg ${media.fileType === 'PHOTO' ? 'bg-green-100' :
                 media.fileType === 'VIDEO' ? 'bg-purple-100' :
-                media.fileType === 'AUDIO' ? 'bg-blue-100' :
-                'bg-gray-100'
-              }`}>
+                  media.fileType === 'AUDIO' ? 'bg-blue-100' :
+                    'bg-gray-100'
+                }`}>
                 {getMediaIcon(media.fileType)}
               </div>
               <div>
@@ -177,12 +177,11 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
               </div>
               <div>
                 <p className="text-sm text-gray-500 mb-1">File Type</p>
-                <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${
-                  media.fileType === 'PHOTO' ? 'bg-green-100 text-green-800' :
+                <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${media.fileType === 'PHOTO' ? 'bg-green-100 text-green-800' :
                   media.fileType === 'VIDEO' ? 'bg-purple-100 text-purple-800' :
-                  media.fileType === 'AUDIO' ? 'bg-blue-100 text-blue-800' :
-                  'bg-gray-100 text-gray-800'
-                }`}>
+                    media.fileType === 'AUDIO' ? 'bg-blue-100 text-blue-800' :
+                      'bg-gray-100 text-gray-800'
+                  }`}>
                   {media.fileType}
                 </span>
               </div>
@@ -286,16 +285,17 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
               ) : null}
             </div>
 
+
             {/* Location Information */}
-            {((media.location && typeof media.location === 'string') || (media.gpsCoordinates && typeof media.gpsCoordinates === 'string')) && (
+            {(media.location || media.gpsCoordinates) && (
               <div className="border-t border-gray-200 pt-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
                   <MapPin className="h-5 w-5 text-gray-600" />
                   Location
                 </h3>
-                <LocationBadge 
-                  location={typeof media.location === 'string' ? media.location : undefined} 
-                  gpsCoordinates={typeof media.gpsCoordinates === 'string' ? media.gpsCoordinates : undefined} 
+                <GPSMapViewer
+                  location={media.location}
+                  gpsCoordinates={media.gpsCoordinates}
                 />
               </div>
             )}
@@ -321,9 +321,9 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
                   </div>
                   {((media.call.location && typeof media.call.location === 'string') || (media.call.gpsCoordinates && typeof media.call.gpsCoordinates === 'string')) && (
                     <div className="mt-2">
-                      <LocationBadge 
-                        location={typeof media.call.location === 'string' ? media.call.location : undefined} 
-                        gpsCoordinates={typeof media.call.gpsCoordinates === 'string' ? media.call.gpsCoordinates : undefined} 
+                      <LocationBadge
+                        location={typeof media.call.location === 'string' ? media.call.location : undefined}
+                        gpsCoordinates={typeof media.call.gpsCoordinates === 'string' ? media.call.gpsCoordinates : undefined}
                       />
                     </div>
                   )}

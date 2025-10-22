@@ -10,7 +10,7 @@ import SearchFilter from '@/components/ui/SearchFilter';
 import Select from '@/components/ui/Select';
 import LocationBadge from '@/components/ui/LocationBadge';
 import { Media, formatFileSize } from '@/types/media';
-import { FileAudio, FileImage, FileVideo, FileText, Phone, Trash2, Eye } from 'lucide-react';
+import { FileAudio, FileImage, FileVideo, FileText, Phone, Trash2, Eye, ArrowDown, Download } from 'lucide-react';
 import MediaViewerModal from '@/components/media/MediaViewerModal';
 import { useAppDispatch } from '@/lib/hooks';
 import { addToast } from '@/store/slices/appSlice';
@@ -141,55 +141,36 @@ export default function MediaPage() {
           <div className="font-medium truncate max-w-[200px]" title={value as string}>
             {value as string}
           </div>
-          <div className="text-xs text-gray-500">
-            {formatFileSize(item.fileSize)}
-          </div>
+
           {(() => {
             const hasLocation = item.location && typeof item.location === 'string';
             const hasGPS = item.gpsCoordinates && typeof item.gpsCoordinates === 'string';
-            if (hasLocation || hasGPS) {
-              return (
-                <LocationBadge
-                  location={hasLocation ? item.location as string : undefined}
-                  gpsCoordinates={hasGPS ? item.gpsCoordinates as string : undefined}
-                />
-              );
-            }
-            return null;
+            return (
+              <LocationBadge
+                location={hasLocation ? item.location as string : undefined}
+                gpsCoordinates={hasGPS ? item.gpsCoordinates as string : undefined}
+              />
+            );
           })()}
         </div>
       ),
     },
     {
       key: 'call',
-      label: 'Related Call',
+      label: 'Media Info',
       sortable: false,
       render: (item: Media, value: unknown) => {
-        if (!item.call) return <span className="text-gray-400 text-sm">-</span>;
         return (
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-blue-600" />
+              <FileText className="h-4 w-4 text-green-600" />
               <span className="text-sm font-medium">
-                {item.call.contactName || item.call.phoneNumber}
+                {formatFileSize(item.fileSize)}
               </span>
             </div>
             <div className="text-xs text-gray-500">
-              {item.call.callType} • {Math.floor(item.call.duration / 60)}:{(item.call.duration % 60).toString().padStart(2, '0')}
+              {item.fileType} • {item.mimeType}
             </div>
-            {(() => {
-              const hasLocation = item.call.location && typeof item.call.location === 'string';
-              const hasGPS = item.call.gpsCoordinates && typeof item.call.gpsCoordinates === 'string';
-              if (hasLocation || hasGPS) {
-                return (
-                  <LocationBadge
-                    location={hasLocation ? item.call.location as string : undefined}
-                    gpsCoordinates={hasGPS ? item.call.gpsCoordinates as string : undefined}
-                  />
-                );
-              }
-              return null;
-            })()}
           </div>
         );
       },
@@ -204,17 +185,7 @@ export default function MediaPage() {
         </div>
       ),
     },
-    {
-      key: 'isEncrypted',
-      label: 'Security',
-      sortable: true,
-      render: (item: Media, value: unknown) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${(value as boolean) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-          }`}>
-          {(value as boolean) ? 'Encrypted' : 'Plain'}
-        </span>
-      ),
-    },
+
     {
       key: 'actions',
       label: 'Actions',
@@ -233,7 +204,7 @@ export default function MediaPage() {
             className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
             title="Download"
           >
-            <FileText className="h-4 w-4" />
+            <Download className="h-4 w-4" />
           </button>
           <button
             onClick={() => handleDeleteMedia(item.id)}
