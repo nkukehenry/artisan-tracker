@@ -26,8 +26,11 @@ export default function MediaPage() {
     mediaFiles,
     isLoading,
     error,
+    pagination,
     filters,
     updateFilters,
+    changePage,
+    changeLimit,
     deleteMedia,
     downloadMedia,
     setSelectedDevice,
@@ -146,9 +149,9 @@ export default function MediaPage() {
             const hasGPS = item.gpsCoordinates && typeof item.gpsCoordinates === 'string';
             if (hasLocation || hasGPS) {
               return (
-                <LocationBadge 
-                  location={hasLocation ? item.location as string : undefined} 
-                  gpsCoordinates={hasGPS ? item.gpsCoordinates as string : undefined} 
+                <LocationBadge
+                  location={hasLocation ? item.location as string : undefined}
+                  gpsCoordinates={hasGPS ? item.gpsCoordinates as string : undefined}
                 />
               );
             }
@@ -179,9 +182,9 @@ export default function MediaPage() {
               const hasGPS = item.call.gpsCoordinates && typeof item.call.gpsCoordinates === 'string';
               if (hasLocation || hasGPS) {
                 return (
-                  <LocationBadge 
-                    location={hasLocation ? item.call.location as string : undefined} 
-                    gpsCoordinates={hasGPS ? item.call.gpsCoordinates as string : undefined} 
+                  <LocationBadge
+                    location={hasLocation ? item.call.location as string : undefined}
+                    gpsCoordinates={hasGPS ? item.call.gpsCoordinates as string : undefined}
                   />
                 );
               }
@@ -206,9 +209,8 @@ export default function MediaPage() {
       label: 'Security',
       sortable: true,
       render: (item: Media, value: unknown) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-          (value as boolean) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-        }`}>
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${(value as boolean) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+          }`}>
           {(value as boolean) ? 'Encrypted' : 'Plain'}
         </span>
       ),
@@ -277,7 +279,7 @@ export default function MediaPage() {
           {selectedDevice && (
             <SearchFilter
               searchValue=""
-              onSearchChange={() => {}}
+              onSearchChange={() => { }}
               searchPlaceholder="Search media files..."
               filterValue={filters.fileType || ''}
               onFilterChange={(value) => updateFilters({ fileType: value as 'PHOTO' | 'VIDEO' | 'AUDIO' | 'DOCUMENT' | undefined })}
@@ -312,6 +314,9 @@ export default function MediaPage() {
               data={mediaFiles}
               columns={columns}
               emptyMessage="No media files found"
+              pagination={pagination || undefined}
+              onPageChange={changePage}
+              onLimitChange={changeLimit}
             />
           )}
         </div>

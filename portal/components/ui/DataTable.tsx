@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
+import Pagination, { PaginationInfo } from './Pagination';
 
 export interface Column<T> {
   key: keyof T | string;
@@ -17,6 +18,9 @@ export interface DataTableProps<T> {
   emptyMessage?: string;
   emptyAction?: ReactNode;
   className?: string;
+  pagination?: PaginationInfo;
+  onPageChange?: (page: number) => void;
+  onLimitChange?: (limit: number) => void;
 }
 
 export default function DataTable<T extends Record<string, unknown> = Record<string, unknown>>({
@@ -26,10 +30,13 @@ export default function DataTable<T extends Record<string, unknown> = Record<str
   emptyMessage = 'No data found',
   emptyAction,
   className = '',
+  pagination,
+  onPageChange,
+  onLimitChange,
 }: DataTableProps<T>) {
   // Ensure data is always an array
   const safeData = Array.isArray(data) ? data : [];
-  
+
   if (safeData.length === 0) {
     return (
       <div className="text-center py-12">
@@ -53,9 +60,8 @@ export default function DataTable<T extends Record<string, unknown> = Record<str
               {columns.map((column, index) => (
                 <th
                   key={index}
-                  className={`px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
-                    column.className || ''
-                  }`}
+                  className={`px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${column.className || ''
+                    }`}
                 >
                   {column.label}
                 </th>
@@ -66,28 +72,27 @@ export default function DataTable<T extends Record<string, unknown> = Record<str
             {safeData.map((item, rowIndex) => (
               <tr
                 key={rowIndex}
-                className={`${
-                  rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                } hover:bg-gray-100 ${onRowClick ? 'cursor-pointer' : ''}`}
+                className={`${rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                  } hover:bg-gray-100 ${onRowClick ? 'cursor-pointer' : ''}`}
                 onClick={() => onRowClick?.(item)}
               >
                 {columns.map((column, colIndex) => {
-                  const value = typeof column.key === 'string' 
+                  const value = typeof column.key === 'string'
                     ? (() => {
-                        let result: unknown = item;
-                        for (const key of column.key.split('.')) {
-                          if (result && typeof result === 'object' && key in result) {
-                            result = (result as Record<string, unknown>)[key];
-                          } else {
-                            return undefined;
-                          }
+                      let result: unknown = item;
+                      for (const key of column.key.split('.')) {
+                        if (result && typeof result === 'object' && key in result) {
+                          result = (result as Record<string, unknown>)[key];
+                        } else {
+                          return undefined;
                         }
-                        return result;
-                      })()
+                      }
+                      return result;
+                    })()
                     : item[column.key];
-                  
+
                   const renderedValue = column.render ? column.render(item, value) : value;
-                  
+
                   return (
                     <td key={colIndex} className="px-4 py-2 whitespace-nowrap">
                       {renderedValue as ReactNode}
@@ -99,6 +104,15 @@ export default function DataTable<T extends Record<string, unknown> = Record<str
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      {pagination && onPageChange && (
+        <Pagination
+          pagination={pagination}
+          onPageChange={onPageChange}
+          onLimitChange={onLimitChange}
+        />
+      )}
     </div>
   );
 }

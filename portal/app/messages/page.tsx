@@ -22,8 +22,11 @@ export default function MessagesPage() {
     messages,
     isLoading,
     error,
+    pagination,
     filters,
     updateFilters,
+    changePage,
+    changeLimit,
   } = useMessages();
 
   const handleFilterChange = (newFilters: Partial<typeof filters>) => {
@@ -50,8 +53,8 @@ export default function MessagesPage() {
       sortable: true,
       render: (item: Message, value: unknown) => (
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${(value as string) === 'SMS' ? 'bg-blue-100 text-blue-800' :
-            (value as string) === 'WHATSAPP' ? 'bg-green-100 text-green-800' :
-              'bg-purple-100 text-purple-800'
+          (value as string) === 'WHATSAPP' ? 'bg-green-100 text-green-800' :
+            'bg-purple-100 text-purple-800'
           }`}>
           {value as string}
         </span>
@@ -201,6 +204,9 @@ export default function MessagesPage() {
                 data={messages}
                 columns={columns}
                 emptyMessage="No messages found"
+                pagination={pagination || undefined}
+                onPageChange={changePage}
+                onLimitChange={changeLimit}
               />
             </div>
           )}

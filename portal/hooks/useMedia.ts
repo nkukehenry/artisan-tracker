@@ -56,6 +56,24 @@ export const useMedia = () => {
     [dispatch]
   );
 
+  const changePage = useCallback(
+    (page: number) => {
+      if (selectedDevice) {
+        dispatch(loadMediaFiles({ deviceId: selectedDevice.deviceId, filters: { ...filters, page } }));
+      }
+    },
+    [selectedDevice, dispatch, filters]
+  );
+
+  const changeLimit = useCallback(
+    (limit: number) => {
+      if (selectedDevice) {
+        dispatch(loadMediaFiles({ deviceId: selectedDevice.deviceId, filters: { ...filters, limit, page: 1 } }));
+      }
+    },
+    [selectedDevice, dispatch, filters]
+  );
+
   // Set selected device
   const handleSetSelectedDevice = useCallback(
     (deviceId: string | null) => {
@@ -91,6 +109,8 @@ export const useMedia = () => {
     deleteMedia: handleDeleteMedia,
     downloadMedia: handleDownloadMedia,
     updateFilters: handleUpdateFilters,
+    changePage,
+    changeLimit,
     setSelectedDevice: handleSetSelectedDevice,
     clearMediaData: handleClearMediaData,
   };

@@ -18,8 +18,11 @@ export default function ContactsPage() {
     contacts,
     isLoading,
     error,
+    pagination,
     filters,
     updateFilters,
+    changePage,
+    changeLimit,
   } = useContacts();
 
   const handleSearchChange = (search: string) => {
@@ -141,6 +144,9 @@ export default function ContactsPage() {
               data={contacts}
               columns={columns}
               emptyMessage="No contacts found"
+              pagination={pagination || undefined}
+              onPageChange={changePage}
+              onLimitChange={changeLimit}
             />
           )}
         </div>

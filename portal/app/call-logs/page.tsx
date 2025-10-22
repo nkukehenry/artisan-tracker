@@ -22,8 +22,11 @@ export default function CallLogsPage() {
     callLogs,
     isLoading,
     error,
+    pagination,
     filters,
     updateFilters,
+    changePage,
+    changeLimit,
   } = useCallLogs();
 
   const handleFilterChange = (newFilters: Partial<typeof filters>) => {
@@ -185,6 +188,9 @@ export default function CallLogsPage() {
               data={callLogs}
               columns={columns}
               emptyMessage="No call logs found"
+              pagination={pagination || undefined}
+              onPageChange={changePage}
+              onLimitChange={changeLimit}
             />
           )}
 

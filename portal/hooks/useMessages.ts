@@ -41,6 +41,24 @@ export const useMessages = () => {
     [selectedDevice, dispatch, filters]
   );
 
+  const changePage = useCallback(
+    (page: number) => {
+      if (selectedDevice) {
+        dispatch(loadMessages({ deviceId: selectedDevice.deviceId, filters: { ...filters, page } }));
+      }
+    },
+    [selectedDevice, dispatch, filters]
+  );
+
+  const changeLimit = useCallback(
+    (limit: number) => {
+      if (selectedDevice) {
+        dispatch(loadMessages({ deviceId: selectedDevice.deviceId, filters: { ...filters, limit, page: 1 } }));
+      }
+    },
+    [selectedDevice, dispatch, filters]
+  );
+
   const clearData = useCallback(() => {
     dispatch(clearMessages());
   }, [dispatch]);
@@ -67,6 +85,8 @@ export const useMessages = () => {
     loadData,
     loadConversations,
     updateFilters: updateFiltersAndLoad,
+    changePage,
+    changeLimit,
     clearData,
   };
 };

@@ -30,6 +30,24 @@ export const useCallLogs = () => {
     [selectedDevice, dispatch, filters]
   );
 
+  const changePage = useCallback(
+    (page: number) => {
+      if (selectedDevice) {
+        dispatch(loadCallLogs({ deviceId: selectedDevice.deviceId, filters: { ...filters, page } }));
+      }
+    },
+    [selectedDevice, dispatch, filters]
+  );
+
+  const changeLimit = useCallback(
+    (limit: number) => {
+      if (selectedDevice) {
+        dispatch(loadCallLogs({ deviceId: selectedDevice.deviceId, filters: { ...filters, limit, page: 1 } }));
+      }
+    },
+    [selectedDevice, dispatch, filters]
+  );
+
   const clearData = useCallback(() => {
     dispatch(clearCallLogs());
   }, [dispatch]);
@@ -52,6 +70,8 @@ export const useCallLogs = () => {
     selectedDevice,
     loadData,
     updateFilters: updateFiltersAndLoad,
+    changePage,
+    changeLimit,
     clearData,
   };
 };
