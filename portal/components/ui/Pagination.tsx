@@ -69,10 +69,6 @@ export default function Pagination({
 
     const pageNumbers = getPageNumbers();
 
-    if (totalPages <= 1) {
-        return null; // Don't show pagination if there's only one page or no data
-    }
-
     return (
         <div className={`flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 ${className}`}>
             {/* Results info */}
@@ -89,8 +85,8 @@ export default function Pagination({
                     onClick={() => onPageChange(page - 1)}
                     disabled={!hasPrev}
                     className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${hasPrev
-                            ? 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-900'
-                            : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
+                        ? 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-900'
+                        : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
                         }`}
                 >
                     <ChevronLeft className="h-4 w-4 mr-1" />
@@ -105,10 +101,10 @@ export default function Pagination({
                             onClick={() => typeof pageNum === 'number' ? onPageChange(pageNum) : undefined}
                             disabled={typeof pageNum !== 'number'}
                             className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${pageNum === page
-                                    ? 'text-white bg-blue-600 border border-blue-600'
-                                    : typeof pageNum === 'number'
-                                        ? 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-900'
-                                        : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
+                                ? 'text-white bg-blue-600 border border-blue-600'
+                                : typeof pageNum === 'number'
+                                    ? 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-900'
+                                    : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
                                 }`}
                         >
                             {pageNum}
@@ -121,8 +117,8 @@ export default function Pagination({
                     onClick={() => onPageChange(page + 1)}
                     disabled={!hasNext}
                     className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${hasNext
-                            ? 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-900'
-                            : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
+                        ? 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-900'
+                        : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
                         }`}
                 >
                     Next
