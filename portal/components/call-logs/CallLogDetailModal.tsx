@@ -4,6 +4,7 @@ import { X, Phone, Clock, MapPin, FileAudio } from 'lucide-react';
 import { CallLog } from '@/types/callLog';
 import GPSMapViewer from '@/components/ui/GPSMapViewer';
 import MediaBadge from '@/components/ui/MediaBadge';
+import MapView from '../ui/MapView';
 
 interface CallLogDetailModalProps {
   callLog: CallLog | null;
@@ -47,16 +48,14 @@ export default function CallLogDetailModal({ callLog, isOpen, onClose }: CallLog
           {/* Header */}
           <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-lg ${
-                callLog.callType === 'INCOMING' ? 'bg-green-100' :
+              <div className={`p-2 rounded-lg ${callLog.callType === 'INCOMING' ? 'bg-green-100' :
                 callLog.callType === 'OUTGOING' ? 'bg-blue-100' :
-                'bg-red-100'
-              }`}>
-                <Phone className={`h-5 w-5 ${
-                  callLog.callType === 'INCOMING' ? 'text-green-600' :
+                  'bg-red-100'
+                }`}>
+                <Phone className={`h-5 w-5 ${callLog.callType === 'INCOMING' ? 'text-green-600' :
                   callLog.callType === 'OUTGOING' ? 'text-blue-600' :
-                  'text-red-600'
-                }`} />
+                    'text-red-600'
+                  }`} />
               </div>
               <div>
                 <h2 className="text-xl font-bold text-gray-900">Call Details</h2>
@@ -156,6 +155,7 @@ export default function CallLogDetailModal({ callLog, isOpen, onClose }: CallLog
                   location={callLog.location}
                   gpsCoordinates={callLog.gpsCoordinates}
                 />
+
               </div>
             )}
 
