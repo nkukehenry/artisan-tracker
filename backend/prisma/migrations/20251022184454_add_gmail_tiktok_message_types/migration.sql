@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `messages` MODIFY `messageType` ENUM('SMS', 'WHATSAPP', 'TELEGRAM', 'FACEBOOK', 'INSTAGRAM', 'TWITTER', 'GMAIL', 'TIKTOK', 'OTHER') NOT NULL;

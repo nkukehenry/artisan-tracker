@@ -11,6 +11,17 @@ import Select from '@/components/ui/Select';
 import LocationBadge from '@/components/ui/LocationBadge';
 import { Media, formatFileSize } from '@/types/media';
 import { FileAudio, FileImage, FileVideo, FileText, Phone, Trash2, Eye, ArrowDown, Download } from 'lucide-react';
+import {
+  FaFileAudio,
+  FaFileImage,
+  FaFileVideo,
+  FaFileAlt,
+  FaDownload,
+  FaEye,
+  FaTrash,
+  FaPhone,
+  FaArrowDown
+} from 'react-icons/fa';
 import MediaViewerModal from '@/components/media/MediaViewerModal';
 import { useAppDispatch } from '@/lib/hooks';
 import { addToast } from '@/store/slices/appSlice';
@@ -109,13 +120,13 @@ export default function MediaPage() {
   const getMediaIcon = (fileType: string) => {
     switch (fileType) {
       case 'AUDIO':
-        return <FileAudio className="h-5 w-5 text-green-600" />;
+        return <FaFileAudio className="h-5 w-5 text-green-600" />;
       case 'PHOTO':
-        return <FileImage className="h-5 w-5 text-purple-600" />;
+        return <FaFileImage className="h-5 w-5 text-purple-600" />;
       case 'VIDEO':
-        return <FileVideo className="h-5 w-5 text-red-600" />;
+        return <FaFileVideo className="h-5 w-5 text-red-600" />;
       default:
-        return <FileText className="h-5 w-5 text-gray-600" />;
+        return <FaFileAlt className="h-5 w-5 text-gray-600" />;
     }
   };
 
@@ -163,7 +174,7 @@ export default function MediaPage() {
         return (
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-green-600" />
+              <FaFileAlt className="h-4 w-4 text-green-600" />
               <span className="text-sm font-medium">
                 {formatFileSize(item.fileSize)}
               </span>

@@ -10,7 +10,24 @@ import SearchFilter from '@/components/ui/SearchFilter';
 import LocationBadge from '@/components/ui/LocationBadge';
 import MessageDetailModal from '@/components/messages/MessageDetailModal';
 import { Message } from '@/types/message';
-import { Smartphone, Eye, MessageSquare, MessageCircle, Send, Mail, ArrowDown, ArrowUp } from 'lucide-react';
+import { Smartphone, Eye, ArrowDown, ArrowUp } from 'lucide-react';
+import {
+  FaSms,
+  FaWhatsapp,
+  FaTelegram,
+  FaEnvelope,
+  FaComment,
+  FaCommentDots,
+  FaPaperPlane,
+  FaMailBulk,
+  FaFacebook,
+  FaInstagram,
+  FaTwitter,
+  FaGoogle,
+  FaTiktok
+} from 'react-icons/fa';
+import { truncateWithTooltip } from '@/lib/textUtils';
+import { getMessageTypeOptions } from '@/lib/messageTypes';
 
 export default function MessagesPage() {
   const { selectedDevice } = useDeviceContext();
@@ -49,13 +66,23 @@ export default function MessagesPage() {
   const getMessageTypeIcon = (messageType: string) => {
     switch (messageType) {
       case 'SMS':
-        return <MessageSquare className="h-4 w-4" />;
+        return <FaSms className="h-4 w-4 text-blue-600" />;
       case 'WHATSAPP':
-        return <MessageCircle className="h-4 w-4" />;
+        return <FaWhatsapp className="h-4 w-4 text-green-600" />;
       case 'TELEGRAM':
-        return <Send className="h-4 w-4" />;
+        return <FaTelegram className="h-4 w-4 text-blue-500" />;
+      case 'FACEBOOK':
+        return <FaFacebook className="h-4 w-4 text-blue-700" />;
+      case 'INSTAGRAM':
+        return <FaInstagram className="h-4 w-4 text-pink-600" />;
+      case 'TWITTER':
+        return <FaTwitter className="h-4 w-4 text-blue-400" />;
+      case 'GMAIL':
+        return <FaGoogle className="h-4 w-4 text-red-600" />;
+      case 'TIKTOK':
+        return <FaTiktok className="h-4 w-4 text-black" />;
       default:
-        return <Mail className="h-4 w-4" />;
+        return <FaComment className="h-4 w-4 text-gray-500" />;
     }
   };
 
@@ -89,26 +116,54 @@ export default function MessagesPage() {
       key: 'sender',
       label: 'From',
       sortable: true,
+      render: (item: Message, value: unknown) => {
+        const truncated = truncateWithTooltip(value as string, 15);
+        return (
+          <span
+            className="cursor-help"
+            title={truncated.isTruncated ? truncated.fullText : undefined}
+          >
+            {truncated.display}
+          </span>
+        );
+      },
     },
     {
       key: 'recipient',
       label: 'To',
       sortable: true,
+      render: (item: Message, value: unknown) => {
+        const truncated = truncateWithTooltip(value as string, 10);
+        return (
+          <span
+            className="cursor-help"
+            title={truncated.isTruncated ? truncated.fullText : undefined}
+          >
+            {truncated.display}
+          </span>
+        );
+      },
     },
     {
       key: 'content',
       label: 'Message',
       sortable: false,
-      render: (item: Message, value: unknown) => (
-        <div className="space-y-1">
-          <div className="max-w-xs truncate" title={value as string}>
-            {value as string}
+      render: (item: Message, value: unknown) => {
+        const truncated = truncateWithTooltip(value as string, 30);
+        return (
+          <div className="space-y-1">
+            <div
+              className="cursor-help"
+              title={truncated.isTruncated ? truncated.fullText : undefined}
+            >
+              {truncated.display}
+            </div>
+            {(item.location || item.gpsCoordinates) && (
+              <LocationBadge location={item.location} gpsCoordinates={item.gpsCoordinates} />
+            )}
           </div>
-          {(item.location || item.gpsCoordinates) && (
-            <LocationBadge location={item.location} gpsCoordinates={item.gpsCoordinates} />
-          )}
-        </div>
-      ),
+        );
+      },
     },
     {
       key: 'timestamp',
@@ -134,9 +189,7 @@ export default function MessagesPage() {
 
   const messageTypeOptions = [
     { value: '', label: 'All Message Types' },
-    { value: 'SMS', label: 'SMS' },
-    { value: 'WHATSAPP', label: 'WhatsApp' },
-    { value: 'TELEGRAM', label: 'Telegram' },
+    ...getMessageTypeOptions()
   ];
 
   const directionOptions = [

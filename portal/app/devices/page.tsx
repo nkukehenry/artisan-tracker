@@ -16,13 +16,28 @@ import {
   Edit,
   RefreshCw,
   AlertCircle,
-  Cpu,
-  HardDrive,
   Thermometer,
-  Signal,
-  Shield,
   Activity
 } from 'lucide-react';
+import {
+  FaMicrochip,
+  FaHdd,
+  FaWifi,
+  FaShieldAlt,
+  FaChartLine,
+  FaMobileAlt,
+  FaBatteryHalf,
+  FaBatteryFull,
+  FaBatteryEmpty,
+  FaThermometerHalf,
+  FaSignal,
+  FaMapMarkerAlt,
+  FaClock,
+  FaCog,
+  FaEdit,
+  FaSync,
+  FaExclamationTriangle
+} from 'react-icons/fa';
 
 export default function DeviceInformationPage() {
   const { selectedDevice, refreshDevices } = useDeviceContext();
@@ -368,7 +383,7 @@ export default function DeviceInformationPage() {
               {/* System Information */}
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <Cpu className="h-5 w-5" />
+                  <FaMicrochip className="h-5 w-5" />
                   System Information
                 </h3>
                 <div className="space-y-4">
@@ -402,7 +417,7 @@ export default function DeviceInformationPage() {
               {/* Memory & Storage */}
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <HardDrive className="h-5 w-5" />
+                  <FaHdd className="h-5 w-5" />
                   Memory & Storage
                 </h3>
                 <div className="space-y-4">
@@ -451,7 +466,7 @@ export default function DeviceInformationPage() {
               {/* Network Information */}
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <Signal className="h-5 w-5" />
+                  <FaSignal className="h-5 w-5" />
                   Network Information
                 </h3>
                 <div className="space-y-4">
@@ -473,7 +488,7 @@ export default function DeviceInformationPage() {
               {/* Security Information */}
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
+                  <FaShieldAlt className="h-5 w-5" />
                   Security Information
                 </h3>
                 <div className="space-y-4">

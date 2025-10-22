@@ -1,9 +1,10 @@
 import { BaseEntity, BaseRepository } from './repository.interface';
+import { MessageType } from '../config/messageTypes';
 
 export interface Message extends BaseEntity {
   id: string;
   deviceId: string;
-  messageType: 'SMS' | 'WHATSAPP' | 'TELEGRAM' | 'FACEBOOK' | 'INSTAGRAM' | 'TWITTER' | 'EMAIL' | 'OTHER';
+  messageType: MessageType;
   // platform removed - not in Prisma schema
   sender?: string;
   recipient?: string;
@@ -22,7 +23,7 @@ export interface Message extends BaseEntity {
 
 export interface CreateMessageData {
   deviceId: string;
-  messageType: 'SMS' | 'WHATSAPP' | 'TELEGRAM' | 'FACEBOOK' | 'INSTAGRAM' | 'TWITTER' | 'EMAIL' | 'OTHER';
+  messageType: MessageType;
   // platform removed - not in Prisma schema
   sender?: string;
   recipient?: string;

@@ -1,6 +1,8 @@
+import { MessageType } from '@/lib/messageTypes';
+
 export interface Message {
   id: string;
-  messageType: 'SMS' | 'WHATSAPP' | 'TELEGRAM';
+  messageType: MessageType;
   sender: string;
   recipient: string;
   content: string;
@@ -21,7 +23,7 @@ export interface Message {
 
 export interface MessageConversation {
   contact: string;
-  messageType: 'SMS' | 'WHATSAPP' | 'TELEGRAM';
+  messageType: MessageType;
   messageCount: number;
   lastMessage: string;
   lastMessageTime: string;
@@ -58,7 +60,7 @@ export interface MessageConversationsResponse {
 export interface MessageFilters {
   page?: number;
   limit?: number;
-  messageType?: 'SMS' | 'WHATSAPP' | 'TELEGRAM';
+  messageType?: MessageType;
   isIncoming?: boolean;
   startDate?: string;
   endDate?: string;

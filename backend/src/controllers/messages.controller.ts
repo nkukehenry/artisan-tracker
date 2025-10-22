@@ -6,6 +6,7 @@ import { IDeviceService } from '../interfaces/device.interface';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { requireAuth, requireRole } from '../middleware/auth';
 import { BadRequestError, NotFoundError } from '../utils/error';
+import { MESSAGE_TYPES } from '../config/messageTypes';
 
 // Swagger documentation removed - kept only in routes
 
@@ -199,7 +200,7 @@ export const messagesValidation = {
       .isLength({ min: 1, max: 50 })
       .withMessage('Device ID must be between 1 and 50 characters'),
     body('messages.*.messageType')
-      .isIn(['SMS', 'WHATSAPP', 'TELEGRAM', 'FACEBOOK', 'INSTAGRAM', 'TWITTER', 'EMAIL', 'OTHER'])
+      .isIn(MESSAGE_TYPES)
       .withMessage('Invalid message type'),
     body('messages.*.platform')
       .optional()
@@ -258,7 +259,7 @@ export const messagesValidation = {
       .withMessage('Limit must be between 1 and 100'),
     query('messageType')
       .optional()
-      .isIn(['SMS', 'WHATSAPP', 'TELEGRAM', 'FACEBOOK', 'INSTAGRAM', 'TWITTER', 'EMAIL', 'OTHER'])
+      .isIn(MESSAGE_TYPES)
       .withMessage('Invalid message type filter'),
     query('isIncoming')
       .optional()
@@ -296,7 +297,7 @@ export const messagesValidation = {
       .withMessage('Limit must be between 1 and 100'),
     query('messageType')
       .optional()
-      .isIn(['SMS', 'WHATSAPP', 'TELEGRAM', 'FACEBOOK', 'INSTAGRAM', 'TWITTER', 'EMAIL', 'OTHER'])
+      .isIn(MESSAGE_TYPES)
       .withMessage('Invalid message type filter'),
   ],
 

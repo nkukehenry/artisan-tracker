@@ -238,6 +238,8 @@ enum MessageType {
   FACEBOOK
   INSTAGRAM
   TWITTER
+  GMAIL
+  TIKTOK
   OTHER
 }
 

@@ -1,6 +1,21 @@
 'use client';
 
-import { X, MessageSquare, Clock, MapPin, User, Users, MessageCircle, Send, Mail } from 'lucide-react';
+import { X, Clock, MapPin, User, Users } from 'lucide-react';
+import {
+  FaSms,
+  FaWhatsapp,
+  FaTelegram,
+  FaEnvelope,
+  FaComment,
+  FaCommentDots,
+  FaPaperPlane,
+  FaMailBulk,
+  FaFacebook,
+  FaInstagram,
+  FaTwitter,
+  FaGoogle,
+  FaTiktok
+} from 'react-icons/fa';
 import { Message } from '@/types/message';
 import GPSMapViewer from '@/components/ui/GPSMapViewer';
 
@@ -16,26 +31,46 @@ export default function MessageDetailModal({ message, isOpen, onClose }: Message
   const getMessageTypeColor = (messageType: string) => {
     switch (messageType) {
       case 'SMS':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-blue-100 text-blue-800';
       case 'WHATSAPP':
         return 'bg-green-100 text-green-800';
       case 'TELEGRAM':
         return 'bg-blue-100 text-blue-800';
-      default:
+      case 'FACEBOOK':
+        return 'bg-blue-100 text-blue-800';
+      case 'INSTAGRAM':
+        return 'bg-pink-100 text-pink-800';
+      case 'TWITTER':
+        return 'bg-blue-100 text-blue-800';
+      case 'GMAIL':
         return 'bg-red-100 text-red-800';
+      case 'TIKTOK':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getMessageTypeIcon = (messageType: string) => {
     switch (messageType) {
       case 'SMS':
-        return <MessageSquare className="h-4 w-4" />;
+        return <FaSms className="h-4 w-4" />;
       case 'WHATSAPP':
-        return <MessageCircle className="h-4 w-4" />;
+        return <FaWhatsapp className="h-4 w-4" />;
       case 'TELEGRAM':
-        return <Send className="h-4 w-4" />;
+        return <FaTelegram className="h-4 w-4" />;
+      case 'FACEBOOK':
+        return <FaFacebook className="h-4 w-4" />;
+      case 'INSTAGRAM':
+        return <FaInstagram className="h-4 w-4" />;
+      case 'TWITTER':
+        return <FaTwitter className="h-4 w-4" />;
+      case 'GMAIL':
+        return <FaGoogle className="h-4 w-4" />;
+      case 'TIKTOK':
+        return <FaTiktok className="h-4 w-4" />;
       default:
-        return <Mail className="h-4 w-4" />;
+        return <FaComment className="h-4 w-4" />;
     }
   };
 
@@ -55,12 +90,15 @@ export default function MessageDetailModal({ message, isOpen, onClose }: Message
             <div className="flex items-center gap-3">
               <div className={`p-2 rounded-lg ${message.messageType === 'SMS' ? 'bg-blue-100' :
                 message.messageType === 'WHATSAPP' ? 'bg-green-100' :
-                  'bg-purple-100'
+                  message.messageType === 'TELEGRAM' ? 'bg-blue-100' :
+                    message.messageType === 'FACEBOOK' ? 'bg-blue-100' :
+                      message.messageType === 'INSTAGRAM' ? 'bg-pink-100' :
+                        message.messageType === 'TWITTER' ? 'bg-blue-100' :
+                          message.messageType === 'GMAIL' ? 'bg-red-100' :
+                            message.messageType === 'TIKTOK' ? 'bg-gray-100' :
+                              'bg-gray-100'
                 }`}>
-                <MessageSquare className={`h-5 w-5 ${message.messageType === 'SMS' ? 'text-blue-600' :
-                  message.messageType === 'WHATSAPP' ? 'text-green-600' :
-                    'text-purple-600'
-                  }`} />
+                {getMessageTypeIcon(message.messageType)}
               </div>
               <div>
                 <h2 className="text-xl font-bold text-gray-900">Message Details</h2>
