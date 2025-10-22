@@ -3,28 +3,28 @@ import { TelemetryRepository, Telemetry, CreateTelemetryData } from '../interfac
 import { logger } from '../config/logger';
 
 export class TelemetryRepositoryImpl implements TelemetryRepository {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: PrismaClient) { }
 
   async create(data: CreateTelemetryData): Promise<Telemetry> {
     try {
       const result = await this.prisma.telemetry.create({
         data: {
           deviceId: data.deviceId,
-          
+
           // Device Info
           orientation: data.deviceInfo?.orientation,
           isRooted: data.deviceInfo?.isRooted,
           isEmulator: data.deviceInfo?.isEmulator,
           screenDensity: data.deviceInfo?.screenDensity,
           screenResolution: data.deviceInfo?.screenResolution,
-          
+
           // Memory Info
           totalMemory: data.memoryInfo?.totalMemory,
           freeMemory: data.memoryInfo?.freeMemory,
           totalStorage: data.memoryInfo?.totalStorage,
           freeStorage: data.memoryInfo?.freeStorage,
           usedMemoryPercentage: data.memoryInfo?.usedMemoryPercentage,
-          
+
           // System Info
           brand: data.systemInfo?.brand,
           manufacturer: data.systemInfo?.manufacturer,
@@ -33,7 +33,7 @@ export class TelemetryRepositoryImpl implements TelemetryRepository {
           product: data.systemInfo?.product,
           board: data.systemInfo?.board,
           hardware: data.systemInfo?.hardware,
-          
+
           // OS Info
           sdkVersion: data.osInfo?.sdkVersion,
           androidVersion: data.osInfo?.androidVersion,
@@ -41,7 +41,7 @@ export class TelemetryRepositoryImpl implements TelemetryRepository {
           codename: data.osInfo?.codename,
           incremental: data.osInfo?.incremental,
           securityPatch: data.osInfo?.securityPatch,
-          
+
           // Battery Info
           batteryPercentage: data.batteryInfo?.percentage,
           batteryTemperature: data.batteryInfo?.temperature,
@@ -51,17 +51,17 @@ export class TelemetryRepositoryImpl implements TelemetryRepository {
           batteryStatus: data.batteryInfo?.batteryStatus,
           chargeCounter: data.batteryInfo?.chargeCounter,
           energyCounter: data.batteryInfo?.energyCounter,
-          
+
           // App Version Info
           appVersion: data.appVersionInfo?.appVersion,
           appVersionCode: data.appVersionInfo?.appVersionCode,
           appInstallTime: data.appVersionInfo?.appInstallTime ? BigInt(data.appVersionInfo.appInstallTime) : null,
-          
+
           // Network Info
           networkOperator: data.networkInfo?.networkOperator,
           simOperator: data.networkInfo?.simOperator,
           simCountryISO: data.networkInfo?.simCountryISO,
-          
+
           // Location Info
           latitude: data.locationInfo?.latitude,
           longitude: data.locationInfo?.longitude,
@@ -70,9 +70,9 @@ export class TelemetryRepositoryImpl implements TelemetryRepository {
           speed: data.locationInfo?.speed,
           heading: data.locationInfo?.heading,
           address: data.locationInfo?.address,
-          
+
           // Timestamp
-          collectedAt: new Date(data.collectedAt),
+          collectedAt: data.collectedAt,
         },
       });
 

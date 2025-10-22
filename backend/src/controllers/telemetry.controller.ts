@@ -31,7 +31,7 @@ export class TelemetryController {
     // Update device batteryLevel and location if available
     try {
       const device = await this.deviceService.getDeviceByDeviceId(telemetryData.deviceId);
-      
+
       if (device) {
         const updateData: any = {
           isOnline: true,
@@ -52,8 +52,8 @@ export class TelemetryController {
         }
 
         await this.deviceService.updateDeviceStatus(telemetryData.deviceId, updateData);
-        
-        logger.info('Device status updated from telemetry', { 
+
+        logger.info('Device status updated from telemetry', {
           deviceId: telemetryData.deviceId,
           batteryLevel: updateData.batteryLevel,
           hasLocation: !!updateData.location
@@ -61,13 +61,13 @@ export class TelemetryController {
       }
     } catch (error) {
       // Don't fail the telemetry upload if device update fails
-      logger.warn('Failed to update device status from telemetry', { 
+      logger.warn('Failed to update device status from telemetry', {
         deviceId: telemetryData.deviceId,
-        error 
+        error
       });
     }
 
-    logger.info('Telemetry data received', { 
+    logger.info('Telemetry data received', {
       deviceId: telemetryData.deviceId,
       collectedAt: new Date(telemetryData.collectedAt)
     });
@@ -75,7 +75,7 @@ export class TelemetryController {
     res.status(201).json({
       success: true,
       message: 'Telemetry data received successfully',
-      data: { 
+      data: {
         telemetry: JSON.parse(
           JSON.stringify(telemetry, (key, value) =>
             typeof value === 'bigint' ? value.toString() : value
@@ -131,7 +131,7 @@ export class TelemetryController {
     res.status(200).json({
       success: true,
       message: 'Latest telemetry retrieved successfully',
-      data: { 
+      data: {
         telemetry: JSON.parse(
           JSON.stringify(telemetry, (key, value) =>
             typeof value === 'bigint' ? value.toString() : value
@@ -168,7 +168,7 @@ export class TelemetryController {
 export const telemetryValidation = {
   callHome: [
     body('deviceId').isString().notEmpty().withMessage('Device ID is required'),
-    body('collectedAt').isInt().withMessage('Collection timestamp is required'),
+    body('collectedAt').isISO8601().withMessage('Collection timestamp must be a valid ISO 8601 date'),
     // Device Info (optional)
     body('deviceInfo.orientation').optional().isString(),
     body('deviceInfo.isRooted').optional().isBoolean(),
