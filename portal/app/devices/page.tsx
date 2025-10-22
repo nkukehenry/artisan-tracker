@@ -4,6 +4,7 @@ import { useState } from 'react';
 import AuthWrapper from '@/components/auth/AuthWrapper';
 import Layout from '@/components/layout/Layout';
 import { useDeviceContext } from '@/contexts/DeviceContext';
+import { useTelemetry } from '@/hooks/useTelemetry';
 import {
   Smartphone,
   Battery,
@@ -14,16 +15,23 @@ import {
   Settings,
   Edit,
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  Cpu,
+  HardDrive,
+  Thermometer,
+  Signal,
+  Shield,
+  Activity
 } from 'lucide-react';
 
 export default function DeviceInformationPage() {
   const { selectedDevice, refreshDevices } = useDeviceContext();
+  const { telemetry, loading: telemetryLoading, error: telemetryError, refetch: refetchTelemetry } = useTelemetry(selectedDevice?.deviceId || null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await refreshDevices();
+    await Promise.all([refreshDevices(), refetchTelemetry()]);
     setIsRefreshing(false);
   };
 
@@ -75,6 +83,24 @@ export default function DeviceInformationPage() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  const getBatteryStatusColor = (status?: string) => {
+    switch (status?.toLowerCase()) {
+      case 'charging': return 'text-green-600';
+      case 'discharging': return 'text-red-600';
+      case 'full': return 'text-blue-600';
+      default: return 'text-gray-600';
+    }
+  };
+
+  const getBatteryStatusIcon = (status?: string) => {
+    switch (status?.toLowerCase()) {
+      case 'charging': return '🔋';
+      case 'discharging': return '🔋';
+      case 'full': return '🔋';
+      default: return '🔋';
+    }
+  };
+
   return (
     <AuthWrapper>
       <Layout>
@@ -108,17 +134,33 @@ export default function DeviceInformationPage() {
               <div className="flex items-center gap-2">
                 <div className={`w-3 h-3 rounded-full ${getStatusColor(selectedDevice)}`}></div>
                 <span className="text-sm font-medium text-gray-900">{getStatusText(selectedDevice)}</span>
+                {telemetryLoading && <RefreshCw className="h-4 w-4 animate-spin text-blue-600" />}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {telemetryError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                  <span className="text-sm text-red-700">{telemetryError}</span>
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="flex items-center gap-3">
                 <Battery className="h-5 w-5 text-gray-400" />
                 <div>
                   <div className="text-sm text-gray-500">Battery Level</div>
                   <div className="font-medium text-gray-900">
-                    {selectedDevice.batteryLevel ? `${selectedDevice.batteryLevel}%` : 'Unknown'}
+                    {telemetry?.batteryPercentage || selectedDevice.batteryLevel ?
+                      `${telemetry?.batteryPercentage || selectedDevice.batteryLevel}` : 'Unknown'}
                   </div>
+                  {telemetry?.batteryStatus && (
+                    <div className={`text-xs ${getBatteryStatusColor(telemetry.batteryStatus)}`}>
+                      {telemetry.batteryStatus}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -129,6 +171,9 @@ export default function DeviceInformationPage() {
                   <div className="font-medium text-gray-900">
                     {selectedDevice.isOnline ? 'Connected' : 'Disconnected'}
                   </div>
+                  {telemetry?.networkOperator && (
+                    <div className="text-xs text-gray-500">{telemetry.networkOperator}</div>
+                  )}
                 </div>
               </div>
 
@@ -136,16 +181,31 @@ export default function DeviceInformationPage() {
                 <Calendar className="h-5 w-5 text-gray-400" />
                 <div>
                   <div className="text-sm text-gray-500">Last Seen</div>
+                  {telemetry?.collectedAt && (
+                    <div className="text-xs text-gray-500">
+                      Data: {formatDate(telemetry.collectedAt)}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Thermometer className="h-5 w-5 text-gray-400" />
+                <div>
+                  <div className="text-sm text-gray-500">Temperature</div>
                   <div className="font-medium text-gray-900">
-                    {selectedDevice.lastSeenAt ? formatDate(selectedDevice.lastSeenAt) : 'Never'}
+                    {telemetry?.batteryTemperature || 'Unknown'}
                   </div>
+                  {telemetry?.batteryVoltage && (
+                    <div className="text-xs text-gray-500">{telemetry.batteryVoltage}</div>
+                  )}
                 </div>
               </div>
             </div>
           </div>
 
           {/* Device Details */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Basic Information */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
@@ -173,45 +233,280 @@ export default function DeviceInformationPage() {
               </div>
             </div>
 
-            {/* Additional Information */}
+            {/* Location Information */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Additional Information</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                Location Information
+              </h3>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm text-gray-500">Device Type</label>
+                  <label className="text-sm text-gray-500">Current Location</label>
                   <div className="font-medium text-gray-900">
-                    {selectedDevice.type ? selectedDevice.type.charAt(0).toUpperCase() + selectedDevice.type.slice(1) : 'Not specified'}
+                    {telemetry?.address || selectedDevice.location || 'Not available'}
+                  </div>
+                </div>
+                {telemetry?.latitude && telemetry?.longitude && (
+                  <>
+                    <div>
+                      <label className="text-sm text-gray-500">Coordinates</label>
+                      <div className="font-medium text-gray-900">
+                        {telemetry.latitude.toFixed(6)}, {telemetry.longitude.toFixed(6)}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm text-gray-500">Accuracy</label>
+                      <div className="font-medium text-gray-900">
+                        {telemetry.accuracy ? `${telemetry.accuracy}m` : 'Unknown'}
+                      </div>
+                    </div>
+                    {telemetry.altitude && (
+                      <div>
+                        <label className="text-sm text-gray-500">Altitude</label>
+                        <div className="font-medium text-gray-900">
+                          {telemetry.altitude}m
+                        </div>
+                      </div>
+                    )}
+                    {telemetry.speed && (
+                      <div>
+                        <label className="text-sm text-gray-500">Speed</label>
+                        <div className="font-medium text-gray-900">
+                          {telemetry.speed} m/s
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+                {telemetry?.collectedAt && (
+                  <div>
+                    <label className="text-sm text-gray-500">Location Updated</label>
+                    <div className="font-medium text-gray-900">
+                      {formatDate(telemetry.collectedAt)}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Device Performance */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <Activity className="h-5 w-5" />
+                Device Performance
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm text-gray-500">Device Status</label>
+                  <div className="font-medium text-gray-900">
+                    <span className={`px-2 py-1 rounded-full text-xs ${selectedDevice.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                      }`}>
+                      {selectedDevice.isActive ? 'Active' : 'Inactive'}
+                    </span>
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm text-gray-500">Owner</label>
+                  <label className="text-sm text-gray-500">Connection Status</label>
                   <div className="font-medium text-gray-900">
-                    {selectedDevice.owner || 'Not assigned'}
+                    <span className={`px-2 py-1 rounded-full text-xs ${selectedDevice.isOnline ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                      {selectedDevice.isOnline ? 'Online' : 'Offline'}
+                    </span>
                   </div>
                 </div>
+                {telemetry && (
+                  <>
+                    <div>
+                      <label className="text-sm text-gray-500">Memory Usage</label>
+                      <div className="font-medium text-gray-900">
+                        {telemetry.usedMemoryPercentage ? `${telemetry.usedMemoryPercentage}%` : 'Unknown'}
+                      </div>
+                      {telemetry.freeMemory && telemetry.totalMemory && (
+                        <div className="text-xs text-gray-500">
+                          {telemetry.freeMemory}GB free of {telemetry.totalMemory}GB
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <label className="text-sm text-gray-500">Storage Usage</label>
+                      <div className="font-medium text-gray-900">
+                        {telemetry.freeStorage && telemetry.totalStorage ?
+                          `${((telemetry.totalStorage - telemetry.freeStorage) / telemetry.totalStorage * 100).toFixed(1)}%` : 'Unknown'}
+                      </div>
+                      {telemetry.freeStorage && telemetry.totalStorage && (
+                        <div className="text-xs text-gray-500">
+                          {telemetry.freeStorage}GB free of {telemetry.totalStorage}GB
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <label className="text-sm text-gray-500">Battery Health</label>
+                      <div className="font-medium text-gray-900">
+                        {telemetry.batteryCapacity || 'Unknown'}
+                      </div>
+                      {telemetry.batteryVoltage && (
+                        <div className="text-xs text-gray-500">
+                          Voltage: {telemetry.batteryVoltage}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
                 <div>
-                  <label className="text-sm text-gray-500">Location</label>
+                  <label className="text-sm text-gray-500">Last Activity</label>
                   <div className="font-medium text-gray-900">
-                    {selectedDevice.location || 'Not specified'}
+                    {selectedDevice.lastSeenAt ? formatDate(selectedDevice.lastSeenAt) : 'Never'}
                   </div>
-                </div>
-                <div>
-                  <label className="text-sm text-gray-500">Description</label>
-                  <div className="font-medium text-gray-900">
-                    {selectedDevice.description || 'No description provided'}
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm text-gray-500">Created At</label>
-                  <div className="font-medium text-gray-900">{formatDate(selectedDevice.createdAt)}</div>
-                </div>
-                <div>
-                  <label className="text-sm text-gray-500">Last Updated</label>
-                  <div className="font-medium text-gray-900">{formatDate(selectedDevice.updatedAt)}</div>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Telemetry Information */}
+          {telemetry && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* System Information */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <Cpu className="h-5 w-5" />
+                  System Information
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm text-gray-500">Brand</label>
+                    <div className="font-medium text-gray-900">{telemetry.brand || 'Unknown'}</div>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-500">Manufacturer</label>
+                    <div className="font-medium text-gray-900">{telemetry.manufacturer || 'Unknown'}</div>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-500">Model</label>
+                    <div className="font-medium text-gray-900">{telemetry.model || 'Unknown'}</div>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-500">Android Version</label>
+                    <div className="font-medium text-gray-900">{telemetry.androidVersion || 'Unknown'}</div>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-500">SDK Version</label>
+                    <div className="font-medium text-gray-900">{telemetry.sdkVersion || 'Unknown'}</div>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-500">Security Patch</label>
+                    <div className="font-medium text-gray-900">{telemetry.securityPatch || 'Unknown'}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Memory & Storage */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <HardDrive className="h-5 w-5" />
+                  Memory & Storage
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm text-gray-500">Total Memory</label>
+                    <div className="font-medium text-gray-900">
+                      {telemetry.totalMemory ? `${telemetry.totalMemory} GB` : 'Unknown'}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-500">Free Memory</label>
+                    <div className="font-medium text-gray-900">
+                      {telemetry.freeMemory ? `${telemetry.freeMemory} GB` : 'Unknown'}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-500">Memory Usage</label>
+                    <div className="font-medium text-gray-900">
+                      {telemetry.usedMemoryPercentage ? `${telemetry.usedMemoryPercentage}%` : 'Unknown'}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-500">Total Storage</label>
+                    <div className="font-medium text-gray-900">
+                      {telemetry.totalStorage ? `${telemetry.totalStorage} GB` : 'Unknown'}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-500">Free Storage</label>
+                    <div className="font-medium text-gray-900">
+                      {telemetry.freeStorage ? `${telemetry.freeStorage} GB` : 'Unknown'}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-500">Screen Resolution</label>
+                    <div className="font-medium text-gray-900">{telemetry.screenResolution || 'Unknown'}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Network & Security */}
+          {telemetry && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Network Information */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <Signal className="h-5 w-5" />
+                  Network Information
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm text-gray-500">Network Operator</label>
+                    <div className="font-medium text-gray-900">{telemetry.networkOperator || 'Unknown'}</div>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-500">SIM Operator</label>
+                    <div className="font-medium text-gray-900">{telemetry.simOperator || 'Unknown'}</div>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-500">SIM Country</label>
+                    <div className="font-medium text-gray-900">{telemetry.simCountryISO || 'Unknown'}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Security Information */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Security Information
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm text-gray-500">Root Status</label>
+                    <div className="font-medium text-gray-900">
+                      <span className={`px-2 py-1 rounded-full text-xs ${telemetry.isRooted ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                        }`}>
+                        {telemetry.isRooted ? 'Rooted' : 'Not Rooted'}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-500">Emulator Status</label>
+                    <div className="font-medium text-gray-900">
+                      <span className={`px-2 py-1 rounded-full text-xs ${telemetry.isEmulator ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
+                        }`}>
+                        {telemetry.isEmulator ? 'Emulator' : 'Real Device'}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-500">App Version</label>
+                    <div className="font-medium text-gray-900">{telemetry.appVersion || 'Unknown'}</div>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-500">App Version Code</label>
+                    <div className="font-medium text-gray-900">{telemetry.appVersionCode || 'Unknown'}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Quick Actions */}
           <div className="bg-white rounded-lg border border-gray-200 p-6">
