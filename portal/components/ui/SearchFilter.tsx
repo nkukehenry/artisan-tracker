@@ -40,7 +40,7 @@ export default function SearchFilter({
           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
       </div>
-      
+
       {filterOptions.length > 0 && onFilterChange && (
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-gray-400" />
@@ -49,7 +49,7 @@ export default function SearchFilter({
             onChange={(e) => onFilterChange(e.target.value)}
             className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="">All {filterLabel}</option>
+            {/* <option value="">All {filterLabel}</option> */}
             {filterOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}

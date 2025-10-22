@@ -6,6 +6,7 @@ export interface Message {
   content: string;
   timestamp: string;
   isRead: boolean;
+  isIncoming: boolean;
   location?: string;
   gpsCoordinates?: string;
   metadata?: string;
@@ -58,6 +59,7 @@ export interface MessageFilters {
   page?: number;
   limit?: number;
   messageType?: 'SMS' | 'WHATSAPP' | 'TELEGRAM';
+  isIncoming?: boolean;
   startDate?: string;
   endDate?: string;
 }

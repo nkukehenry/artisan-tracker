@@ -1268,6 +1268,11 @@ const swaggerDefinition: SwaggerDefinition = {
             type: 'boolean',
             example: false,
           },
+          isIncoming: {
+            type: 'boolean',
+            example: false,
+            description: 'true for incoming messages, false for outgoing messages',
+          },
           metadata: {
             type: 'object',
             example: {},

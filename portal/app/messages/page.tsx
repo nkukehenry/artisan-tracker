@@ -10,7 +10,7 @@ import SearchFilter from '@/components/ui/SearchFilter';
 import LocationBadge from '@/components/ui/LocationBadge';
 import MessageDetailModal from '@/components/messages/MessageDetailModal';
 import { Message } from '@/types/message';
-import { Smartphone, Eye } from 'lucide-react';
+import { Smartphone, Eye, MessageSquare, MessageCircle, Send, Mail, ArrowDown, ArrowUp } from 'lucide-react';
 
 export default function MessagesPage() {
   const { selectedDevice } = useDeviceContext();
@@ -46,17 +46,42 @@ export default function MessagesPage() {
     setSelectedMessage(null);
   };
 
+  const getMessageTypeIcon = (messageType: string) => {
+    switch (messageType) {
+      case 'SMS':
+        return <MessageSquare className="h-4 w-4" />;
+      case 'WHATSAPP':
+        return <MessageCircle className="h-4 w-4" />;
+      case 'TELEGRAM':
+        return <Send className="h-4 w-4" />;
+      default:
+        return <Mail className="h-4 w-4" />;
+    }
+  };
+
   const columns = [
     {
       key: 'messageType',
       label: 'Type',
       sortable: true,
       render: (item: Message, value: unknown) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${(value as string) === 'SMS' ? 'bg-blue-100 text-blue-800' :
+        <span className={`inline-flex items-center gap-2 px-3 py-3 rounded-full text-xs font-medium ${(value as string) === 'SMS' ? 'bg-purple-100 text-purple-800' :
           (value as string) === 'WHATSAPP' ? 'bg-green-100 text-green-800' :
-            'bg-purple-100 text-purple-800'
+            (value as string) === 'TELEGRAM' ? 'bg-blue-100 text-blue-800' :
+              'bg-red-100 text-red-800'
           }`}>
-          {value as string}
+          {getMessageTypeIcon(value as string)}
+        </span>
+      ),
+    },
+    {
+      key: 'isIncoming',
+      label: 'Direction',
+      sortable: true,
+      render: (item: Message, value: unknown) => (
+        <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${value ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800'}`}>
+          {value ? <ArrowDown className="h-3 w-3" /> : <ArrowUp className="h-3 w-3" />}
+          {value ? 'Incoming' : 'Outgoing'}
         </span>
       ),
     },
@@ -92,17 +117,6 @@ export default function MessagesPage() {
       render: (item: Message, value: unknown) => new Date(value as string).toLocaleString(),
     },
     {
-      key: 'isRead',
-      label: 'Status',
-      sortable: true,
-      render: (item: Message, value: unknown) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${(value as boolean) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-          }`}>
-          {(value as boolean) ? 'Read' : 'Unread'}
-        </span>
-      ),
-    },
-    {
       key: 'actions',
       label: 'Actions',
       sortable: false,
@@ -119,10 +133,16 @@ export default function MessagesPage() {
   ];
 
   const messageTypeOptions = [
-    { value: '', label: 'All Types' },
+    { value: '', label: 'All Message Types' },
     { value: 'SMS', label: 'SMS' },
     { value: 'WHATSAPP', label: 'WhatsApp' },
     { value: 'TELEGRAM', label: 'Telegram' },
+  ];
+
+  const directionOptions = [
+    { value: '', label: 'All Message Directions' },
+    { value: 'true', label: 'Incoming' },
+    { value: 'false', label: 'Outgoing' },
   ];
 
   if (!selectedDevice) {
@@ -165,15 +185,30 @@ export default function MessagesPage() {
           </div>
 
           {/* Filters */}
-          <SearchFilter
-            searchValue=""
-            onSearchChange={() => { }}
-            searchPlaceholder="Search messages..."
-            filterValue={filters.messageType || ''}
-            onFilterChange={(value) => handleFilterChange({ messageType: value as 'SMS' | 'WHATSAPP' | 'TELEGRAM' })}
-            filterOptions={messageTypeOptions}
-            filterLabel="Message Type"
-          />
+          <div className="flex gap-4">
+            <SearchFilter
+              searchValue=""
+              onSearchChange={() => { }}
+              searchPlaceholder="Search messages..."
+              filterValue={filters.messageType || ''}
+              onFilterChange={(value) => handleFilterChange({ messageType: value as 'SMS' | 'WHATSAPP' | 'TELEGRAM' })}
+              filterOptions={messageTypeOptions}
+              filterLabel="Message Type"
+            />
+
+            <select
+              value={filters.isIncoming !== undefined ? filters.isIncoming.toString() : ''}
+              onChange={(e) => handleFilterChange({ isIncoming: e.target.value === '' ? undefined : e.target.value === 'true' })}
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              {/* <option value="">All {filterLabel}</option> */}
+              {directionOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
           {/* Loading State */}
           {isLoading && messages.length === 0 ? (

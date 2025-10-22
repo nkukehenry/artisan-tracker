@@ -218,6 +218,7 @@ model Message {
   recipient      String?
   timestamp      DateTime
   isRead         Boolean     @default(false)
+  isIncoming     Boolean     @default(true) // true for incoming messages, false for outgoing
   metadata       Json?       // Platform-specific data
   location       String?     // Location where message was sent
   gpsCoordinates String?    @db.Text // GPS coordinates as JSON string

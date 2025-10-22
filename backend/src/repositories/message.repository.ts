@@ -13,7 +13,7 @@ export class MessageRepositoryImpl extends BaseRepositoryImpl<Message> implement
     paginationOptions: { page: number; limit: number },
     filterOptions?: {
       messageType?: string;
-      direction?: string;
+      isIncoming?: boolean;
       sender?: string;
       startDate?: Date;
       endDate?: Date;
@@ -39,15 +39,19 @@ export class MessageRepositoryImpl extends BaseRepositoryImpl<Message> implement
       }
 
       const where: any = { deviceId: device.id };
-      
+
       if (filterOptions?.messageType) {
         where.messageType = filterOptions.messageType;
       }
-      
+
+      if (filterOptions?.isIncoming !== undefined) {
+        where.isIncoming = filterOptions.isIncoming;
+      }
+
       if (filterOptions?.sender) {
         where.sender = { contains: filterOptions.sender };
       }
-      
+
       if (filterOptions?.startDate || filterOptions?.endDate) {
         where.timestamp = {};
         if (filterOptions.startDate) where.timestamp.gte = filterOptions.startDate;
@@ -76,6 +80,7 @@ export class MessageRepositoryImpl extends BaseRepositoryImpl<Message> implement
         // direction removed - not in Prisma schema
         timestamp: item.timestamp,
         isRead: item.isRead,
+        isIncoming: item.isIncoming,
         metadata: (item.metadata as Record<string, any>) || {},
         location: item.location || undefined,
         gpsCoordinates: item.gpsCoordinates || undefined,
@@ -125,7 +130,7 @@ export class MessageRepositoryImpl extends BaseRepositoryImpl<Message> implement
       }
 
       const where: any = { deviceId: device.id };
-      
+
       if (filterOptions?.messageType) {
         where.messageType = filterOptions.messageType;
       }

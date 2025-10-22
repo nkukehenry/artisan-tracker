@@ -50,12 +50,13 @@ export class MessagesController {
         // direction removed - not in Prisma schema
         timestamp: messageData.timestamp,
         isRead: messageData.isRead ?? false,
+        isIncoming: messageData.isIncoming ?? false,
         metadata: messageData.metadata,
         location: messageData.location,
         gpsCoordinates: messageData.gpsCoordinates,
         // isEncrypted: messageData.isEncrypted ?? false, // Removed as not in schema
       };
-      
+
       const created = await this.messageRepository.create(message);
       createdMessages.push(created);
     }
@@ -75,7 +76,7 @@ export class MessagesController {
     }
 
     const { deviceId } = req.params;
-    const { page = 1, limit = 20, messageType, direction, sender, startDate, endDate } = req.query;
+    const { page = 1, limit = 20, messageType, isIncoming, sender, startDate, endDate } = req.query;
     const userId = req.user?.id;
 
     const paginationOptions = {
@@ -85,7 +86,7 @@ export class MessagesController {
 
     const filterOptions = {
       messageType: messageType as string,
-      direction: direction as string,
+      isIncoming: isIncoming !== undefined ? isIncoming === 'true' : undefined,
       sender: sender as string,
       startDate: startDate ? new Date(startDate as string) : undefined,
       endDate: endDate ? new Date(endDate as string) : undefined,
@@ -259,10 +260,10 @@ export const messagesValidation = {
       .optional()
       .isIn(['SMS', 'WHATSAPP', 'TELEGRAM', 'FACEBOOK', 'INSTAGRAM', 'TWITTER', 'EMAIL', 'OTHER'])
       .withMessage('Invalid message type filter'),
-    query('direction')
+    query('isIncoming')
       .optional()
-      .isIn(['INCOMING', 'OUTGOING'])
-      .withMessage('Invalid direction filter'),
+      .isBoolean()
+      .withMessage('isIncoming must be a boolean value'),
     query('sender')
       .optional()
       .isString()

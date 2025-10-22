@@ -9,6 +9,7 @@ export const getMessages = async (
     page?: number;
     limit?: number;
     messageType?: 'SMS' | 'WHATSAPP' | 'TELEGRAM';
+    isIncoming?: boolean;
     startDate?: string;
     endDate?: string;
   } = {}
@@ -19,6 +20,7 @@ export const getMessages = async (
     if (filters.page) params.append('page', filters.page.toString());
     if (filters.limit) params.append('limit', filters.limit.toString());
     if (filters.messageType) params.append('messageType', filters.messageType);
+    if (filters.isIncoming !== undefined) params.append('isIncoming', filters.isIncoming.toString());
     if (filters.startDate) params.append('startDate', filters.startDate);
     if (filters.endDate) params.append('endDate', filters.endDate);
 

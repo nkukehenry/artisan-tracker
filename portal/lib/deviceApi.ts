@@ -147,6 +147,8 @@ export const deviceApi = {
   getDeviceMessages: async (deviceId: string, params?: {
     page?: number;
     limit?: number;
+    messageType?: string;
+    isIncoming?: boolean;
     startDate?: string;
     endDate?: string;
   }) => {

@@ -11,6 +11,7 @@ export interface Message extends BaseEntity {
   // direction removed - not in Prisma schema
   timestamp: Date;
   isRead: boolean;
+  isIncoming: boolean;
   metadata?: Record<string, any>;
   location?: string;
   gpsCoordinates?: string;
@@ -29,6 +30,7 @@ export interface CreateMessageData {
   // direction removed - not in Prisma schema
   timestamp: Date;
   isRead: boolean;
+  isIncoming: boolean;
   metadata?: Record<string, any>;
   location?: string;
   gpsCoordinates?: string;
@@ -50,7 +52,7 @@ export interface MessageRepository extends BaseRepository<Message> {
     paginationOptions: { page: number; limit: number },
     filterOptions?: {
       messageType?: string;
-      direction?: string;
+      isIncoming?: boolean;
       sender?: string;
       startDate?: Date;
       endDate?: Date;

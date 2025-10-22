@@ -1,6 +1,6 @@
 'use client';
 
-import { X, MessageSquare, Clock, MapPin, User, Users } from 'lucide-react';
+import { X, MessageSquare, Clock, MapPin, User, Users, MessageCircle, Send, Mail } from 'lucide-react';
 import { Message } from '@/types/message';
 import GPSMapViewer from '@/components/ui/GPSMapViewer';
 
@@ -16,26 +16,26 @@ export default function MessageDetailModal({ message, isOpen, onClose }: Message
   const getMessageTypeColor = (messageType: string) => {
     switch (messageType) {
       case 'SMS':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-purple-100 text-purple-800';
       case 'WHATSAPP':
         return 'bg-green-100 text-green-800';
       case 'TELEGRAM':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-blue-100 text-blue-800';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-red-100 text-red-800';
     }
   };
 
   const getMessageTypeIcon = (messageType: string) => {
     switch (messageType) {
       case 'SMS':
-        return '📱';
+        return <MessageSquare className="h-4 w-4" />;
       case 'WHATSAPP':
-        return '💬';
+        return <MessageCircle className="h-4 w-4" />;
       case 'TELEGRAM':
-        return '✈️';
+        return <Send className="h-4 w-4" />;
       default:
-        return '💬';
+        return <Mail className="h-4 w-4" />;
     }
   };
 
@@ -53,16 +53,14 @@ export default function MessageDetailModal({ message, isOpen, onClose }: Message
           {/* Header */}
           <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-lg ${
-                message.messageType === 'SMS' ? 'bg-blue-100' :
+              <div className={`p-2 rounded-lg ${message.messageType === 'SMS' ? 'bg-blue-100' :
                 message.messageType === 'WHATSAPP' ? 'bg-green-100' :
-                'bg-purple-100'
-              }`}>
-                <MessageSquare className={`h-5 w-5 ${
-                  message.messageType === 'SMS' ? 'text-blue-600' :
+                  'bg-purple-100'
+                }`}>
+                <MessageSquare className={`h-5 w-5 ${message.messageType === 'SMS' ? 'text-blue-600' :
                   message.messageType === 'WHATSAPP' ? 'text-green-600' :
-                  'text-purple-600'
-                }`} />
+                    'text-purple-600'
+                  }`} />
               </div>
               <div>
                 <h2 className="text-xl font-bold text-gray-900">Message Details</h2>
@@ -85,14 +83,21 @@ export default function MessageDetailModal({ message, isOpen, onClose }: Message
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-gray-500 mb-1">Message Type</p>
-                <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${getMessageTypeColor(message.messageType)}`}>
-                  {getMessageTypeIcon(message.messageType)} {message.messageType}
+                <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${getMessageTypeColor(message.messageType)}`}>
+                  {getMessageTypeIcon(message.messageType)}
+                  {message.messageType}
                 </span>
               </div>
               <div>
                 <p className="text-sm text-gray-500 mb-1">Status</p>
                 <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${message.isRead ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                   {message.isRead ? 'Read' : 'Unread'}
+                </span>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Direction</p>
+                <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${message.isIncoming ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800'}`}>
+                  {message.isIncoming ? 'Incoming' : 'Outgoing'}
                 </span>
               </div>
               <div>
