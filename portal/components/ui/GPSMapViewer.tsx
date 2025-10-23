@@ -29,11 +29,6 @@ export default function GPSMapViewer({ location, gpsCoordinates, className = '' 
   const embeddedMapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${Number(coords?.longitude) - 0.01},${Number(coords?.latitude) - 0.01},${Number(coords?.longitude) + 0.01},${Number(coords?.latitude) + 0.01}&layer=mapnik&marker=${coords?.latitude},${coords?.longitude}`;
 
 
-  const openInGoogleMaps = () => {
-    if (coords) {
-      window.open(`https://www.google.com/maps?q=${coords.latitude},${coords.longitude}`, '_blank');
-    }
-  };
 
   return (
     <div className={`bg-white border border-gray-200 rounded-lg p-4 ${className}`}>

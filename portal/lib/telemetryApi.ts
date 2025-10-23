@@ -17,7 +17,7 @@ export const telemetryApi = {
         deviceId: string,
         page: number = 1,
         limit: number = 20
-    ): Promise<any> => {
+    ): Promise<unknown> => {
         const response = await apiClient.get(`/telemetry/device/${deviceId}`, {
             params: { page, limit }
         });

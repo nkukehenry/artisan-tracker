@@ -13,7 +13,6 @@ export default function DurationInputModal({
     isOpen,
     onClose,
     onConfirm,
-    action,
     actionLabel,
 }: DurationInputModalProps) {
     const [duration, setDuration] = useState(30);

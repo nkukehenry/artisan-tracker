@@ -15,11 +15,6 @@ import {
   FaSms,
   FaWhatsapp,
   FaTelegram,
-  FaEnvelope,
-  FaComment,
-  FaCommentDots,
-  FaPaperPlane,
-  FaMailBulk,
   FaFacebook,
   FaInstagram,
   FaTwitter,
@@ -66,23 +61,23 @@ export default function MessagesPage() {
   const getMessageTypeIcon = (messageType: string) => {
     switch (messageType) {
       case 'SMS':
-        return <FaSms className="h-4 w-4 text-blue-600" />;
+        return '📱';
       case 'WHATSAPP':
-        return <FaWhatsapp className="h-4 w-4 text-green-600" />;
+        return '💬';
       case 'TELEGRAM':
-        return <FaTelegram className="h-4 w-4 text-blue-500" />;
+        return '✈️';
       case 'FACEBOOK':
-        return <FaFacebook className="h-4 w-4 text-blue-700" />;
+        return '📘';
       case 'INSTAGRAM':
-        return <FaInstagram className="h-4 w-4 text-pink-600" />;
+        return '📷';
       case 'TWITTER':
-        return <FaTwitter className="h-4 w-4 text-blue-400" />;
+        return '🐦';
       case 'GMAIL':
-        return <FaGoogle className="h-4 w-4 text-red-600" />;
+        return '🔍';
       case 'TIKTOK':
-        return <FaTiktok className="h-4 w-4 text-black" />;
+        return '🎵';
       default:
-        return <FaComment className="h-4 w-4 text-gray-500" />;
+        return '💬';
     }
   };
 

@@ -59,7 +59,7 @@ export default function RemoteControlPage() {
   });
 
   // WebRTC peer connection
-  const { peerConnection, setupPeerConnection, handleOffer, handleIceCandidate, closePeerConnection } =
+  const { setupPeerConnection, handleOffer, handleIceCandidate, closePeerConnection } =
     useWebRTC({
       wsConnection,
       onStatusChange: setScreenShareStatus,

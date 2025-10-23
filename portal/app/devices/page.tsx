@@ -11,7 +11,6 @@ import {
   Wifi,
   MapPin,
   Calendar,
-  User,
   Settings,
   Edit,
   RefreshCw,
@@ -22,21 +21,8 @@ import {
 import {
   FaMicrochip,
   FaHdd,
-  FaWifi,
   FaShieldAlt,
-  FaChartLine,
-  FaMobileAlt,
-  FaBatteryHalf,
-  FaBatteryFull,
-  FaBatteryEmpty,
-  FaThermometerHalf,
-  FaSignal,
-  FaMapMarkerAlt,
-  FaClock,
-  FaCog,
-  FaEdit,
-  FaSync,
-  FaExclamationTriangle
+  FaSignal
 } from 'react-icons/fa';
 
 export default function DeviceInformationPage() {
@@ -90,13 +76,6 @@ export default function DeviceInformationPage() {
     return new Date(dateString).toLocaleString();
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
 
   const getBatteryStatusColor = (status?: string) => {
     switch (status?.toLowerCase()) {
@@ -107,14 +86,6 @@ export default function DeviceInformationPage() {
     }
   };
 
-  const getBatteryStatusIcon = (status?: string) => {
-    switch (status?.toLowerCase()) {
-      case 'charging': return '🔋';
-      case 'discharging': return '🔋';
-      case 'full': return '🔋';
-      default: return '🔋';
-    }
-  };
 
   return (
     <AuthWrapper>

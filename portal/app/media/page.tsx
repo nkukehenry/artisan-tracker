@@ -7,21 +7,9 @@ import { useDevices } from '@/hooks/useDevices';
 import { useMedia } from '@/hooks/useMedia';
 import DataTable from '@/components/ui/DataTable';
 import SearchFilter from '@/components/ui/SearchFilter';
-import Select from '@/components/ui/Select';
 import LocationBadge from '@/components/ui/LocationBadge';
 import { Media, formatFileSize } from '@/types/media';
-import { FileAudio, FileImage, FileVideo, FileText, Phone, Trash2, Eye, ArrowDown, Download } from 'lucide-react';
-import {
-  FaFileAudio,
-  FaFileImage,
-  FaFileVideo,
-  FaFileAlt,
-  FaDownload,
-  FaEye,
-  FaTrash,
-  FaPhone,
-  FaArrowDown
-} from 'react-icons/fa';
+import { Trash2, Eye, Download } from 'lucide-react';
 import MediaViewerModal from '@/components/media/MediaViewerModal';
 import { useAppDispatch } from '@/lib/hooks';
 import { addToast } from '@/store/slices/appSlice';
@@ -29,7 +17,6 @@ import { addToast } from '@/store/slices/appSlice';
 export default function MediaPage() {
   const dispatch = useAppDispatch();
   const { devices } = useDevices();
-  const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
   const [isViewerModalOpen, setIsViewerModalOpen] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
 
@@ -48,10 +35,6 @@ export default function MediaPage() {
     selectedDevice,
   } = useMedia();
 
-  const handleDeviceChange = (deviceId: string) => {
-    setSelectedDeviceId(deviceId);
-    setSelectedDevice(deviceId || null);
-  };
 
   const handleDeleteMedia = async (mediaId: string) => {
     if (window.confirm('Are you sure you want to delete this media file?')) {
@@ -120,13 +103,13 @@ export default function MediaPage() {
   const getMediaIcon = (fileType: string) => {
     switch (fileType) {
       case 'AUDIO':
-        return <FaFileAudio className="h-5 w-5 text-green-600" />;
+        return '🎵';
       case 'PHOTO':
-        return <FaFileImage className="h-5 w-5 text-purple-600" />;
+        return '📷';
       case 'VIDEO':
-        return <FaFileVideo className="h-5 w-5 text-red-600" />;
+        return '🎥';
       default:
-        return <FaFileAlt className="h-5 w-5 text-gray-600" />;
+        return '📄';
     }
   };
 
@@ -174,7 +157,7 @@ export default function MediaPage() {
         return (
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <FaFileAlt className="h-4 w-4 text-green-600" />
+              <span className="text-lg">📄</span>
               <span className="text-sm font-medium">
                 {formatFileSize(item.fileSize)}
               </span>
@@ -237,13 +220,6 @@ export default function MediaPage() {
     { value: 'DOCUMENT', label: 'Documents' },
   ];
 
-  const deviceOptions = [
-    { value: '', label: 'Select a device' },
-    ...devices.map(device => ({
-      value: device.deviceId,
-      label: device.name,
-    })),
-  ];
 
   return (
     <AuthWrapper>

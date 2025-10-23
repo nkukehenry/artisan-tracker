@@ -12,8 +12,7 @@ export interface DownloadOptions {
 
 export const downloadFile = async (
     blob: Blob,
-    fileName: string,
-    mimeType?: string
+    fileName: string
 ): Promise<void> => {
     return new Promise((resolve, reject) => {
         try {

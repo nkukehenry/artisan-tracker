@@ -1,15 +1,10 @@
 'use client';
 
-import { X, Clock, MapPin, User, Users, MessageSquare } from 'lucide-react';
+import { X, Clock, MapPin, User, Users } from 'lucide-react';
 import {
   FaSms,
   FaWhatsapp,
   FaTelegram,
-  FaEnvelope,
-  FaComment,
-  FaCommentDots,
-  FaPaperPlane,
-  FaMailBulk,
   FaFacebook,
   FaInstagram,
   FaTwitter,
@@ -54,23 +49,23 @@ export default function MessageDetailModal({ message, isOpen, onClose }: Message
   const getMessageTypeIcon = (messageType: string) => {
     switch (messageType) {
       case 'SMS':
-        return <FaSms className="h-4 w-4" />;
+        return '📱';
       case 'WHATSAPP':
-        return <FaWhatsapp className="h-4 w-4" />;
+        return '💬';
       case 'TELEGRAM':
-        return <FaTelegram className="h-4 w-4" />;
+        return '✈️';
       case 'FACEBOOK':
-        return <FaFacebook className="h-4 w-4" />;
+        return '📘';
       case 'INSTAGRAM':
-        return <FaInstagram className="h-4 w-4" />;
+        return '📷';
       case 'TWITTER':
-        return <FaTwitter className="h-4 w-4" />;
+        return '🐦';
       case 'GMAIL':
-        return <FaGoogle className="h-4 w-4" />;
+        return '🔍';
       case 'TIKTOK':
-        return <FaTiktok className="h-4 w-4" />;
+        return '🎵';
       default:
-        return <FaComment className="h-4 w-4" />;
+        return '💬';
     }
   };
 

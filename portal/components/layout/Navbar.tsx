@@ -5,7 +5,6 @@ import {
 } from 'lucide-react';
 import NotificationDropdown from './NotificationDropdown';
 import ProfileDropdown from './ProfileDropdown';
-import ThemeToggle from '@/components/ui/ThemeToggle';
 import DeviceSelector from '@/components/devices/DeviceSelector';
 
 interface NavbarProps {

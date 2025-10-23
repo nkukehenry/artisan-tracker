@@ -25,7 +25,6 @@ export default function SearchFilter({
   filterValue,
   onFilterChange,
   filterOptions = [],
-  filterLabel = 'Filter',
   className = '',
 }: SearchFilterProps) {
   return (

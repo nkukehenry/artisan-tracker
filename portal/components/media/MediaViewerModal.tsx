@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { X, Download, Trash2, FileAudio, FileImage, FileVideo, FileText, MapPin, Clock, Shield } from 'lucide-react';
 import { Media } from '@/types/media';
 import { useAppDispatch } from '@/lib/hooks';
@@ -23,19 +24,7 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
 
-  useEffect(() => {
-    if (isOpen && media) {
-      loadMediaFile();
-    } else {
-      // Clean up object URL when modal closes
-      if (mediaUrl) {
-        URL.revokeObjectURL(mediaUrl);
-        setMediaUrl('');
-      }
-    }
-  }, [isOpen, media]);
-
-  const loadMediaFile = async () => {
+  const loadMediaFile = useCallback(async () => {
     if (!media) return;
 
     setIsLoading(true);
@@ -56,7 +45,19 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [media]);
+
+  useEffect(() => {
+    if (isOpen && media) {
+      loadMediaFile();
+    } else {
+      // Clean up object URL when modal closes
+      if (mediaUrl) {
+        URL.revokeObjectURL(mediaUrl);
+        setMediaUrl('');
+      }
+    }
+  }, [isOpen, media, loadMediaFile]);
 
   const handleDownload = async () => {
     if (!media) return;
@@ -239,10 +240,13 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
                 <div className="space-y-4">
                   {media.fileType === 'PHOTO' && (
                     <div className="flex justify-center">
-                      <img
+                      <Image
                         src={mediaUrl}
                         alt={media.fileName}
-                        className="max-w-full max-h-96 rounded-lg shadow-lg"
+                        width={400}
+                        height={300}
+                        className="max-w-full max-h-96 rounded-lg shadow-lg object-contain"
+                        unoptimized
                       />
                     </div>
                   )}
