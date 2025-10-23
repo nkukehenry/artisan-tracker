@@ -60,7 +60,7 @@ export interface MessageConversationsResponse {
 export interface MessageFilters {
   page?: number;
   limit?: number;
-  messageType?: MessageType;
+  messageType?: 'SMS' | 'WHATSAPP' | 'TELEGRAM';
   isIncoming?: boolean;
   startDate?: string;
   endDate?: string;

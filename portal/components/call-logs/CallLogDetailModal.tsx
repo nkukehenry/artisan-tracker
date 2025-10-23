@@ -4,7 +4,6 @@ import { X, Phone, Clock, MapPin, FileAudio } from 'lucide-react';
 import { CallLog } from '@/types/callLog';
 import GPSMapViewer from '@/components/ui/GPSMapViewer';
 import MediaBadge from '@/components/ui/MediaBadge';
-import MapView from '../ui/MapView';
 
 interface CallLogDetailModalProps {
   callLog: CallLog | null;

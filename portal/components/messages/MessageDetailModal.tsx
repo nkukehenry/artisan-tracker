@@ -1,6 +1,6 @@
 'use client';
 
-import { X, Clock, MapPin, User, Users } from 'lucide-react';
+import { X, Clock, MapPin, User, Users, MessageSquare } from 'lucide-react';
 import {
   FaSms,
   FaWhatsapp,
