@@ -61,23 +61,23 @@ export default function MessagesPage() {
   const getMessageTypeIcon = (messageType: string) => {
     switch (messageType) {
       case 'SMS':
-        return '📱';
+        return <FaSms className="h-4 w-4" />;
       case 'WHATSAPP':
-        return '💬';
+        return <FaWhatsapp className="h-4 w-4" />;
       case 'TELEGRAM':
-        return '✈️';
+        return <FaTelegram className="h-4 w-4" />;
       case 'FACEBOOK':
-        return '📘';
+        return <FaFacebook className="h-4 w-4" />;
       case 'INSTAGRAM':
-        return '📷';
+        return <FaInstagram className="h-4 w-4" />;
       case 'TWITTER':
-        return '🐦';
+        return <FaTwitter className="h-4 w-4" />;
       case 'GMAIL':
-        return '🔍';
+        return <FaGoogle className="h-4 w-4" />;
       case 'TIKTOK':
-        return '🎵';
+        return <FaTiktok className="h-4 w-4" />;
       default:
-        return '💬';
+        return <FaSms className="h-4 w-4" />;
     }
   };
 

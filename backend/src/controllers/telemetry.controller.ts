@@ -36,6 +36,7 @@ export class TelemetryController {
         const updateData: any = {
           isOnline: true,
           lastSeenAt: new Date(),
+          latestTelemetryId: telemetry.id,
         };
 
         // Update battery level if available

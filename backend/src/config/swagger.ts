@@ -494,23 +494,21 @@ const swaggerDefinition: SwaggerDefinition = {
       },
       CallHomeRequest: {
         type: 'object',
-        required: ['deviceId', 'batteryLevel', 'location'],
+        required: ['deviceId'],
         properties: {
-          deviceId: {
-            type: 'string',
-            minLength: 3,
-            maxLength: 50,
-            example: '1234567890',
-          },
-          batteryLevel: {
-            type: 'integer',
-            minimum: 0,
-            maximum: 100,
-            example: 50,
-          },
-          location: {
+          deviceInfo: {
             type: 'object',
-            required: ['latitude', 'longitude'],
+            properties: {
+              deviceId: {
+                type: 'string',
+                minLength: 3,
+                maxLength: 50,
+                example: '1234567890',
+              },
+            },
+          },
+          locationInfo: {
+            type: 'object',
             properties: {
               latitude: {
                 type: 'number',
@@ -524,192 +522,83 @@ const swaggerDefinition: SwaggerDefinition = {
                 maximum: 180,
                 example: -74.006,
               },
-              accuracy: {
+            },
+          },
+          batteryInfo: {
+            type: 'object',
+            properties: {
+              percentage: {
                 type: 'number',
                 minimum: 0,
-                example: 10,
-              },
-              address: {
-                type: 'string',
-                maxLength: 255,
-                example: 'New York, NY, USA',
+                maximum: 100,
+                example: 50,
               },
             },
           },
-          // Optional network information
-          networkOperator: {
-            type: 'string',
-            maxLength: 100,
-            example: 'MTN',
+          appVersionInfo: {
+            type: 'object',
+            properties: {
+              appVersion: {
+                type: 'string',
+                maxLength: 20,
+                example: '1.0.0',
+              },
+            },
           },
-          simOperator: {
-            type: 'string',
-            maxLength: 100,
-            example: 'MTN UG',
+          networkInfo: {
+            type: 'object',
+            properties: {
+              networkOperator: {
+                type: 'string',
+                maxLength: 100,
+                example: 'MTN',
+              },
+            },
           },
-          simCountryISO: {
-            type: 'string',
-            minLength: 2,
-            maxLength: 3,
-            example: 'UG',
+          systemInfo: {
+            type: 'object',
+            properties: {
+              brand: {
+                type: 'string',
+                maxLength: 100,
+                example: 'Samsung',
+              },
+              manufacturer: {
+                type: 'string',
+                maxLength: 100,
+                example: 'Samsung Electronics',
+              },
+              model: {
+                type: 'string',
+                maxLength: 100,
+                example: 'iPhone 13 Pro',
+              },
+              device: {
+                type: 'string',
+                maxLength: 100,
+                example: 'o1q',
+              },
+              product: {
+                type: 'string',
+                maxLength: 100,
+                example: 'o1quew',
+              },
+              board: {
+                type: 'string',
+                maxLength: 100,
+                example: 'exynos2100',
+              },
+              hardware: {
+                type: 'string',
+                maxLength: 100,
+                example: 'exynos2100',
+              },
+            },
           },
-          // Optional memory and storage
-          totalMemoryGB: {
-            type: 'number',
-            minimum: 0,
-            example: 8.0,
-          },
-          freeMemoryGB: {
-            type: 'number',
-            minimum: 0,
-            example: 3.2,
-          },
-          totalStorageGB: {
-            type: 'number',
-            minimum: 0,
-            example: 256.0,
-          },
-          freeStorageGB: {
-            type: 'number',
-            minimum: 0,
-            example: 128.5,
-          },
-          usedMemoryPercentage: {
-            type: 'integer',
-            minimum: 0,
-            maximum: 100,
-            example: 60,
-          },
-          // Optional device state
-          orientation: {
-            type: 'string',
-            enum: ['portrait', 'landscape'],
-            example: 'portrait',
-          },
-          isRooted: {
-            type: 'boolean',
-            example: false,
-          },
-          // Additional device attributes
-          brand: {
-            type: 'string',
-            maxLength: 50,
-            example: 'Samsung',
-          },
-          manufacturer: {
-            type: 'string',
-            maxLength: 100,
-            example: 'Samsung Electronics',
-          },
-          deviceName: {
-            type: 'string',
-            maxLength: 100,
-            example: 'o1q',
-          },
-          product: {
-            type: 'string',
-            maxLength: 100,
-            example: 'o1quew',
-          },
-          board: {
-            type: 'string',
-            maxLength: 100,
-            example: 'exynos2100',
-          },
-          hardware: {
-            type: 'string',
-            maxLength: 100,
-            example: 'exynos2100',
-          },
-          // Android System Information
-          sdkVersion: {
-            type: 'integer',
-            minimum: 1,
-            maximum: 100,
-            example: 34,
-          },
-          androidVersion: {
-            type: 'string',
-            maxLength: 20,
-            example: '14',
-          },
-          release: {
-            type: 'string',
-            maxLength: 20,
-            example: '14',
-          },
-          codename: {
-            type: 'string',
-            maxLength: 50,
-            example: 'UpsideDownCake',
-          },
-          incremental: {
-            type: 'string',
-            maxLength: 50,
-            example: '123456789',
-          },
-          securityPatch: {
-            type: 'string',
-            maxLength: 20,
-            example: '2025-09-01',
-          },
-          // Additional device state
-          isEmulator: {
-            type: 'boolean',
-            example: false,
-          },
-          screenDensity: {
-            type: 'number',
-            minimum: 0,
-            example: 3.0,
-          },
-          screenResolution: {
-            type: 'string',
-            pattern: '^\\d+x\\d+$',
-            example: '1080x2400',
-          },
-          // App Information
-          appVersionCode: {
-            type: 'integer',
-            minimum: 1,
-            example: 105,
-          },
-          appInstallTime: {
-            type: 'integer',
-            minimum: 0,
-            example: 1696320000000,
-          },
-          // Data Collection
           collectedAt: {
-            type: 'integer',
-            minimum: 0,
-            example: 1696351200000,
-          },
-        },
-      },
-      UpdateDeviceRequest: {
-        type: 'object',
-        properties: {
-          name: {
             type: 'string',
-            minLength: 2,
-            maxLength: 100,
-            example: 'John\'s iPhone',
-          },
-          model: {
-            type: 'string',
-            maxLength: 100,
-            example: 'iPhone 13 Pro',
-          },
-          osVersion: {
-            type: 'string',
-            maxLength: 50,
-            example: 'iOS 15.0',
-          },
-          appVersion: {
-            type: 'string',
-            maxLength: 20,
-            example: '1.0.0',
+            format: 'date-time',
+            example: '2023-01-01T12:00:00Z',
           },
         },
       },

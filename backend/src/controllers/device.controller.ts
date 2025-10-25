@@ -25,7 +25,7 @@ export class DeviceController {
       }
 
       const user = (req as any).user;
-      const { 
+      const {
         deviceId, name, model, osVersion, appVersion,
         brand, manufacturer, deviceName, product, board, hardware,
         sdkVersion, androidVersion, release, codename, incremental, securityPatch,
@@ -74,16 +74,18 @@ export class DeviceController {
       });
 
       logger.info('Device registered successfully', { deviceId, userId: user.id });
-      console.log('Device registered successfully', { device});
+      console.log('Device registered successfully', { device });
 
       res.status(201).json({
         success: true,
         message: 'Device registered successfully',
-        data: { device: JSON.parse(
-          JSON.stringify(device, (key, value) =>
-            typeof value === 'bigint' ? value.toString() : value
+        data: {
+          device: JSON.parse(
+            JSON.stringify(device, (key, value) =>
+              typeof value === 'bigint' ? value.toString() : value
+            )
           )
-        ) },
+        },
       });
     } catch (error) {
       console.log('Error in registerDevice', error);
@@ -152,7 +154,7 @@ export class DeviceController {
       res.status(200).json({
         success: true,
         message: 'Device retrieved successfully',
-        data: { 
+        data: {
           device: JSON.parse(
             JSON.stringify(device, (key, value) =>
               typeof value === 'bigint' ? value.toString() : value
@@ -197,7 +199,7 @@ export class DeviceController {
       res.status(200).json({
         success: true,
         message: 'Device updated successfully',
-        data: { 
+        data: {
           device: JSON.parse(
             JSON.stringify(device, (key, value) =>
               typeof value === 'bigint' ? value.toString() : value
@@ -362,7 +364,7 @@ export class DeviceController {
       res.status(200).json({
         success: true,
         message: 'Device status updated successfully',
-        data: { 
+        data: {
           device: JSON.parse(
             JSON.stringify(updatedDevice, (key, value) =>
               typeof value === 'bigint' ? value.toString() : value
@@ -381,28 +383,13 @@ export class DeviceController {
    */
   public callHome = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      console.log('req.body', req.body);
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         throw createError('Validation failed', 400, errors.array());
       }
 
-      const { 
-        deviceId, batteryLevel, location,
-        // Device hardware information
-        brand, manufacturer, model, device, product, board, hardware,
-        // Android system information
-        sdkVersion, androidVersion, release, codename, incremental, securityPatch,
-        // Memory and storage
-        totalMemoryGB, freeMemoryGB, totalStorageGB, freeStorageGB, usedMemoryPercentage,
-        // Device state
-        orientation, isRooted, isEmulator, screenDensity, screenResolution,
-        // Network information
-        networkOperator, simOperator, simCountryISO,
-        // App information
-        appVersion, appVersionCode, appInstallTime,
-        // Data collection
-        collectedAt
-      } = req.body;
+      const { deviceId } = req.body;
 
       // Find device by deviceId
       const dbDevice = await this.deviceService.getDeviceByDeviceId(deviceId);
@@ -412,60 +399,18 @@ export class DeviceController {
 
       // Update device with call home data
       const updatedDevice = await this.deviceService.updateDevice(dbDevice.id, {
-        batteryLevel,
-        location,
-        // Device hardware information
-        brand,
-        manufacturer,
-        model,
-        deviceName: device, // Map 'device' field to 'deviceName'
-        product,
-        board,
-        hardware,
-        // Android system information
-        sdkVersion,
-        androidVersion,
-        release,
-        codename,
-        incremental,
-        securityPatch,
-        // Memory and storage
-        totalMemoryGB,
-        freeMemoryGB,
-        totalStorageGB,
-        freeStorageGB,
-        usedMemoryPercentage,
-        // Device state
-        orientation,
-        isRooted,
-        isEmulator,
-        screenDensity,
-        screenResolution,
-        // Network information
-        networkOperator,
-        simOperator,
-        simCountryISO,
-        // App information
-        appVersion,
-        appVersionCode,
-        appInstallTime,
-        // Data collection
-        collectedAt,
         isOnline: true,
         lastSeenAt: new Date(),
       });
 
-      logger.info('Device called home successfully', { 
-        deviceId, 
-        batteryLevel, 
-        hasLocation: !!location,
-        memoryUsage: usedMemoryPercentage 
+      logger.info('Device called home successfully', {
+        deviceId,
       });
 
       res.status(200).json({
         success: true,
         message: 'Call home successful',
-        data: { 
+        data: {
           device: {
             id: updatedDevice.id,
             deviceId: updatedDevice.deviceId,
@@ -538,7 +483,7 @@ export const deviceValidation = {
       .trim()
       .isLength({ max: 20 })
       .withMessage('App version must be less than 20 characters'),
-    
+
     // Device Hardware Information
     body('brand')
       .optional()
@@ -570,7 +515,7 @@ export const deviceValidation = {
       .trim()
       .isLength({ max: 100 })
       .withMessage('Hardware must be less than 100 characters'),
-    
+
     // Android System Information
     body('sdkVersion')
       .optional()
@@ -601,7 +546,7 @@ export const deviceValidation = {
       .trim()
       .isLength({ max: 20 })
       .withMessage('Security patch must be less than 20 characters'),
-    
+
     // Memory and Storage
     body('totalMemoryGB')
       .optional()
@@ -623,7 +568,7 @@ export const deviceValidation = {
       .optional()
       .isInt({ min: 0, max: 100 })
       .withMessage('Used memory percentage must be between 0 and 100'),
-    
+
     // Device State
     body('orientation')
       .optional()
@@ -647,7 +592,7 @@ export const deviceValidation = {
       .trim()
       .matches(/^\d+x\d+$/)
       .withMessage('Screen resolution must be in format WIDTHxHEIGHT'),
-    
+
     // Network Information
     body('networkOperator')
       .optional()
@@ -664,7 +609,7 @@ export const deviceValidation = {
       .trim()
       .isLength({ min: 2, max: 3 })
       .withMessage('SIM country ISO must be 2-3 characters'),
-    
+
     // App Information
     body('appVersionCode')
       .optional()
@@ -674,12 +619,12 @@ export const deviceValidation = {
       .optional()
       .isInt({ min: 0 })
       .withMessage('App install time must be a positive integer'),
-    
+
     // Data Collection
     body('collectedAt')
       .optional()
-      .isInt({ min: 0 })
-      .withMessage('Collected at must be a positive integer'),
+      .isISO8601()
+      .withMessage('Collected at must be a valid ISO 8601 date string'),
   ],
 
   callHome: [
@@ -687,181 +632,31 @@ export const deviceValidation = {
       .trim()
       .isLength({ min: 3, max: 50 })
       .withMessage('Device ID must be between 3 and 50 characters'),
-    body('batteryLevel')
-      .isInt({ min: 0, max: 100 })
-      .withMessage('Battery level must be between 0 and 100'),
-    body('location')
+    body('locationInfo')
       .isObject()
-      .withMessage('Location must be an object'),
-    body('location.latitude')
-      .isFloat({ min: -90, max: 90 })
-      .withMessage('Latitude must be between -90 and 90'),
-    body('location.longitude')
-      .isFloat({ min: -180, max: 180 })
-      .withMessage('Longitude must be between -180 and 180'),
-    body('location.accuracy')
-      .optional()
-      .isFloat({ min: 0 })
-      .withMessage('Accuracy must be a positive number'),
-    body('location.address')
-      .optional()
-      .trim()
-      .isLength({ max: 255 })
-      .withMessage('Address must be less than 255 characters'),
-    
-    // Optional network information
-    body('networkOperator')
-      .optional()
-      .trim()
-      .isLength({ max: 100 })
-      .withMessage('Network operator must be less than 100 characters'),
-    body('simOperator')
-      .optional()
-      .trim()
-      .isLength({ max: 100 })
-      .withMessage('SIM operator must be less than 100 characters'),
-    body('simCountryISO')
-      .optional()
-      .trim()
-      .isLength({ min: 2, max: 3 })
-      .withMessage('SIM country ISO must be 2-3 characters'),
-    
-    // Optional memory and storage
-    body('totalMemoryGB')
-      .optional()
-      .isFloat({ min: 0 })
-      .withMessage('Total memory must be a positive number'),
-    body('freeMemoryGB')
-      .optional()
-      .isFloat({ min: 0 })
-      .withMessage('Free memory must be a positive number'),
-    body('totalStorageGB')
-      .optional()
-      .isFloat({ min: 0 })
-      .withMessage('Total storage must be a positive number'),
-    body('freeStorageGB')
-      .optional()
-      .isFloat({ min: 0 })
-      .withMessage('Free storage must be a positive number'),
-    body('usedMemoryPercentage')
-      .optional()
-      .isInt({ min: 0, max: 100 })
-      .withMessage('Used memory percentage must be between 0 and 100'),
-    
-    // Optional device state
-    body('orientation')
-      .optional()
-      .trim()
-      .isIn(['portrait', 'landscape'])
-      .withMessage('Orientation must be portrait or landscape'),
-    body('isRooted')
-      .optional()
-      .isBoolean()
-      .withMessage('isRooted must be a boolean'),
-    
-    // Additional device attributes
-    body('brand')
-      .optional()
-      .trim()
-      .isLength({ max: 50 })
-      .withMessage('Brand must be less than 50 characters'),
-    body('manufacturer')
-      .optional()
-      .trim()
-      .isLength({ max: 100 })
-      .withMessage('Manufacturer must be less than 100 characters'),
-    body('model')
-      .optional()
-      .trim()
-      .isLength({ max: 100 })
-      .withMessage('Model must be less than 100 characters'),
-    body('device')
-      .optional()
-      .trim()
-      .isLength({ max: 100 })
-      .withMessage('Device must be less than 100 characters'),
-    body('deviceName')
-      .optional()
-      .trim()
-      .isLength({ max: 100 })
-      .withMessage('Device name must be less than 100 characters'),
-    body('product')
-      .optional()
-      .trim()
-      .isLength({ max: 100 })
-      .withMessage('Product must be less than 100 characters'),
-    body('board')
-      .optional()
-      .trim()
-      .isLength({ max: 100 })
-      .withMessage('Board must be less than 100 characters'),
-    body('hardware')
-      .optional()
-      .trim()
-      .isLength({ max: 100 })
-      .withMessage('Hardware must be less than 100 characters'),
-    
-    // Android System Information
-    body('sdkVersion')
-      .optional()
-      .isInt({ min: 1, max: 100 })
-      .withMessage('SDK version must be a valid integer'),
-    body('androidVersion')
-      .optional()
-      .trim()
-      .isLength({ max: 20 })
-      .withMessage('Android version must be less than 20 characters'),
-    body('release')
-      .optional()
-      .trim()
-      .isLength({ max: 20 })
-      .withMessage('Release must be less than 20 characters'),
-    body('codename')
-      .optional()
-      .trim()
-      .isLength({ max: 50 })
-      .withMessage('Codename must be less than 50 characters'),
-    body('incremental')
-      .optional()
-      .trim()
-      .isLength({ max: 50 })
-      .withMessage('Incremental must be less than 50 characters'),
-    body('securityPatch')
-      .optional()
-      .trim()
-      .isLength({ max: 20 })
-      .withMessage('Security patch must be less than 20 characters'),
-    
-    // Additional device state
-    body('isEmulator')
-      .optional()
-      .isBoolean()
-      .withMessage('isEmulator must be a boolean'),
-    body('screenDensity')
-      .optional()
-      .isFloat({ min: 0 })
-      .withMessage('Screen density must be a positive number'),
-    body('screenResolution')
-      .optional()
-      .trim()
-      .matches(/^\d+x\d+$/)
-      .withMessage('Screen resolution must be in format WIDTHxHEIGHT'),
-    
-    // App Information
-    body('appVersionCode')
-      .optional()
-      .isInt({ min: 1 })
-      .withMessage('App version code must be a positive integer'),
-    body('appInstallTime')
-      .optional()
-      .isInt({ min: 0 })
-      .withMessage('App install time must be a positive integer'),
-    
+      .withMessage('Location info must be an object'),
+    body('deviceInfo')
+      .isObject()
+      .withMessage('Device info must be an object'),
+    body('batteryInfo')
+      .isObject()
+      .withMessage('Battery info must be an object'),
+    body('appVersionInfo')
+      .isObject()
+      .withMessage('App version info must be an object'),
+    body('networkInfo')
+      .isObject()
+      .withMessage('Network info must be an object'),
+    body('systemInfo')
+      .isObject()
+      .withMessage('System info must be an object'),
+    body('osInfo')
+      .isObject()
+      .withMessage('OS info must be an object'),
     // Data Collection
     body('collectedAt')
-      .optional()
-      .isInt({ min: 0 })
-      .withMessage('Collected at must be a positive integer'),
+      .isISO8601()
+      .withMessage('Collected at must be a valid ISO 8601 date string'),
   ],
 
   getDeviceById: [
@@ -871,7 +666,7 @@ export const deviceValidation = {
         const isPrismaId = /^[a-z0-9]{20,25}$/i.test(value);
         // Also accept standard UUID format
         const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
-        
+
         if (!isPrismaId && !isUUID) {
           throw new Error('Device ID must be a valid database ID format');
         }
@@ -886,7 +681,7 @@ export const deviceValidation = {
         const isPrismaId = /^[a-z0-9]{20,25}$/i.test(value);
         // Also accept standard UUID format
         const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
-        
+
         if (!isPrismaId && !isUUID) {
           throw new Error('Device ID must be a valid database ID format');
         }
@@ -921,7 +716,7 @@ export const deviceValidation = {
         const isPrismaId = /^[a-z0-9]{20,25}$/i.test(value);
         // Also accept standard UUID format
         const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
-        
+
         if (!isPrismaId && !isUUID) {
           throw new Error('Device ID must be a valid database ID format');
         }
@@ -936,7 +731,7 @@ export const deviceValidation = {
         const isPrismaId = /^[a-z0-9]{20,25}$/i.test(value);
         // Also accept standard UUID format
         const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
-        
+
         if (!isPrismaId && !isUUID) {
           throw new Error('Device ID must be a valid database ID format');
         }
@@ -958,7 +753,7 @@ export const deviceValidation = {
         const isPrismaId = /^[a-z0-9]{20,25}$/i.test(value);
         // Also accept standard UUID format
         const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
-        
+
         if (!isPrismaId && !isUUID) {
           throw new Error('Device ID must be a valid database ID format');
         }
@@ -995,7 +790,7 @@ export const deviceValidation = {
         const isPrismaId = /^[a-z0-9]{20,25}$/i.test(value);
         // Also accept standard UUID format
         const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
-        
+
         if (!isPrismaId && !isUUID) {
           throw new Error('Device ID must be a valid database ID format');
         }

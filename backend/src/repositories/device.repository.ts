@@ -123,7 +123,7 @@ export class DeviceRepositoryImpl extends BaseRepositoryImpl<Device> implements 
     try {
       await this.prisma.device.update({
         where: { deviceId },
-        data: { 
+        data: {
           lastSeenAt: new Date(),
           isOnline: true,
         },
@@ -167,14 +167,16 @@ export class DeviceRepositoryImpl extends BaseRepositoryImpl<Device> implements 
     }
   }
 
-  async updateStatus(id: string, isOnline: boolean, lastSeenAt?: Date, batteryLevel?: number): Promise<Device> {
+  async updateStatus(id: string, isOnline: boolean, lastSeenAt?: Date, batteryLevel?: number, latestTelemetryId?: string): Promise<Device> {
     try {
+      console.log('Updating device status', { id, isOnline, lastSeenAt, batteryLevel, latestTelemetryId });
       const device = await this.prisma.device.update({
-        where: { id },
+        where: { deviceId: id },
         data: {
           isOnline,
           lastSeenAt: lastSeenAt || new Date(),
           batteryLevel: batteryLevel || null,
+          latestTelemetryId: latestTelemetryId || null,
         },
       });
       logger.info('Device status updated', { id, isOnline });
@@ -225,6 +227,7 @@ export class DeviceRepositoryImpl extends BaseRepositoryImpl<Device> implements 
       appVersionCode: data.appVersionCode ?? null,
       appInstallTime: data.appInstallTime ?? null,
       collectedAt: data.collectedAt ?? null,
+      latestTelemetryId: data.latestTelemetryId ?? null,
     });
   }
 

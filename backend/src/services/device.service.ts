@@ -20,7 +20,7 @@ export class DeviceService implements IDeviceService {
   constructor(
     private deviceRepository: DeviceRepository,
     private deviceCommandRepository: DeviceCommandRepository
-  ) {}
+  ) { }
 
   async registerDevice(data: any): Promise<any> {
     try {
@@ -75,6 +75,7 @@ export class DeviceService implements IDeviceService {
         appVersionCode: data.appVersionCode || null,
         appInstallTime: data.appInstallTime || null,
         collectedAt: data.collectedAt || null,
+        latestTelemetryId: null,
       });
 
       // Cache device status
@@ -95,14 +96,14 @@ export class DeviceService implements IDeviceService {
   async updateDeviceStatus(deviceId: string, data: any): Promise<any> {
     try {
       // Update in database
-      await this.deviceRepository.updateStatus(deviceId, data.isOnline, new Date(), data.batteryLevel);
+      await this.deviceRepository.updateStatus(deviceId, data.isOnline, new Date(), data.batteryLevel, data.latestTelemetryId);
 
       // Update cache
       await redis.setDeviceStatus(deviceId, data);
 
       // Get updated device
       const device = await this.deviceRepository.findByDeviceId(deviceId);
-      
+
       logger.info('Device status updated successfully', { deviceId, data });
       return device;
     } catch (error) {
@@ -160,7 +161,7 @@ export class DeviceService implements IDeviceService {
   async getDevicesByTenant(tenantId: string, options: any = {}): Promise<any> {
     try {
       const result = await this.deviceRepository.findByTenant(tenantId, options);
-      
+
       // Update with cached status for each device
       for (const device of result.data) {
         const cachedStatus = await redis.getDeviceStatus(device.deviceId);
@@ -182,7 +183,7 @@ export class DeviceService implements IDeviceService {
   async getDevicesByUser(userId: string, options: any = {}): Promise<any> {
     try {
       const result = await this.deviceRepository.findByUser(userId, options);
-      
+
       // Update with cached status for each device
       for (const device of result.data) {
         const cachedStatus = await redis.getDeviceStatus(device.deviceId);
@@ -254,7 +255,7 @@ export class DeviceService implements IDeviceService {
   async sendCommand(data: any): Promise<any> {
     try {
       const { deviceId, command, payload } = data;
-      
+
       // Get device
       const device = await this.deviceRepository.findByDeviceId(deviceId);
       if (!device) {

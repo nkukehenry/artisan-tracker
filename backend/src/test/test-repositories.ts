@@ -8,7 +8,7 @@ async function testRepositories() {
     // Test Tenant Repository
     logger.info('Testing Tenant Repository...');
     const tenantRepo = container.getTenantRepository();
-    
+
     // Create a test tenant
     const testTenant = await tenantRepo.create({
       name: 'Test Company',
@@ -26,7 +26,7 @@ async function testRepositories() {
     // Test User Repository
     logger.info('Testing User Repository...');
     const userRepo = container.getUserRepository();
-    
+
     // Create a test user
     const testUser = await userRepo.create({
       email: 'test@test-company.com',
@@ -49,7 +49,7 @@ async function testRepositories() {
     // Test Device Repository
     logger.info('Testing Device Repository...');
     const deviceRepo = container.getDeviceRepository();
-    
+
     // Create a test device
     const testDevice = await deviceRepo.create({
       deviceId: 'TEST-DEVICE-001',
@@ -105,7 +105,7 @@ async function testRepositories() {
     // Test Device Command Repository
     logger.info('Testing Device Command Repository...');
     const commandRepo = container.getDeviceCommandRepository();
-    
+
     // Create a test command
     const testCommand = await commandRepo.create({
       deviceId: testDevice.id,

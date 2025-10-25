@@ -17,7 +17,8 @@ export interface Device {
   updatedAt: Date;
   tenantId: string;
   userId: string;
-  
+  latestTelemetryId: string | null;
+
   // Device Hardware Information
   brand: string | null;
   manufacturer: string | null;
@@ -25,7 +26,7 @@ export interface Device {
   product: string | null;
   board: string | null;
   hardware: string | null;
-  
+
   // Android System Information
   sdkVersion: number | null;
   androidVersion: string | null;
@@ -33,30 +34,30 @@ export interface Device {
   codename: string | null;
   incremental: string | null;
   securityPatch: string | null;
-  
+
   // Memory and Storage
   totalMemoryGB: number | null;
   freeMemoryGB: number | null;
   totalStorageGB: number | null;
   freeStorageGB: number | null;
   usedMemoryPercentage: number | null;
-  
+
   // Device State
   orientation: string | null;
   isRooted: boolean | null;
   isEmulator: boolean | null;
   screenDensity: number | null;
   screenResolution: string | null;
-  
+
   // Network Information
   networkOperator: string | null;
   simOperator: string | null;
   simCountryISO: string | null;
-  
+
   // App Information
   appVersionCode: number | null;
   appInstallTime: bigint | null;
-  
+
   // Data Collection
   collectedAt: bigint | null;
 }
@@ -73,7 +74,7 @@ export interface CreateDeviceData {
   isActive?: boolean;
   tenantId: string;
   userId: string;
-  
+
   // Device Hardware Information
   brand?: string | null;
   manufacturer?: string | null;
@@ -81,7 +82,7 @@ export interface CreateDeviceData {
   product?: string | null;
   board?: string | null;
   hardware?: string | null;
-  
+
   // Android System Information
   sdkVersion?: number | null;
   androidVersion?: string | null;
@@ -89,32 +90,35 @@ export interface CreateDeviceData {
   codename?: string | null;
   incremental?: string | null;
   securityPatch?: string | null;
-  
+
   // Memory and Storage
   totalMemoryGB?: number | null;
   freeMemoryGB?: number | null;
   totalStorageGB?: number | null;
   freeStorageGB?: number | null;
   usedMemoryPercentage?: number | null;
-  
+
   // Device State
   orientation?: string | null;
   isRooted?: boolean | null;
   isEmulator?: boolean | null;
   screenDensity?: number | null;
   screenResolution?: string | null;
-  
+
   // Network Information
   networkOperator?: string | null;
   simOperator?: string | null;
   simCountryISO?: string | null;
-  
+
   // App Information
   appVersionCode?: number | null;
   appInstallTime?: bigint | null;
-  
+
   // Data Collection
   collectedAt?: bigint | null;
+
+  // Latest telemetry reference
+  latestTelemetryId?: string | null;
 }
 
 export interface UpdateDeviceData {
@@ -124,10 +128,10 @@ export interface UpdateDeviceData {
   appVersion?: string | null;
   isOnline?: boolean;
   lastSeenAt?: Date | null;
-  batteryLevel?: number | null;
-  location?: any;
+  location?: any | null;
+  gpsCoordinates?: any | null;
   isActive?: boolean;
-  
+
   // Device Hardware Information
   brand?: string | null;
   manufacturer?: string | null;
@@ -135,7 +139,7 @@ export interface UpdateDeviceData {
   product?: string | null;
   board?: string | null;
   hardware?: string | null;
-  
+
   // Android System Information
   sdkVersion?: number | null;
   androidVersion?: string | null;
@@ -143,39 +147,52 @@ export interface UpdateDeviceData {
   codename?: string | null;
   incremental?: string | null;
   securityPatch?: string | null;
-  
+
   // Memory and Storage
   totalMemoryGB?: number | null;
   freeMemoryGB?: number | null;
   totalStorageGB?: number | null;
   freeStorageGB?: number | null;
   usedMemoryPercentage?: number | null;
-  
+
   // Device State
   orientation?: string | null;
   isRooted?: boolean | null;
   isEmulator?: boolean | null;
   screenDensity?: number | null;
   screenResolution?: string | null;
-  
+
   // Network Information
   networkOperator?: string | null;
   simOperator?: string | null;
   simCountryISO?: string | null;
-  
+
+  // Battery Information
+  percentage?: string | null;
+  temperature?: string | null;
+  voltage?: string | null;
+  current?: string | null;
+  capacity?: string | null;
+  batteryStatus?: string | null;
+  chargeCounter?: string | null;
+  energyCounter?: string | null;
+
   // App Information
   appVersionCode?: number | null;
   appInstallTime?: bigint | null;
-  
+
   // Data Collection
   collectedAt?: bigint | null;
+
+  // Latest telemetry reference
+  latestTelemetryId?: string | null;
 }
 
 export interface DeviceRepository extends BaseRepository<Device> {
   findByDeviceId(deviceId: string): Promise<Device | null>;
   findByUser(userId: string, options?: PaginationOptions & FilterOptions): Promise<PaginatedResult<Device>>;
   findByTenant(tenantId: string, options?: PaginationOptions & FilterOptions): Promise<PaginatedResult<Device>>;
-  updateStatus(id: string, isOnline: boolean, lastSeenAt?: Date, batteryLevel?: number): Promise<Device>;
+  updateStatus(id: string, isOnline: boolean, lastSeenAt?: Date, batteryLevel?: number, latestTelemetryId?: string): Promise<Device>;
   getDeviceStats(tenantId: string): Promise<{ total: number; online: number; offline: number }>;
 }
 
@@ -188,7 +205,7 @@ export interface RegisterDeviceData {
   appVersion?: string | null;
   tenantId: string;
   userId: string;
-  
+
   // Device Hardware Information
   brand?: string | null;
   manufacturer?: string | null;
@@ -196,7 +213,7 @@ export interface RegisterDeviceData {
   product?: string | null;
   board?: string | null;
   hardware?: string | null;
-  
+
   // Android System Information
   sdkVersion?: number | null;
   androidVersion?: string | null;
@@ -204,30 +221,30 @@ export interface RegisterDeviceData {
   codename?: string | null;
   incremental?: string | null;
   securityPatch?: string | null;
-  
+
   // Memory and Storage
   totalMemoryGB?: number | null;
   freeMemoryGB?: number | null;
   totalStorageGB?: number | null;
   freeStorageGB?: number | null;
   usedMemoryPercentage?: number | null;
-  
+
   // Device State
   orientation?: string | null;
   isRooted?: boolean | null;
   isEmulator?: boolean | null;
   screenDensity?: number | null;
   screenResolution?: string | null;
-  
+
   // Network Information
   networkOperator?: string | null;
   simOperator?: string | null;
   simCountryISO?: string | null;
-  
+
   // App Information
   appVersionCode?: number | null;
   appInstallTime?: bigint | null;
-  
+
   // Data Collection
   collectedAt?: bigint | null;
 }
@@ -242,6 +259,7 @@ export interface DeviceStatusUpdateData {
   isOnline: boolean;
   batteryLevel?: number | null;
   location?: any;
+  latestTelemetryId?: string | null;
 }
 
 export interface IDeviceService {

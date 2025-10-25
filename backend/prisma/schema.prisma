@@ -132,6 +132,10 @@ model Device {
   appActivities   AppActivity[]
   commands        DeviceCommand[]
   
+  // Latest telemetry reference
+  latestTelemetryId String?
+  latestTelemetry   Telemetry? @relation("DeviceLatestTelemetry", fields: [latestTelemetryId], references: [id])
+  
   @@map("devices")
 }
 
@@ -468,6 +472,9 @@ model Telemetry {
   // Timestamps
   collectedAt DateTime
   createdAt   DateTime @default(now())
+  
+  // Relations
+  devicesWithLatestTelemetry Device[] @relation("DeviceLatestTelemetry")
   
   @@map("telemetry")
   @@index([deviceId])

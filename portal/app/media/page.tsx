@@ -13,6 +13,7 @@ import { Trash2, Eye, Download } from 'lucide-react';
 import MediaViewerModal from '@/components/media/MediaViewerModal';
 import { useAppDispatch } from '@/lib/hooks';
 import { addToast } from '@/store/slices/appSlice';
+import { FaFile, FaImage, FaMusic, FaVideo } from 'react-icons/fa';
 
 export default function MediaPage() {
   const dispatch = useAppDispatch();
@@ -103,13 +104,13 @@ export default function MediaPage() {
   const getMediaIcon = (fileType: string) => {
     switch (fileType) {
       case 'AUDIO':
-        return '🎵';
+        return <FaMusic className="h-4 w-4 text-green-600" />;
       case 'PHOTO':
-        return '📷';
+        return <FaImage className="h-4 w-4 text-purple-600" />;
       case 'VIDEO':
-        return '🎥';
+        return <FaVideo className="h-4 w-4 text-red-600" />;
       default:
-        return '📄';
+        return <FaFile className="h-4 w-4 text-gray-600" />;
     }
   };
 
