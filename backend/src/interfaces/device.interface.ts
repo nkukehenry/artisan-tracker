@@ -18,48 +18,6 @@ export interface Device {
   tenantId: string;
   userId: string;
   latestTelemetryId: string | null;
-
-  // Device Hardware Information
-  brand: string | null;
-  manufacturer: string | null;
-  deviceName: string | null;
-  product: string | null;
-  board: string | null;
-  hardware: string | null;
-
-  // Android System Information
-  sdkVersion: number | null;
-  androidVersion: string | null;
-  release: string | null;
-  codename: string | null;
-  incremental: string | null;
-  securityPatch: string | null;
-
-  // Memory and Storage
-  totalMemoryGB: number | null;
-  freeMemoryGB: number | null;
-  totalStorageGB: number | null;
-  freeStorageGB: number | null;
-  usedMemoryPercentage: number | null;
-
-  // Device State
-  orientation: string | null;
-  isRooted: boolean | null;
-  isEmulator: boolean | null;
-  screenDensity: number | null;
-  screenResolution: string | null;
-
-  // Network Information
-  networkOperator: string | null;
-  simOperator: string | null;
-  simCountryISO: string | null;
-
-  // App Information
-  appVersionCode: number | null;
-  appInstallTime: bigint | null;
-
-  // Data Collection
-  collectedAt: bigint | null;
 }
 
 export interface CreateDeviceData {
@@ -74,49 +32,6 @@ export interface CreateDeviceData {
   isActive?: boolean;
   tenantId: string;
   userId: string;
-
-  // Device Hardware Information
-  brand?: string | null;
-  manufacturer?: string | null;
-  deviceName?: string | null;
-  product?: string | null;
-  board?: string | null;
-  hardware?: string | null;
-
-  // Android System Information
-  sdkVersion?: number | null;
-  androidVersion?: string | null;
-  release?: string | null;
-  codename?: string | null;
-  incremental?: string | null;
-  securityPatch?: string | null;
-
-  // Memory and Storage
-  totalMemoryGB?: number | null;
-  freeMemoryGB?: number | null;
-  totalStorageGB?: number | null;
-  freeStorageGB?: number | null;
-  usedMemoryPercentage?: number | null;
-
-  // Device State
-  orientation?: string | null;
-  isRooted?: boolean | null;
-  isEmulator?: boolean | null;
-  screenDensity?: number | null;
-  screenResolution?: string | null;
-
-  // Network Information
-  networkOperator?: string | null;
-  simOperator?: string | null;
-  simCountryISO?: string | null;
-
-  // App Information
-  appVersionCode?: number | null;
-  appInstallTime?: bigint | null;
-
-  // Data Collection
-  collectedAt?: bigint | null;
-
   // Latest telemetry reference
   latestTelemetryId?: string | null;
 }
@@ -131,59 +46,6 @@ export interface UpdateDeviceData {
   location?: any | null;
   gpsCoordinates?: any | null;
   isActive?: boolean;
-
-  // Device Hardware Information
-  brand?: string | null;
-  manufacturer?: string | null;
-  deviceName?: string | null;
-  product?: string | null;
-  board?: string | null;
-  hardware?: string | null;
-
-  // Android System Information
-  sdkVersion?: number | null;
-  androidVersion?: string | null;
-  release?: string | null;
-  codename?: string | null;
-  incremental?: string | null;
-  securityPatch?: string | null;
-
-  // Memory and Storage
-  totalMemoryGB?: number | null;
-  freeMemoryGB?: number | null;
-  totalStorageGB?: number | null;
-  freeStorageGB?: number | null;
-  usedMemoryPercentage?: number | null;
-
-  // Device State
-  orientation?: string | null;
-  isRooted?: boolean | null;
-  isEmulator?: boolean | null;
-  screenDensity?: number | null;
-  screenResolution?: string | null;
-
-  // Network Information
-  networkOperator?: string | null;
-  simOperator?: string | null;
-  simCountryISO?: string | null;
-
-  // Battery Information
-  percentage?: string | null;
-  temperature?: string | null;
-  voltage?: string | null;
-  current?: string | null;
-  capacity?: string | null;
-  batteryStatus?: string | null;
-  chargeCounter?: string | null;
-  energyCounter?: string | null;
-
-  // App Information
-  appVersionCode?: number | null;
-  appInstallTime?: bigint | null;
-
-  // Data Collection
-  collectedAt?: bigint | null;
-
   // Latest telemetry reference
   latestTelemetryId?: string | null;
 }
