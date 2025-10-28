@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import AuthWrapper from '@/components/auth/AuthWrapper';
 import Layout from '@/components/layout/Layout';
 import { useDeviceContext } from '@/contexts/DeviceContext';
@@ -14,6 +14,26 @@ import { useWebSocketConnection } from '@/hooks/useWebSocketConnection';
 import { useWebRTC } from '@/hooks/useWebRTC';
 import { useRemoteCommands } from '@/hooks/useRemoteCommands';
 import { Smartphone } from 'lucide-react';
+
+// Generate or retrieve a unique web client device ID
+function getWebClientDeviceId(): string {
+  // Check if we're in browser environment
+  if (typeof window === 'undefined') {
+    // Return a default ID during SSR
+    return `web_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+  }
+
+  const storageKey = 'web_client_device_id';
+  let deviceId = sessionStorage.getItem(storageKey);
+
+  if (!deviceId) {
+    // Generate a unique ID: web_timestamp_random
+    deviceId = `web_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+    sessionStorage.setItem(storageKey, deviceId);
+  }
+
+  return deviceId;
+}
 
 interface Recording {
   id: string;
@@ -30,10 +50,16 @@ export default function RemoteControlPage() {
   const { selectedDevice } = useDeviceContext();
   const wsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'ws://localhost:9090/signaling';
 
+  // Generate unique web client device ID (persisted in session storage)
+  const webClientDeviceId = useMemo(() => getWebClientDeviceId(), []);
+
   const [isConnecting, setIsConnecting] = useState(false);
   const [isScreenShareModalOpen, setIsScreenShareModalOpen] = useState(false);
   const [screenShareStatus, setScreenShareStatus] = useState('disconnected');
   const [previousRecordings, setPreviousRecordings] = useState<Recording[]>([]);
+
+  // Store screen share command to send when WebSocket connects
+  const [pendingScreenShareCommand, setPendingScreenShareCommand] = useState(false);
 
   // WebSocket connection
   const {
@@ -45,16 +71,36 @@ export default function RemoteControlPage() {
     url: wsUrl,
     onMessage: handleWebSocketMessage,
     onOpen: () => {
+      console.log('WebSocket connected, checking for pending commands');
       setScreenShareStatus('Connected');
-      setIsConnecting(false); // Connection established
+      setIsConnecting(false);
+
+      // If screen share is active and we have a pending command, send it
+      if (pendingScreenShareCommand && selectedDevice && isScreenShareModalOpen) {
+        const streamCommand = {
+          type: 'client-message',
+          deviceId: webClientDeviceId,
+          targetDeviceId: selectedDevice.deviceId,
+          action: 'stream_screen',
+          duration: 30000,
+          timestamp: Date.now(),
+        };
+
+        console.log('Sending pending stream_screen command:', streamCommand);
+        if (wsConnection) {
+          wsConnection.send(JSON.stringify(streamCommand));
+          setScreenShareStatus('Waiting for offer...');
+        }
+        setPendingScreenShareCommand(false);
+      }
     },
     onClose: () => {
       setScreenShareStatus('disconnected');
-      setIsConnecting(false); // Stop loading on close
+      setIsConnecting(false);
     },
     onError: () => {
       setScreenShareStatus('error');
-      setIsConnecting(false); // Stop loading on error
+      setIsConnecting(false);
     },
   });
 
@@ -62,6 +108,8 @@ export default function RemoteControlPage() {
   const { peerConnection, setupPeerConnection, handleOffer, handleIceCandidate } =
     useWebRTC({
       wsConnection,
+      webClientDeviceId,
+      targetDeviceId: selectedDevice?.deviceId,
       onStatusChange: setScreenShareStatus,
     });
 
@@ -70,6 +118,7 @@ export default function RemoteControlPage() {
     selectedDevice,
     wsConnection,
     wsUrl,
+    webClientDeviceId,
     onWebSocketReconnect: reconnectWebSocket,
   });
 
@@ -81,26 +130,48 @@ export default function RemoteControlPage() {
       candidate?: string;
       label?: number;
       id?: string;
+      sdp?: string;
+      sdpMLineIndex?: number;
+      sdpMid?: string;
       data?: { result?: string };
     };
 
-    // Handle ICE candidate without type
-    if (msg.candidate && !msg.type) {
-      handleIceCandidate({
-        candidate: msg.candidate,
-        label: msg.label,
-        id: msg.id,
-      } as never);
-      return;
-    }
+    console.log('Received WebSocket message:', msg);
 
     // Handle different message types
     switch (msg.type) {
       case 'offer':
-        handleOffer(msg as RTCSessionDescriptionInit);
+        console.log('Received WebRTC offer, handling...');
+        handleOffer({
+          type: 'offer',
+          sdp: msg.sdp,
+        } as RTCSessionDescriptionInit);
+        break;
+      case 'answer':
+        console.log('Received WebRTC answer');
+        // Answers are handled automatically by the peer connection
         break;
       case 'candidate':
-        handleIceCandidate(msg as never);
+        console.log('Received ICE candidate, processing...');
+        // Format ICE candidate for handleIceCandidate
+        const candidateObj = {
+          candidate: msg.candidate,
+          label: msg.label,
+          id: msg.id,
+          sdpMLineIndex: msg.sdpMLineIndex ?? msg.label,
+          sdpMid: msg.sdpMid ?? msg.id,
+        };
+        handleIceCandidate(candidateObj as never);
+        break;
+      case 'success':
+        console.log('Received success message');
+        if (isScreenShareModalOpen) {
+          setScreenShareStatus('Connected - waiting for offer');
+        }
+        break;
+      case 'error':
+        console.error('Received error message:', msg);
+        setScreenShareStatus('error');
         break;
       case 'command-response':
         dispatch(
@@ -160,15 +231,37 @@ export default function RemoteControlPage() {
       if (isScreenShareModalOpen) {
         // Close modal and cleanup
         setIsScreenShareModalOpen(false);
+        setScreenShareStatus('disconnected');
         // closePeerConnection();
         // disconnectWebSocket();
-        // setScreenShareStatus('disconnected');
       } else {
-        // Open modal, connect WebSocket, and setup peer connection
+        // Open modal and setup peer connection
         setIsScreenShareModalOpen(true);
-        connectWebSocket(true);
-        setupPeerConnection();
         setScreenShareStatus('Connecting...');
+
+        // Setup WebRTC peer connection first
+        setupPeerConnection();
+
+        // Send stream_screen command to Android device
+        if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+          const streamCommand = {
+            type: 'client-message',
+            deviceId: webClientDeviceId,
+            targetDeviceId: selectedDevice.deviceId,
+            action: 'stream_screen',
+            duration: 30000, // 30 seconds
+            timestamp: Date.now(),
+          };
+
+          console.log('Sending stream_screen command:', streamCommand);
+          wsConnection.send(JSON.stringify(streamCommand));
+          setScreenShareStatus('Waiting for offer...');
+        } else {
+          // If WebSocket not connected, set pending flag and wait for connection
+          console.log('WebSocket not connected, setting pending flag...');
+          setPendingScreenShareCommand(true);
+          setScreenShareStatus('Connecting...');
+        }
       }
     } catch (err) {
       dispatch(

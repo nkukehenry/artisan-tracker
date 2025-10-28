@@ -2,6 +2,8 @@ import { useState, useCallback, useRef } from 'react';
 
 interface UseWebRTCProps {
   wsConnection: WebSocket | null;
+  webClientDeviceId?: string;
+  targetDeviceId?: string;
   onStatusChange?: (status: string) => void;
 }
 
@@ -13,7 +15,7 @@ interface UseWebRTCReturn {
   closePeerConnection: () => void;
 }
 
-export const useWebRTC = ({ wsConnection, onStatusChange }: UseWebRTCProps): UseWebRTCReturn => {
+export const useWebRTC = ({ wsConnection, webClientDeviceId, targetDeviceId, onStatusChange }: UseWebRTCProps): UseWebRTCReturn => {
   const [peerConnection, setPeerConnection] = useState<RTCPeerConnection | null>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
 
@@ -42,16 +44,17 @@ export const useWebRTC = ({ wsConnection, onStatusChange }: UseWebRTCProps): Use
       if (!event.candidate) return;
 
       if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
-        wsConnection.send(
-          JSON.stringify({
-            type: 'candidate',
-            sdpMLineIndex: event.candidate.sdpMLineIndex,
-            sdpMid: event.candidate.sdpMid,
-            candidate: event.candidate.candidate,
-            label: event.candidate.sdpMLineIndex,
-            id: event.candidate.sdpMid,
-          })
-        );
+        const candidateMessage = {
+          type: 'candidate',
+          deviceId: webClientDeviceId,
+          targetDeviceId: targetDeviceId,
+          sdpMLineIndex: event.candidate.sdpMLineIndex,
+          sdpMid: event.candidate.sdpMid,
+          candidate: event.candidate.candidate,
+          label: event.candidate.sdpMLineIndex,
+          id: event.candidate.sdpMid,
+        };
+        wsConnection.send(JSON.stringify(candidateMessage));
       } else {
         console.warn('WebSocket not available for sending ICE candidate');
       }
@@ -76,7 +79,7 @@ export const useWebRTC = ({ wsConnection, onStatusChange }: UseWebRTCProps): Use
     setPeerConnection(pc);
     peerConnectionRef.current = pc;
     return pc;
-  }, [wsConnection, onStatusChange]);
+  }, [wsConnection, webClientDeviceId, targetDeviceId, onStatusChange]);
 
   const handleOffer = useCallback(
     async (offer: RTCSessionDescriptionInit) => {
@@ -100,7 +103,13 @@ export const useWebRTC = ({ wsConnection, onStatusChange }: UseWebRTCProps): Use
         await pc.setLocalDescription(answer);
 
         if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
-          wsConnection.send(JSON.stringify(answerPayload));
+          const answerMessage = {
+            ...answerPayload,
+            type: 'answer',
+            deviceId: webClientDeviceId,
+            targetDeviceId: targetDeviceId,
+          };
+          wsConnection.send(JSON.stringify(answerMessage));
           if (onStatusChange) {
             onStatusChange('Waiting for stream...');
           }
@@ -112,7 +121,7 @@ export const useWebRTC = ({ wsConnection, onStatusChange }: UseWebRTCProps): Use
         }
       }
     },
-    [wsConnection, setupPeerConnection, onStatusChange]
+    [wsConnection, webClientDeviceId, targetDeviceId, setupPeerConnection, onStatusChange]
   );
 
   const handleIceCandidate = useCallback(

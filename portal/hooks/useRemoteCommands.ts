@@ -7,6 +7,7 @@ interface UseRemoteCommandsProps {
   selectedDevice: Device | null;
   wsConnection: WebSocket | null;
   wsUrl: string;
+  webClientDeviceId?: string;
   onWebSocketReconnect: (isScreenShare?: boolean) => void;
 }
 
@@ -19,6 +20,7 @@ export const useRemoteCommands = ({
   selectedDevice,
   wsConnection,
   wsUrl,
+  webClientDeviceId,
   onWebSocketReconnect,
 }: UseRemoteCommandsProps): UseRemoteCommandsReturn => {
   const dispatch = useAppDispatch();
@@ -64,10 +66,12 @@ export const useRemoteCommands = ({
 
       setIsSendingCommand(true);
       try {
+        // Use channel-based routing: send to specific target device
         const commandPayload = {
           type: 'client-message',
           action: command,
-          deviceId: selectedDevice.deviceId,
+          deviceId: webClientDeviceId || 'web_client', // Web client device ID
+          targetDeviceId: selectedDevice.deviceId, // Target Android device
           duration: (payload?.duration as number) || 30,
           timestamp: Date.now(),
         };
@@ -96,7 +100,7 @@ export const useRemoteCommands = ({
         dispatch(setLoading({ isLoading: false, message: 'Command sent successfully' }));
       }
     },
-    [selectedDevice, wsConnection, wsUrl, onWebSocketReconnect, dispatch]
+    [selectedDevice, wsConnection, wsUrl, webClientDeviceId, onWebSocketReconnect, dispatch]
   );
 
   return {

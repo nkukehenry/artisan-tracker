@@ -36,19 +36,7 @@ export const useWebSocketConnection = ({
   const connect = useCallback((isScreenShare: boolean = false) => {
     // Don't create a new connection if one is already open
     if (wsConnection?.readyState === WebSocket.OPEN) {
-      console.log('WebSocket already connected', isScreenShare);
-
-      if (isScreenShare) {
-        console.log('Sending screen share command');
-        wsConnection.send(
-          JSON.stringify(
-            {
-              type: 'client-message', action: 'stream_screen',
-              duration: 3000, timestamp: Date.now(),
-            }));
-
-      }
-
+      console.log('WebSocket already connected');
       return;
     }
 
@@ -66,18 +54,25 @@ export const useWebSocketConnection = ({
       setWsConnection(ws);
       reconnectAttemptsRef.current = 0; // Reset reconnect attempts on successful connection
 
+      // Register this web client as a device with the signaling server
+      const webClientDeviceId = typeof window !== 'undefined'
+        ? sessionStorage.getItem('web_client_device_id') || 'web_client'
+        : 'web_client';
+      ws.send(
+        JSON.stringify({
+          type: 'device_registration',
+          deviceId: webClientDeviceId,
+          deviceInfo: {
+            deviceId: webClientDeviceId,
+            platform: 'web',
+            timestamp: Date.now(),
+          }
+        })
+      );
+      console.log('Registered web client device:', webClientDeviceId);
+
       if (onOpen) {
         onOpen();
-      }
-
-      if (isScreenShare) {
-        console.log('Sending screen share command after connection');
-        ws.send(
-          JSON.stringify(
-            {
-              type: 'client-message', action: 'stream_screen',
-              duration: 3000, timestamp: Date.now(),
-            }));
       }
     };
 
