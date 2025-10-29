@@ -82,7 +82,7 @@ export default function RemoteControlPage() {
           deviceId: webClientDeviceId,
           targetDeviceId: selectedDevice.deviceId,
           action: 'stream_screen',
-          duration: 30000,
+          duration: 30,
           timestamp: Date.now(),
         };
 

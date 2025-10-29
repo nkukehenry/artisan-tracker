@@ -6,6 +6,7 @@ import Layout from '@/components/layout/Layout';
 import { Monitor, Volume2, RefreshCw, Smartphone } from 'lucide-react';
 import { useDeviceContext } from '@/contexts/DeviceContext';
 import { useWebSocketContext, useWebSocketMessage } from '@/contexts/WebSocketContext';
+import ScreenShareModal from '@/components/devices/ScreenShareModal';
 
 interface ConnectedDevice {
     deviceId: string;
@@ -39,6 +40,8 @@ export default function RemoteControlPage() {
     const [streamingActive, setStreamingActive] = useState(false);
     const [duration, setDuration] = useState<number>(30); // Default duration in seconds
     const streamTimerRef = useRef<NodeJS.Timeout | null>(null); // Timer for auto-reset
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [streamType, setStreamType] = useState<'audio' | 'video' | 'screen' | null>(null);
 
     // Use global device context
     const { selectedDevice } = useDeviceContext();
@@ -86,9 +89,10 @@ export default function RemoteControlPage() {
             updateStatus('Remote track received', 'success');
             console.log('Received track:', ev.track.kind);
 
-            if (!remoteVideoRef.current) return;
-
             if (ev.track.kind === 'audio') {
+                // Audio streams use the main page video element
+                if (!remoteVideoRef.current) return;
+
                 console.log('Audio track received - enabling playback');
                 console.log('Audio track details:', {
                     id: ev.track.id,
@@ -116,10 +120,21 @@ export default function RemoteControlPage() {
                     updateStatus(`Audio playback error: ${err.message}`, 'error');
                 });
             } else {
-                remoteVideoRef.current.srcObject = ev.streams[0];
-                remoteVideoRef.current.muted = true;
-                remoteVideoRef.current.play().catch((err) => console.error('Video play error:', err));
-                setStreamingActive(true);
+                // Video and screen streams use the modal's video element
+                const videoElement = isModalOpen
+                    ? document.getElementById('remoteVideo') as HTMLVideoElement
+                    : remoteVideoRef.current;
+
+                if (videoElement) {
+                    videoElement.srcObject = ev.streams[0];
+                    videoElement.muted = streamType === 'screen' ? false : true;
+                    videoElement.play().then(() => {
+                        console.log('Video playback started successfully');
+                        setStreamingActive(true);
+                    }).catch((err) => {
+                        console.error('Video play error:', err);
+                    });
+                }
             }
         };
 
@@ -177,7 +192,7 @@ export default function RemoteControlPage() {
         setPeerConnection(pc);
         peerConnectionRef.current = pc;
         return pc;
-    }, [deviceId, peerConnection, updateStatus, sendMessage, selectedDevice]);
+    }, [deviceId, peerConnection, updateStatus, sendMessage, selectedDevice, isModalOpen, streamType]);
 
     // WebRTC offer handler
     const handleWebRTCOffer = useCallback((msg: WebSocketMessage & RTCSessionDescriptionInit) => {
@@ -631,8 +646,14 @@ export default function RemoteControlPage() {
             peerConnectionRef.current = null;
         }
 
+        // Clear video elements
         if (remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = null;
+        }
+
+        const modalVideo = document.getElementById('remoteVideo') as HTMLVideoElement;
+        if (modalVideo) {
+            modalVideo.srcObject = null;
         }
 
         // Clear remote device ID reference
@@ -647,6 +668,10 @@ export default function RemoteControlPage() {
             streamTimerRef.current = null;
         }
 
+        // Close modal if open
+        setIsModalOpen(false);
+        setStreamType(null);
+
         updateStatus('Stream ended', 'info');
     }, [updateStatus]);
 
@@ -659,6 +684,17 @@ export default function RemoteControlPage() {
         // Reset any existing connection first
         resetPeerConnection();
 
+        // Determine stream type and open modal for video/screen
+        const isVisualStream = action === 'stream_video' || action === 'stream_screen';
+        const streamTypeValue = action === 'stream_audio' ? 'audio' : action === 'stream_video' ? 'video' : 'screen';
+
+        if (isVisualStream) {
+            setIsModalOpen(true);
+            setStreamType(streamTypeValue);
+        } else {
+            setStreamType('audio');
+        }
+
         const targetId = selectedDevice?.deviceId || null;
         sendAction(action, duration, null, targetId);
 
@@ -667,11 +703,14 @@ export default function RemoteControlPage() {
         streamTimerRef.current = setTimeout(() => {
             console.log(`Stream duration (${duration}s) completed, resetting connection`);
             resetPeerConnection();
-            // sendAction('stop_streaming', null, null, targetId);
         }, durationMs);
 
         const actionDisplayName = action.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         updateStatus(`Starting ${actionDisplayName} for ${duration} seconds`, 'info');
+    };
+
+    const handleCloseModal = () => {
+        resetPeerConnection();
     };
 
     return (
@@ -713,23 +752,24 @@ export default function RemoteControlPage() {
                         })()}
                     </div>
 
-                    {/* Video Section */}
-                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-200">
-                            <h2 className="text-lg font-semibold text-gray-900">Live Stream</h2>
-                            <p className="text-sm text-gray-600">Real-time audio/video feed from device</p>
+                    {/* Audio Video Section (for audio streams only) */}
+                    {streamType === 'audio' && (
+                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                            <div className="px-6 py-4 border-b border-gray-200">
+                                <h2 className="text-lg font-semibold text-gray-900">Live Audio Stream</h2>
+                                <p className="text-sm text-gray-600">Real-time audio feed from device</p>
+                            </div>
+                            <div className="p-6">
+                                <video
+                                    ref={remoteVideoRef}
+                                    autoPlay
+                                    playsInline
+                                    controls
+                                    className="w-full max-w-2xl h-64 bg-black rounded-lg"
+                                />
+                            </div>
                         </div>
-                        <div className="p-6">
-                            <video
-                                ref={remoteVideoRef}
-                                id="remoteVideo"
-                                autoPlay
-                                playsInline
-                                controls
-                                className="w-full max-w-2xl h-64 bg-black rounded-lg"
-                            />
-                        </div>
-                    </div>
+                    )}
 
                     {/* Controls */}
                     <div className="bg-white rounded-lg border border-gray-200">
@@ -787,6 +827,18 @@ export default function RemoteControlPage() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Screen Share Modal */}
+                    {selectedDevice && (
+                        <ScreenShareModal
+                            isOpen={isModalOpen}
+                            onClose={handleCloseModal}
+                            deviceName={selectedDevice.name}
+                            deviceId={selectedDevice.deviceId}
+                            screenShareStatus={streamingActive ? 'connected' : 'connecting...'}
+                            isConnected={streamingActive && isConnected}
+                        />
+                    )}
 
                 </div>
             </Layout>
