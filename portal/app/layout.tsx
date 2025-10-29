@@ -5,6 +5,7 @@ import ReduxProvider from "@/components/providers/ReduxProvider";
 import AppProvider from "@/components/providers/AppProvider";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { DeviceProvider } from "@/contexts/DeviceContext";
+import WebSocketProviderWrapper from "@/components/providers/WebSocketProviderWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,9 +35,11 @@ export default function RootLayout({
         <ThemeProvider>
           <ReduxProvider>
             <DeviceProvider>
-              <AppProvider>
-                {children}
-              </AppProvider>
+              <WebSocketProviderWrapper>
+                <AppProvider>
+                  {children}
+                </AppProvider>
+              </WebSocketProviderWrapper>
             </DeviceProvider>
           </ReduxProvider>
         </ThemeProvider>

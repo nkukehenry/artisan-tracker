@@ -20,22 +20,68 @@ export const useWebRTC = ({ wsConnection, webClientDeviceId, targetDeviceId, onS
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
 
   const setupPeerConnection = useCallback(() => {
+    // Only create a new peer connection if one doesn't exist or the current one is closed
+    if (peerConnectionRef.current && peerConnectionRef.current.connectionState !== 'closed') {
+      console.log('Peer connection already exists, reusing it');
+      return peerConnectionRef.current;
+    }
+
+    console.log('Creating new peer connection');
     const pc = new RTCPeerConnection({
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
     });
 
     pc.ontrack = (event) => {
-      console.log('Remote track received');
-      if (onStatusChange) {
-        onStatusChange('Live');
-      }
+      console.log('Remote track received:', event.track.kind);
+      console.log('Stream ID:', event.streams[0]?.id);
+      console.log('Tracks in stream:', event.streams[0]?.getTracks());
 
       const remoteVideo = document.getElementById('remoteVideo') as HTMLVideoElement;
-      if (remoteVideo) {
-        remoteVideo.srcObject = event.streams[0];
-      } else {
+      if (!remoteVideo) {
         console.error('Remote video element not found for track received');
+        return;
       }
+
+      const handlePlayback = () => {
+        try {
+          // Handle audio vs video tracks differently
+          if (event.track.kind === 'audio') {
+            console.log('Audio track received - enabling playback');
+            remoteVideo.muted = false; // Unmute for audio
+            if (onStatusChange) {
+              onStatusChange('Live - Audio streaming');
+            }
+          } else {
+            console.log('Video track received');
+            remoteVideo.muted = true;
+            if (onStatusChange) {
+              onStatusChange('Live');
+            }
+          }
+
+          // Only set srcObject and play if not already set
+          if (remoteVideo.srcObject !== event.streams[0]) {
+            remoteVideo.srcObject = event.streams[0];
+          }
+
+          // Attempt to play, but don't throw if it fails
+          const playPromise = remoteVideo.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => console.log(`${event.track.kind} playback started`))
+              .catch(err => {
+                if (err.name !== 'AbortError' && err.name !== 'NotAllowedError') {
+                  console.error(`${event.track.kind} play error:`, err);
+                }
+              });
+          }
+        } catch (err) {
+          console.error('Error in track handler:', err);
+        }
+      };
+
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(handlePlayback);
     };
 
     pc.onicecandidate = (event) => {
@@ -61,19 +107,26 @@ export const useWebRTC = ({ wsConnection, webClientDeviceId, targetDeviceId, onS
     };
 
     pc.onconnectionstatechange = () => {
-      console.log('Peer connection state:', pc.connectionState);
+      console.log(`=== WebRTC connection state changed: ${pc.connectionState} ===`);
+      console.log(`Signaling state: ${pc.signalingState}`);
+      console.log(`ICE gathering state: ${pc.iceGatheringState}`);
 
       if (onStatusChange) {
         onStatusChange(pc.connectionState);
       }
 
       if (pc.connectionState === 'connected') {
-        const remoteVideo = document.getElementById('remoteVideo') as HTMLVideoElement;
-        if (remoteVideo) {
-          remoteVideo.muted = true;
-          remoteVideo.play().catch((err) => console.error('Video play error:', err));
-        }
+        console.log('=== WebRTC connection established successfully ===');
+        // Playback is handled in ontrack handler, don't force play here to avoid interruption
       }
+    };
+
+    pc.oniceconnectionstatechange = () => {
+      console.log(`=== ICE connection state changed: ${pc.iceConnectionState} ===`);
+    };
+
+    pc.onicegatheringstatechange = () => {
+      console.log(`=== ICE gathering state changed: ${pc.iceGatheringState} ===`);
     };
 
     setPeerConnection(pc);

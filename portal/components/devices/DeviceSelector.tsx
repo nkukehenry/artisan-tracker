@@ -14,9 +14,6 @@ export default function DeviceSelector({ className = '' }: DeviceSelectorProps) 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
 
-    // Debug: Log the devices value to understand its structure
-    console.log('DeviceSelector - devices value:', devices, 'type:', typeof devices, 'isArray:', Array.isArray(devices));
-
     // Ensure devices is an array before filtering
     const devicesArray = Array.isArray(devices) ? devices : [];
     const filteredDevices = devicesArray.filter(device =>

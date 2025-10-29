@@ -31,6 +31,7 @@ interface Message {
   sdpMLineIndex?: number;
   sdpMid?: string;
   data?: any;
+  fromDevice?: string; // Sender device ID (used when deviceId is set to recipient)
 }
 
 enum RTCSdpType {
@@ -280,30 +281,69 @@ export class SignalingService {
 
     logger.debug('WebRTC signaling message', { type, deviceId, targetDeviceId });
 
-    // If targetDeviceId is specified, route to specific device
-    if (targetDeviceId) {
+    // For offer and answer, targetDeviceId is strongly recommended for proper routing
+    // If missing, we'll infer routing for offers (Android -> Web) but warn about it
+    if ((type === 'offer' || type === 'answer') && !targetDeviceId) {
+      // For offers from Android devices (not web), infer web client as target
+      // For answers from web clients, we require targetDeviceId (which should be set by web client)
+      if (type === 'offer' && deviceId && !deviceId.startsWith('web_')) {
+        // Android device sending offer - find a web client to send to
+        // If there's only one web client, route to it; otherwise broadcast with warning
+        const webClients = Array.from(this.deviceChannels.entries())
+          .filter(([id]) => id.startsWith('web_'));
+
+        if (webClients.length === 0) {
+          logger.warn('Android device sent offer but no web clients connected', { deviceId });
+          this.sendError(ws, 'No web clients available to receive offer', deviceId || undefined);
+          return;
+        } else if (webClients.length === 1) {
+          // Single web client - route to it
+          const [targetId] = webClients[0];
+          logger.info('Inferring targetDeviceId for offer', { deviceId, inferredTarget: targetId });
+          message.targetDeviceId = targetId; // Update message with inferred target
+        } else {
+          // Multiple web clients - log warning but broadcast (should be avoided)
+          logger.warn('Android device sent offer without targetDeviceId and multiple web clients exist', {
+            deviceId,
+            webClientsCount: webClients.length
+          });
+          this.broadcastToAllDevices(message, deviceId);
+          return;
+        }
+      } else if (type === 'answer') {
+        // Answers should always have targetDeviceId
+        logger.error('WebRTC answer missing targetDeviceId, rejecting', { type, deviceId });
+        this.sendError(ws, `targetDeviceId is required for ${type} messages`, deviceId || undefined);
+        return;
+      }
+    }
+
+    // If targetDeviceId is specified (or inferred), route to specific device
+    const finalTargetDeviceId = message.targetDeviceId || targetDeviceId;
+    if (finalTargetDeviceId) {
       const signalingMessage = {
         type,
         sdp: message.sdp,
         label: message.label,
         id: message.id,
         candidate: message.candidate,
-        sdpMLineIndex: message.sdpMLineIndex ?? message.label,
-        sdpMid: message.sdpMid ?? message.id,
+        // sdpMLineIndex: message.sdpMLineIndex ?? message.label,
+        // sdpMid: message.sdpMid ?? message.id,
         deviceId,
         timestamp: Date.now()
       };
 
-      if (this.sendToDevice(targetDeviceId, signalingMessage)) {
-        logger.debug('WebRTC message sent', { type, targetDeviceId });
+      if (this.sendToDevice(finalTargetDeviceId, signalingMessage)) {
+        logger.debug('WebRTC message sent', { type, targetDeviceId: finalTargetDeviceId });
       } else {
-        logger.warn('Failed to send WebRTC message', { type, targetDeviceId });
-        this.sendError(ws, `Target device ${targetDeviceId} not found`, deviceId || undefined);
+        logger.warn('Failed to send WebRTC message', { type, targetDeviceId: finalTargetDeviceId });
+        this.sendError(ws, `Target device ${finalTargetDeviceId} not found`, deviceId || undefined);
       }
     } else {
-      // Broadcast to all other devices (excluding sender)
+      // For candidates only: broadcast to all other devices (excluding sender) if no targetDeviceId
+      // This provides backward compatibility but is not recommended for offers/answers
+      logger.debug('WebRTC candidate broadcasted (no targetDeviceId)', { type, deviceId });
       this.broadcastToAllDevices(message, deviceId);
-      logger.debug('WebRTC message broadcasted', { type, deviceId });
     }
   }
 
@@ -492,15 +532,22 @@ export class SignalingService {
       ? message
       : JSON.stringify(message);
 
+    // Get the WebSocket for the excluded device (if any)
+    const excludeWs = excludeDeviceId ? this.deviceChannels.get(excludeDeviceId) : undefined;
+
     let sentCount = 0;
     this.wss.clients.forEach((client) => {
+      // Skip the excluded client
+      if (client === excludeWs) {
+        return;
+      }
       if (client.readyState === WebSocket.OPEN) {
         client.send(messageStr);
         sentCount++;
       }
     });
 
-    logger.debug('Message sent to all devices', { recipients: sentCount });
+    logger.debug('Message sent to all devices', { recipients: sentCount, excludeDeviceId });
   }
 
   /**
