@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import AuthWrapper from '@/components/auth/AuthWrapper';
 import Layout from '@/components/layout/Layout';
-import { Monitor, Square, RefreshCw, Volume2, AlertCircle } from 'lucide-react';
+import { Monitor, Volume2 } from 'lucide-react';
 import { useDeviceContext } from '@/contexts/DeviceContext';
 import { useWebSocketContext, useWebSocketMessage } from '@/contexts/WebSocketContext';
 
@@ -37,6 +37,8 @@ export default function RemoteControlPage() {
     const [connectedDevices, setConnectedDevices] = useState<ConnectedDevice[]>([]);
     const [peerConnection, setPeerConnection] = useState<RTCPeerConnection | null>(null);
     const [streamingActive, setStreamingActive] = useState(false);
+    const [duration, setDuration] = useState<number>(30); // Default duration in seconds
+    const streamTimerRef = useRef<NodeJS.Timeout | null>(null); // Timer for auto-reset
 
     // Use global device context
     const { selectedDevice } = useDeviceContext();
@@ -587,19 +589,6 @@ export default function RemoteControlPage() {
         }
     }, [deviceId, sendMessage, updateStatus]);
 
-    // Request connected devices list
-    const requestConnectedDevices = useCallback(() => {
-        if (isConnected && deviceId) {
-            const sent = sendMessage({
-                type: 'get_connected_devices',
-                deviceId: deviceId,
-                timestamp: Date.now(),
-            });
-            if (!sent) {
-                updateStatus('Cannot request devices: WebSocket not open', 'error');
-            }
-        }
-    }, [isConnected, deviceId, sendMessage, updateStatus]);
 
     // Auto-connect on mount - only run once
     useEffect(() => {
@@ -613,41 +602,75 @@ export default function RemoteControlPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Only run once on mount
 
-    // Refresh devices every 5 seconds when connected
+    // Cleanup timer on unmount
     useEffect(() => {
-        if (isConnected && isRegistered && deviceId) {
-            requestConnectedDevices();
-            const interval = setInterval(requestConnectedDevices, 5000);
-            return () => clearInterval(interval);
-        }
-    }, [isConnected, isRegistered, deviceId, requestConnectedDevices]);
+        return () => {
+            if (streamTimerRef.current) {
+                clearTimeout(streamTimerRef.current);
+            }
+        };
+    }, []);
 
-    const getStatusColor = () => {
-        if (status.toLowerCase().includes('error')) return 'text-red-600 bg-red-50';
-        if (status.toLowerCase().includes('success') || status.toLowerCase().includes('live') || status.toLowerCase().includes('connected')) return 'text-green-600 bg-green-50';
-        if (status.toLowerCase().includes('warning')) return 'text-yellow-600 bg-yellow-50';
-        return 'text-blue-600 bg-blue-50';
+    const getConnectionStatus = () => {
+        const isReady = isConnected && isRegistered;
+        return {
+            text: isReady ? 'Connected' : 'Disconnected',
+            colorClass: isReady ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50',
+            dotColor: isReady ? 'bg-green-500' : 'bg-red-500'
+        };
     };
 
-    const handleStream = (action: 'stream_audio' | 'stream_video') => {
-        const duration = 30;
-        const targetId = selectedDevice?.deviceId || null;
-        sendAction(action, duration, null, targetId);
-    };
-
-    const handleStopStream = () => {
+    // Reset peer connection and cleanup
+    const resetPeerConnection = useCallback(() => {
+        console.log('Resetting peer connection');
         setStreamingActive(false);
-        sendAction('stop_streaming');
+
         if (peerConnectionRef.current) {
             peerConnectionRef.current.close();
             setPeerConnection(null);
             peerConnectionRef.current = null;
         }
+
         if (remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = null;
         }
+
         // Clear remote device ID reference
         remoteDeviceIdRef.current = null;
+
+        // Clear pending candidates
+        pendingCandidatesRef.current = [];
+
+        // Clear any existing timer
+        if (streamTimerRef.current) {
+            clearTimeout(streamTimerRef.current);
+            streamTimerRef.current = null;
+        }
+
+        updateStatus('Stream ended', 'info');
+    }, [updateStatus]);
+
+    const handleStream = (action: 'stream_audio' | 'stream_video') => {
+        // Clear any existing timer
+        if (streamTimerRef.current) {
+            clearTimeout(streamTimerRef.current);
+        }
+
+        // Reset any existing connection first
+        resetPeerConnection();
+
+        const targetId = selectedDevice?.deviceId || null;
+        sendAction(action, duration, null, targetId);
+
+        // Set up auto-reset timer
+        const durationMs = duration * 1000;
+        streamTimerRef.current = setTimeout(() => {
+            console.log(`Stream duration (${duration}s) completed, resetting connection`);
+            resetPeerConnection();
+            // sendAction('stop_streaming', null, null, targetId);
+        }, durationMs);
+
+        updateStatus(`Starting ${action.replace('_', ' ')} for ${duration} seconds`, 'info');
     };
 
     return (
@@ -655,17 +678,24 @@ export default function RemoteControlPage() {
             <Layout>
                 <div className="space-y-6">
                     {/* Header */}
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Android Device Controller</h1>
-                        <p className="text-gray-600">Control and monitor Android devices remotely</p>
-                    </div>
-
-                    {/* Status Card */}
-                    <div className={`rounded-lg border p-4 ${getStatusColor()}`}>
-                        <div className="flex items-center gap-2">
-                            <AlertCircle className="h-5 w-5" />
-                            <span className="font-medium">Status: {status}</span>
+                    <div className="flex items-start justify-between gap-4">
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900">Android Device Controller</h1>
+                            <p className="text-gray-600">Control and monitor Android devices remotely</p>
                         </div>
+
+                        {/* Status Card */}
+                        {(() => {
+                            const connectionStatus = getConnectionStatus();
+                            return (
+                                <div className={`rounded-lg border p-4 ${connectionStatus.colorClass} flex-shrink-0`}>
+                                    <div className="flex items-center gap-2">
+                                        <div className={`h-3 w-3 rounded-full ${connectionStatus.dotColor}`}></div>
+                                        <span className="font-medium">{connectionStatus.text}</span>
+                                    </div>
+                                </div>
+                            );
+                        })()}
                     </div>
 
                     {/* Video Section */}
@@ -690,107 +720,51 @@ export default function RemoteControlPage() {
                     <div className="bg-white rounded-lg border border-gray-200">
                         <div className="px-6 py-4 border-b border-gray-200">
                             <h2 className="text-lg font-semibold text-gray-900">Stream Controls</h2>
-                            <p className="text-sm text-gray-600">Start or stop streaming from devices</p>
+                            <p className="text-sm text-gray-600">Start streaming from devices with custom duration</p>
                         </div>
-                        <div className="p-6 flex flex-wrap gap-4">
-                            <button
-                                onClick={() => handleStream('stream_audio')}
-                                disabled={!isConnected || !isRegistered}
-                                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                <Volume2 className="h-5 w-5" />
-                                Stream Audio
-                            </button>
-                            <button
-                                onClick={() => handleStream('stream_video')}
-                                disabled={!isConnected || !isRegistered}
-                                className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                <Monitor className="h-5 w-5" />
-                                Stream Video
-                            </button>
-                            <button
-                                onClick={handleStopStream}
-                                disabled={!isConnected || !isRegistered || !streamingActive}
-                                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                <Square className="h-5 w-5" />
-                                Stop Stream
-                            </button>
-                            <button
-                                onClick={requestConnectedDevices}
-                                disabled={!isConnected || !isRegistered}
-                                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                <RefreshCw className="h-5 w-5" />
-                                Refresh Devices
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Web Client Device Information */}
-                    <div className="bg-white rounded-lg border border-gray-200 p-6">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Web Client Connection</h3>
-                        <div className="space-y-2 text-sm">
-                            <div className="flex justify-between">
-                                <span className="text-gray-600">Device ID:</span>
-                                <span className="font-mono text-gray-900">{deviceId || 'Not connected'}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-600">Channel:</span>
-                                <span className="font-mono text-gray-900">{deviceChannel || 'Not registered'}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-600">Connection:</span>
-                                <span className={`font-medium ${isConnected ? 'text-green-600' : 'text-red-600'}`}>
-                                    {isConnected ? 'Connected' : 'Disconnected'}
+                        <div className="p-6 space-y-4">
+                            {/* Duration Input */}
+                            <div className="flex items-center gap-4">
+                                <label htmlFor="duration" className="text-sm font-medium text-gray-700">
+                                    Duration (seconds):
+                                </label>
+                                <input
+                                    id="duration"
+                                    type="number"
+                                    min="1"
+                                    max="3600"
+                                    value={duration}
+                                    onChange={(e) => setDuration(Math.max(1, Math.min(3600, parseInt(e.target.value) || 30)))}
+                                    disabled={streamingActive}
+                                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed w-32"
+                                />
+                                <span className="text-sm text-gray-500">
+                                    {duration > 0 ? `Stream will run for ${duration} second${duration !== 1 ? 's' : ''}` : 'Please enter a valid duration'}
                                 </span>
                             </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-600">Registration:</span>
-                                <span className={`font-medium ${isRegistered ? 'text-green-600' : 'text-red-600'}`}>
-                                    {isRegistered ? 'Registered' : 'Not registered'}
-                                </span>
+
+                            {/* Stream Buttons */}
+                            <div className="flex flex-wrap gap-4">
+                                <button
+                                    onClick={() => handleStream('stream_audio')}
+                                    disabled={!isConnected || !isRegistered || streamingActive || duration <= 0}
+                                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <Volume2 className="h-5 w-5" />
+                                    Stream Audio
+                                </button>
+                                <button
+                                    onClick={() => handleStream('stream_video')}
+                                    disabled={!isConnected || !isRegistered || streamingActive || duration <= 0}
+                                    className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <Monitor className="h-5 w-5" />
+                                    Stream Video
+                                </button>
                             </div>
                         </div>
                     </div>
 
-                    {/* WebSocket Connected Devices */}
-                    <div className="bg-white rounded-lg border border-gray-200 p-6">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">WebSocket Connected Devices ({connectedDevices.length})</h3>
-                        <p className="text-sm text-gray-600 mb-4">These are devices currently connected via WebSocket signaling</p>
-                        {connectedDevices.length === 0 ? (
-                            <p className="text-gray-500">No devices connected via WebSocket</p>
-                        ) : (
-                            <div className="space-y-2">
-                                {connectedDevices.map((device) => {
-                                    const deviceType = device.deviceId.startsWith('web_') ? 'Web Client' : 'Android Device';
-                                    return (
-                                        <div
-                                            key={device.deviceId}
-                                            className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                                        >
-                                            <div className="font-mono text-sm text-gray-900">{device.deviceId}</div>
-                                            <div className="text-xs text-gray-600">
-                                                {deviceType} • {device.channel}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Message Routing Info */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <h3 className="text-sm font-semibold text-blue-900 mb-2">How It Works</h3>
-                        <ul className="text-sm text-blue-800 space-y-1">
-                            <li>• <strong>1.</strong> Select a device from the dropdown above</li>
-                            <li>• <strong>2.</strong> Click Stream Audio or Stream Video to start streaming from that device</li>
-                            <li>• <strong>3.</strong> Click Stop Stream to stop the stream</li>
-                            <li>• <strong>Note:</strong> If no device is selected, commands will be broadcast to all connected Android devices</li>
-                        </ul>
-                    </div>
                 </div>
             </Layout>
         </AuthWrapper>
