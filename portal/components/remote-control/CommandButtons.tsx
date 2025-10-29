@@ -31,9 +31,7 @@ const commandButtons: CommandButton[] = [
   { action: 'get_location', label: 'Get Location', icon: Map, iconColor: 'text-orange-500' },
   { action: 'get_contacts', label: 'Get Contacts', icon: Users, iconColor: 'text-indigo-500' },
   { action: 'get_call_logs', label: 'Get Call Logs', icon: Phone, iconColor: 'text-pink-500' },
-  { action: 'get_messages', label: 'Get Messages', icon: MessageSquare, iconColor: 'text-teal-500' },
-  { action: 'stream_audio', label: 'Stream Audio', icon: MessageSquare, iconColor: 'text-teal-500', requiresDuration: true },
-  { action: 'stream_video', label: 'Stream Video', icon: MessageSquare, iconColor: 'text-teal-500', requiresDuration: true },
+  { action: 'get_messages', label: 'Get Messages', icon: MessageSquare, iconColor: 'text-teal-500' }
 ];
 
 export default function CommandButtons({ onCommandClick, disabled = false }: CommandButtonsProps) {

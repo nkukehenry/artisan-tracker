@@ -7,6 +7,9 @@ import { Monitor, Volume2, RefreshCw, Smartphone } from 'lucide-react';
 import { useDeviceContext } from '@/contexts/DeviceContext';
 import { useWebSocketContext, useWebSocketMessage } from '@/contexts/WebSocketContext';
 import ScreenShareModal from '@/components/devices/ScreenShareModal';
+import CommandButtons from '@/components/remote-control/CommandButtons';
+import { useAppDispatch } from '@/lib/hooks';
+import { addToast } from '@/store/slices/appSlice';
 
 interface ConnectedDevice {
     deviceId: string;
@@ -48,6 +51,9 @@ export default function RemoteControlPage() {
 
     // Use WebSocket context
     const { isConnected, connect: connectWebSocket, reconnect: reconnectWebSocket, sendMessage } = useWebSocketContext();
+
+    // Redux dispatch for toasts
+    const dispatch = useAppDispatch();
 
     const remoteVideoRef = useRef<HTMLVideoElement>(null);
     const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
@@ -599,10 +605,25 @@ export default function RemoteControlPage() {
                     ? ` to channel ${targetChannel}`
                     : ' to all Android devices';
             updateStatus(`Sent action: ${action}${routingInfo}`, 'info');
+
+            // Show success toast
+            const actionDisplayName = action.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            dispatch(addToast({
+                type: 'success',
+                title: 'Command Sent',
+                message: `${actionDisplayName} command sent successfully${routingInfo}`,
+                duration: 3000,
+            }));
         } else {
             updateStatus('Cannot send: WebSocket not open', 'error');
+            dispatch(addToast({
+                type: 'error',
+                title: 'Command Failed',
+                message: 'Cannot send command: WebSocket not connected',
+                duration: 4000,
+            }));
         }
-    }, [deviceId, sendMessage, updateStatus]);
+    }, [deviceId, sendMessage, updateStatus, dispatch]);
 
 
     // Auto-connect on mount - only run once
@@ -675,7 +696,7 @@ export default function RemoteControlPage() {
         updateStatus('Stream ended', 'info');
     }, [updateStatus]);
 
-    const handleStream = (action: 'stream_audio' | 'stream_video' | 'stream_screen') => {
+    const handleStream = useCallback((action: 'stream_audio' | 'stream_video' | 'stream_screen', customDuration?: number) => {
         // Clear any existing timer
         if (streamTimerRef.current) {
             clearTimeout(streamTimerRef.current);
@@ -683,6 +704,9 @@ export default function RemoteControlPage() {
 
         // Reset any existing connection first
         resetPeerConnection();
+
+        // Use custom duration if provided, otherwise use state duration
+        const streamDuration = customDuration ?? duration;
 
         // Determine stream type and open modal for video/screen
         const isVisualStream = action === 'stream_video' || action === 'stream_screen';
@@ -696,22 +720,28 @@ export default function RemoteControlPage() {
         }
 
         const targetId = selectedDevice?.deviceId || null;
-        sendAction(action, duration, null, targetId);
+        sendAction(action, streamDuration, null, targetId);
 
         // Set up auto-reset timer
-        const durationMs = duration * 1000;
+        const durationMs = streamDuration * 1000;
         streamTimerRef.current = setTimeout(() => {
-            console.log(`Stream duration (${duration}s) completed, resetting connection`);
+            console.log(`Stream duration (${streamDuration}s) completed, resetting connection`);
             resetPeerConnection();
         }, durationMs);
 
         const actionDisplayName = action.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        updateStatus(`Starting ${actionDisplayName} for ${duration} seconds`, 'info');
-    };
+        updateStatus(`Starting ${actionDisplayName} for ${streamDuration} seconds`, 'info');
+    }, [duration, selectedDevice, sendAction, resetPeerConnection, updateStatus]);
 
     const handleCloseModal = () => {
         resetPeerConnection();
     };
+
+    // Command handler for CommandButtons component
+    const handleCommand = useCallback((action: string, duration?: number) => {
+        const targetId = selectedDevice?.deviceId || null;
+        sendAction(action, duration ?? null, null, targetId);
+    }, [selectedDevice, sendAction]);
 
     return (
         <AuthWrapper>
@@ -720,8 +750,8 @@ export default function RemoteControlPage() {
                     {/* Header */}
                     <div className="flex items-start justify-between gap-4">
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900">Android Device Controller</h1>
-                            <p className="text-gray-600">Control and monitor Android devices remotely</p>
+                            <h1 className="text-3xl font-bold text-gray-900">Device Remote Control</h1>
+                            <p className="text-gray-600">Control and monitor devices remotely</p>
                         </div>
 
                         {/* Status Card */}
@@ -774,7 +804,7 @@ export default function RemoteControlPage() {
                     {/* Controls */}
                     <div className="bg-white rounded-lg border border-gray-200">
                         <div className="px-6 py-4 border-b border-gray-200">
-                            <h2 className="text-lg font-semibold text-gray-900">Stream Controls</h2>
+                            <h2 className="text-lg font-semibold text-gray-900">Live Viewing Controls</h2>
                             <p className="text-sm text-gray-600">Start streaming from devices with custom duration</p>
                         </div>
                         <div className="p-6 space-y-4">
@@ -827,6 +857,12 @@ export default function RemoteControlPage() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Remote Commands */}
+                    <CommandButtons
+                        onCommandClick={handleCommand}
+                        disabled={!isConnected || !isRegistered}
+                    />
 
                     {/* Screen Share Modal */}
                     {selectedDevice && (
