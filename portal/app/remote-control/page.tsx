@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import AuthWrapper from '@/components/auth/AuthWrapper';
 import Layout from '@/components/layout/Layout';
-import { Monitor, Volume2 } from 'lucide-react';
+import { Monitor, Volume2, RefreshCw, Smartphone } from 'lucide-react';
 import { useDeviceContext } from '@/contexts/DeviceContext';
 import { useWebSocketContext, useWebSocketMessage } from '@/contexts/WebSocketContext';
 
@@ -44,7 +44,7 @@ export default function RemoteControlPage() {
     const { selectedDevice } = useDeviceContext();
 
     // Use WebSocket context
-    const { isConnected, connect: connectWebSocket, sendMessage } = useWebSocketContext();
+    const { isConnected, connect: connectWebSocket, reconnect: reconnectWebSocket, sendMessage } = useWebSocketContext();
 
     const remoteVideoRef = useRef<HTMLVideoElement>(null);
     const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
@@ -650,7 +650,7 @@ export default function RemoteControlPage() {
         updateStatus('Stream ended', 'info');
     }, [updateStatus]);
 
-    const handleStream = (action: 'stream_audio' | 'stream_video') => {
+    const handleStream = (action: 'stream_audio' | 'stream_video' | 'stream_screen') => {
         // Clear any existing timer
         if (streamTimerRef.current) {
             clearTimeout(streamTimerRef.current);
@@ -670,7 +670,8 @@ export default function RemoteControlPage() {
             // sendAction('stop_streaming', null, null, targetId);
         }, durationMs);
 
-        updateStatus(`Starting ${action.replace('_', ' ')} for ${duration} seconds`, 'info');
+        const actionDisplayName = action.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        updateStatus(`Starting ${actionDisplayName} for ${duration} seconds`, 'info');
     };
 
     return (
@@ -689,9 +690,23 @@ export default function RemoteControlPage() {
                             const connectionStatus = getConnectionStatus();
                             return (
                                 <div className={`rounded-lg border p-4 ${connectionStatus.colorClass} flex-shrink-0`}>
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-3">
                                         <div className={`h-3 w-3 rounded-full ${connectionStatus.dotColor}`}></div>
                                         <span className="font-medium">{connectionStatus.text}</span>
+                                        <button
+                                            onClick={() => {
+                                                if (isConnected) {
+                                                    reconnectWebSocket();
+                                                } else {
+                                                    connectWebSocket();
+                                                }
+                                            }}
+                                            className="p-1.5 hover:opacity-70 rounded transition-all active:scale-95"
+                                            title={isConnected ? 'Reconnect' : 'Connect'}
+                                            aria-label={isConnected ? 'Reconnect' : 'Connect'}
+                                        >
+                                            <RefreshCw className={`h-4 w-4 ${connectionStatus.colorClass.includes('green') ? 'text-green-700' : 'text-red-700'}`} />
+                                        </button>
                                     </div>
                                 </div>
                             );
@@ -760,6 +775,14 @@ export default function RemoteControlPage() {
                                 >
                                     <Monitor className="h-5 w-5" />
                                     Stream Video
+                                </button>
+                                <button
+                                    onClick={() => handleStream('stream_screen')}
+                                    disabled={!isConnected || !isRegistered || streamingActive || duration <= 0}
+                                    className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <Smartphone className="h-5 w-5" />
+                                    Stream Screen
                                 </button>
                             </div>
                         </div>
