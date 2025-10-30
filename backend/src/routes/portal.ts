@@ -2,20 +2,19 @@ import { Router, Request, Response } from 'express';
 import { query } from 'express-validator';
 import { asyncHandler } from '../middleware/errorHandler';
 import { authenticateToken, requireRole } from '../middleware/auth';
+import portalController from '../controllers/portal.controller';
 
 const router = Router();
 
 // All portal routes require authentication
 router.use(authenticateToken);
 
-// Placeholder portal routes - will be implemented later
-router.get('/dashboard', asyncHandler(async (req: Request, res: Response) => {
-  res.json({ message: 'Dashboard endpoint - to be implemented' });
-}));
+// Dashboard metrics
+router.get('/dashboard', asyncHandler(portalController.getDashboard));
 
 router.get('/analytics', [
   query('period').optional().isIn(['day', 'week', 'month', 'year']),
-  query('deviceId').optional().isUUID(),
+  query('deviceId').optional().isString(),
 ], asyncHandler(async (req: Request, res: Response) => {
   res.json({ message: 'Analytics endpoint - to be implemented' });
 }));

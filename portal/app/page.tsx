@@ -1,112 +1,70 @@
+"use client";
 import AuthWrapper from '@/components/auth/AuthWrapper';
 import Layout from '@/components/layout/Layout';
-import { Smartphone, Wifi, Users, Send } from 'lucide-react';
+import MetricsCards from '@/components/dashboard/MetricsCards';
+import ChartPie from '@/components/ui/ChartPie';
+import ChartLine from '@/components/ui/ChartLine';
+import { useDashboard } from '@/hooks/useDashboard';
+import { RefreshCw } from 'lucide-react';
 
 export default function Home() {
+  const { data, loading, error, reload } = useDashboard();
   return (
     <AuthWrapper>
       <Layout>
         <div className="space-y-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600">Welcome to Mutindo Tracker Portal</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+              <p className="text-gray-600">Welcome to Mutindo Tracker Portal</p>
+            </div>
+            <button
+              onClick={reload}
+              disabled={loading}
+              className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
           </div>
 
-          {/* Sample Dashboard Content */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Stats Cards */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-              <div className="flex items-center">
-                <Smartphone className="w-6 h-6 text-blue-500" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Devices</p>
-                  <p className="text-2xl font-bold text-blue-600">12</p>
+          {error && (
+            <div className="p-4 border border-red-200 bg-red-50 text-red-700 rounded">{error}</div>
+          )}
+
+          {loading && !data ? (
+            <div className="p-6 bg-white border rounded">Loading metrics...</div>
+          ) : data ? (
+            <>
+              <MetricsCards counts={data.counts} />
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Messages by Type</h3>
+                  <ChartPie data={data.breakdowns.messagesByType.map((d) => ({ label: d.type, value: d.count }))} />
+                </div>
+                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Calls by Type</h3>
+                  <ChartPie data={data.breakdowns.callsByType.map((d) => ({ label: d.type, value: d.count }))} />
+                </div>
+                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Media by Type</h3>
+                  <ChartPie data={data.breakdowns.mediaByType.map((d) => ({ label: d.type, value: d.count }))} />
                 </div>
               </div>
-            </div>
 
-            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-              <div className="flex items-center">
-                <Wifi className="w-6 h-6 text-green-500" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Online Devices</p>
-                  <p className="text-2xl font-bold text-green-600">8</p>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Messages per Day (last {data.scope.days} days)</h3>
+                  <ChartLine data={data.series.messagesPerDay} label="Messages" />
+                </div>
+                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Calls per Day (last {data.scope.days} days)</h3>
+                  <ChartLine data={data.series.callsPerDay} label="Calls" />
                 </div>
               </div>
-            </div>
-
-            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-              <div className="flex items-center">
-                <Users className="w-6 h-6 text-blue-500" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Active Users</p>
-                  <p className="text-2xl font-bold text-blue-600">24</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-              <div className="flex items-center">
-                <Send className="w-6 h-6 text-orange-500" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Commands Sent</p>
-                  <p className="text-2xl font-bold text-orange-600">156</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Sample Table */}
-          <div className="bg-white rounded-lg border border-gray-200">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Device
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Last Seen
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  <tr>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      iPhone 14 Pro
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                        Online
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      2 minutes ago
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      Samsung Galaxy S23
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                        In Transit
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      5 minutes ago
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+            </>
+          ) : null}
         </div>
       </Layout>
     </AuthWrapper>
