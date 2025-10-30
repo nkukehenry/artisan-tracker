@@ -31,7 +31,7 @@ const navigation: NavItem[] = [
   { name: 'Contacts', href: '/contacts', icon: Users },
   { name: 'Location', href: '/location', icon: MapPin },
   { name: 'Media Files', href: '/media', icon: FileImage },
-  { name: 'App Activities', href: '/app-activities', icon: Grid3X3 },
+  // { name: 'App Activities', href: '/app-activities', icon: Grid3X3 },
 ];
 
 interface SidebarProps {
@@ -87,15 +87,15 @@ export default function Sidebar({ onClose }: SidebarProps) {
       </nav>
 
       {/* Add Device Button */}
-      <div className="px-3 pb-4">
+      {/* <div className="px-3 pb-4">
         <button className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-800 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-900">
           <Plus className="h-4 w-4" />
           Add Device
         </button>
-      </div>
+      </div> */}
 
       {/* Footer */}
-      <div className="border-t border-gray-800 p-4">
+      {/* <div className="border-t border-gray-800 p-4">
         <div className="space-y-2">
           <Link href="/docs" className="block text-xs text-white hover:text-gray-300 transition-colors">
             Documentation
@@ -105,7 +105,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
           </Link>
         </div>
         <p className="mt-4 text-center text-xs text-white">© 2025 Mutindo</p>
-      </div>
+      </div> */}
     </div>
   );
 }

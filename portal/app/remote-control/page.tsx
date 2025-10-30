@@ -43,6 +43,7 @@ export default function RemoteControlPage() {
     const [streamingActive, setStreamingActive] = useState(false);
     const [duration, setDuration] = useState<number>(30); // Default duration in seconds
     const streamTimerRef = useRef<NodeJS.Timeout | null>(null); // Timer for auto-reset
+    const heartbeatTimerRef = useRef<NodeJS.Timeout | null>(null); // Timer for device heartbeat
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [streamType, setStreamType] = useState<'audio' | 'video' | 'screen' | null>(null);
 
@@ -524,35 +525,54 @@ export default function RemoteControlPage() {
             console.log('Registration message sent successfully');
             updateStatus('Registering web client...', 'info');
         } else {
-            console.error('Failed to send registration message');
-            updateStatus('Failed to send registration message', 'error');
+            console.warn('WebSocket not ready to send registration yet, will retry shortly...');
+            // Rely on the periodic retry loop to resend shortly
         }
     }, [isConnected, getWebClientDeviceId, sendMessage, updateStatus]);
 
-    // Handle connection status changes
+    // Handle connection status changes (ensure registration with retries)
     useEffect(() => {
+        let retryInterval: NodeJS.Timeout | null = null;
+        let attempts = 0;
+
         if (isConnected) {
             updateStatus('Connected to signaling server', 'success');
-            // Registration happens automatically in WebSocketContext on connect
-            // But we'll also trigger explicit registration as a fallback
             registerWebClient();
 
-            // Give it a moment, then check if we got registered
-            const checkRegistration = setTimeout(() => {
-                if (!isRegistered && isConnected) {
-                    console.log('Not registered after 2 seconds, retrying registration...');
-                    // Retry registration if we didn't get a response
-                    registerWebClient();
+            // Retry every 1500ms until registered or max attempts reached
+            retryInterval = setInterval(() => {
+                if (isRegistered) {
+                    if (retryInterval) clearInterval(retryInterval);
+                    return;
                 }
-            }, 2000);
-            return () => clearTimeout(checkRegistration);
+                if (!isConnected) {
+                    if (retryInterval) clearInterval(retryInterval);
+                    return;
+                }
+                attempts += 1;
+                console.log(`Registration attempt #${attempts}`);
+                registerWebClient();
+                if (attempts >= 10) {
+                    if (retryInterval) clearInterval(retryInterval);
+                    updateStatus('Registration attempts exhausted', 'warning');
+                    dispatch(addToast({
+                        type: 'warning',
+                        title: 'Registration Issue',
+                        message: 'Unable to register web client. Please refresh and try again.',
+                    }));
+                }
+            }, 1500);
         } else {
             updateStatus('Disconnected', 'warning');
             setIsRegistered(false);
             setDeviceId(null);
             setDeviceChannel(null);
         }
-    }, [isConnected, isRegistered, registerWebClient, updateStatus]);
+
+        return () => {
+            if (retryInterval) clearInterval(retryInterval);
+        };
+    }, [isConnected, isRegistered, registerWebClient, updateStatus, dispatch]);
 
     // Manual disconnect function (optional, not currently used)
     // const disconnect = useCallback(() => {
@@ -580,8 +600,13 @@ export default function RemoteControlPage() {
         targetDeviceId: string | null = null,
         targetChannel: string | null = null
     ) => {
-        if (!deviceId) {
+        if (!isRegistered || !deviceId) {
             updateStatus('Device not registered', 'error');
+            dispatch(addToast({
+                type: 'error',
+                title: 'Not Registered',
+                message: 'Please wait for web client registration before sending commands.',
+            }));
             return;
         }
 
@@ -623,7 +648,7 @@ export default function RemoteControlPage() {
                 duration: 4000,
             }));
         }
-    }, [deviceId, sendMessage, updateStatus, dispatch]);
+    }, [deviceId, isRegistered, sendMessage, updateStatus, dispatch]);
 
 
     // Auto-connect on mount - only run once
@@ -644,8 +669,40 @@ export default function RemoteControlPage() {
             if (streamTimerRef.current) {
                 clearTimeout(streamTimerRef.current);
             }
+            if (heartbeatTimerRef.current) {
+                clearInterval(heartbeatTimerRef.current);
+            }
         };
     }, []);
+
+    // Heartbeat to keep web client present on server
+    useEffect(() => {
+        // Clear any previous heartbeat interval
+        if (heartbeatTimerRef.current) {
+            clearInterval(heartbeatTimerRef.current);
+            heartbeatTimerRef.current = null;
+        }
+
+        if (isConnected && isRegistered && deviceId) {
+            // Send heartbeat every 25s (< DEVICE_TIMEOUT)
+            heartbeatTimerRef.current = setInterval(() => {
+                const sent = sendMessage({
+                    type: 'device_heartbeat',
+                    deviceId: deviceId,
+                });
+                if (!sent) {
+                    console.warn('Heartbeat not sent: WebSocket not open');
+                }
+            }, 25000);
+        }
+
+        return () => {
+            if (heartbeatTimerRef.current) {
+                clearInterval(heartbeatTimerRef.current);
+                heartbeatTimerRef.current = null;
+            }
+        };
+    }, [isConnected, isRegistered, deviceId, sendMessage]);
 
     const getConnectionStatus = () => {
         const isReady = isConnected && isRegistered;

@@ -48,7 +48,7 @@ export class SignalingService {
   private deviceInfo: Map<string, DeviceInfo>; // deviceId -> deviceInfo
   private heartbeatTimers: Map<string, NodeJS.Timeout>; // deviceId -> timer
   private readonly HEARTBEAT_INTERVAL = 30000; // 30 seconds
-  private readonly DEVICE_TIMEOUT = 90000; // 90 seconds
+  private readonly DEVICE_TIMEOUT = 120000; // 90 seconds
   private readonly MAX_CHANNELS_PER_DEVICE = 5;
 
   constructor(server: HTTPServer) {
