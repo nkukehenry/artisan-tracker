@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   Home,
@@ -46,8 +47,14 @@ export default function Sidebar({ onClose }: SidebarProps) {
       {/* Logo */}
       <div className="flex h-16 items-center justify-between border-b border-gray-800 px-6">
         <div className="flex items-center gap-2 py-4">
-          <div className="h-8 w-8 rounded-lg bg-blue-800 flex items-center justify-center">
-            <Smartphone className="h-5 w-5 text-white" />
+          <div className="h-8 w-8 rounded-lg flex items-center justify-center overflow-hidden">
+            <Image
+              src="/images/logo.png"
+              alt="Logo"
+              width={32}
+              height={32}
+              className="w-full h-full object-contain"
+            />
           </div>
           <h1 className="text-xl font-bold text-white">ProjectEast</h1>
         </div>

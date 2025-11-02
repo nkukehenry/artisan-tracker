@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect } from 'react';
+import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAppSelector } from '@/lib/hooks';
-import { Smartphone } from 'lucide-react';
 
 interface SplashScreenProps {
   disableRedirects?: boolean;
@@ -58,8 +58,14 @@ export default function SplashScreen({ disableRedirects = false }: SplashScreenP
       <div className="text-center">
         {/* Logo */}
         <div className="flex justify-center mb-8">
-          <div className="h-16 w-16 rounded-2xl bg-blue-800 flex items-center justify-center shadow-lg">
-            <Smartphone className="h-10 w-10 text-white" />
+          <div className="h-16 w-16 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden bg-white/10 backdrop-blur-sm">
+            <Image
+              src="/images/logo.png"
+              alt="Logo"
+              width={64}
+              height={64}
+              className="w-full h-full object-contain"
+            />
           </div>
         </div>
 

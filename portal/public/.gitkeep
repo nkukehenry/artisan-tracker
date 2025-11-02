@@ -1,0 +1,4 @@
+# This directory is for static assets (images, icons, etc.)
+# Files placed here can be referenced directly from the root path
+# Example: /logo.png in public/ becomes accessible at /logo.png
+

@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/lib/hooks';
 import { registerUser, clearError } from '@/store/slices/authSlice';
 import { addToast } from '@/store/slices/appSlice';
-import { Smartphone, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import PublicRoute from '@/components/auth/PublicRoute';
 
 export default function RegisterPage() {
@@ -93,8 +94,14 @@ export default function RegisterPage() {
           {/* Header */}
           <div className="text-center">
             <div className="flex justify-center">
-              <div className="h-12 w-12 rounded-lg bg-blue-800 flex items-center justify-center">
-                <Smartphone className="h-8 w-8 text-white" />
+              <div className="h-12 w-12 rounded-lg flex items-center justify-center overflow-hidden bg-white/10 backdrop-blur-sm">
+                <Image
+                  src="/images/logo.png"
+                  alt="Logo"
+                  width={48}
+                  height={48}
+                  className="w-full h-full object-contain"
+                />
               </div>
             </div>
             <h2 className="mt-6 text-3xl font-bold text-gray-900">
