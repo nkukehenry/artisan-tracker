@@ -26,13 +26,13 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     if (!hasInitialized || isLoading) return;
 
     if (isAuthenticated) {
-      // If authenticated and on login/register, redirect to dashboard
-      if (pathname === '/login' || pathname === '/register') {
+      // If authenticated and on login, redirect to dashboard
+      if (pathname === '/login') {
         router.replace('/');
       }
     } else {
-      // If not authenticated and not on login/register, redirect to login
-      if (pathname !== '/login' && pathname !== '/register') {
+      // If not authenticated and not on login, redirect to login
+      if (pathname !== '/login') {
         router.replace('/login');
       }
     }

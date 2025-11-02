@@ -26,14 +26,29 @@ export default function AppProvider({ children }: AppProviderProps) {
 
   // Don't show global loading for authentication - let AuthWrapper handle it
 
-  // Handle auth errors with toasts
+  // Handle auth errors with toasts (but skip token-related errors)
   useEffect(() => {
     if (authError) {
-      dispatch(addToast({
-        type: 'error',
-        title: 'Authentication Error',
-        message: authError,
-      }));
+      // Filter out token-related errors - these are internal checks and users don't need to see them
+      const tokenErrorMessages = [
+        'No access token found',
+        'Token expired',
+        'Failed to validate token',
+        'No refresh token available',
+      ];
+
+      const isTokenError = tokenErrorMessages.some(msg =>
+        authError?.toLowerCase().includes(msg.toLowerCase())
+      );
+
+      // Only show non-token errors
+      if (!isTokenError) {
+        dispatch(addToast({
+          type: 'error',
+          title: 'Authentication Error',
+          message: authError,
+        }));
+      }
     }
   }, [authError, dispatch]);
 

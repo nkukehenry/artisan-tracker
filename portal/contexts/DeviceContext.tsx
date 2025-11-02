@@ -1,9 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback, ReactNode } from 'react';
 import { Device } from '@/types/device';
 import { deviceApi } from '@/lib/deviceApi';
-import { useAppDispatch } from '@/lib/hooks';
+import { useAppDispatch, useAppSelector } from '@/lib/hooks';
 import { addToast } from '@/store/slices/appSlice';
 
 interface DeviceContextType {
@@ -26,16 +26,13 @@ export function DeviceProvider({ children }: DeviceProviderProps) {
     const [isLoading, setIsLoading] = useState(false);
     const dispatch = useAppDispatch();
     const hasInitialized = useRef(false);
+    const { isAuthenticated } = useAppSelector((state) => state.auth);
 
     // Load devices from API
-    const loadDevices = async () => {
+    const loadDevices = useCallback(async () => {
         setIsLoading(true);
         try {
             const result = await deviceApi.getDevices();
-            console.log('DeviceContext - API result:', result);
-            console.log('DeviceContext - result.data:', result.data);
-            console.log('DeviceContext - result.data type:', typeof result.data);
-            console.log('DeviceContext - result.data isArray:', Array.isArray(result.data));
 
             if (result.success) {
                 // Handle different possible response structures
@@ -68,12 +65,18 @@ export function DeviceProvider({ children }: DeviceProviderProps) {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [dispatch]);
 
-    // Load devices on mount
+    // Load devices only when user is authenticated
     useEffect(() => {
-        loadDevices();
-    }, []);
+        if (isAuthenticated) {
+            loadDevices();
+        } else {
+            // Clear devices when user is not authenticated
+            setDevices([]);
+            setSelectedDevice(null);
+        }
+    }, [isAuthenticated, loadDevices]);
 
     // Load selected device from localStorage on mount and auto-select first device if none selected
     useEffect(() => {

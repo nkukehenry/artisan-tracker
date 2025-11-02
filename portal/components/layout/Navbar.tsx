@@ -6,6 +6,7 @@ import {
 import NotificationDropdown from './NotificationDropdown';
 import ProfileDropdown from './ProfileDropdown';
 import DeviceSelector from '@/components/devices/DeviceSelector';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 interface NavbarProps {
   onMenuClick?: () => void;
@@ -13,7 +14,7 @@ interface NavbarProps {
 
 export default function Navbar({ onMenuClick }: NavbarProps) {
   return (
-    <div className="flex h-16 items-center justify-between border-b border-gray-200 bg-white dark:bg-dark-background px-6">
+    <div className="flex h-16 items-center justify-between border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-dark-background px-6">
       {/* Left section - Mobile menu button and Device Selector */}
       <div className="flex items-center gap-4">
         <button
@@ -32,7 +33,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
       {/* Right section - Theme Toggle, Notifications and Profile */}
       <div className="flex items-center gap-4">
         {/* Theme Toggle */}
-        {/* <ThemeToggle /> */}
+        <ThemeToggle />
 
         {/* Notifications */}
         <NotificationDropdown />

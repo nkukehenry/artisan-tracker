@@ -33,12 +33,41 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const theme = localStorage.getItem('theme');
+                  const html = document.documentElement;
+                  
+                  if (theme === 'dark') {
+                    html.classList.add('dark');
+                  } else if (theme === 'light') {
+                    html.classList.remove('dark');
+                  } else {
+                    // For 'system' or no theme, check system preference
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    if (prefersDark) {
+                      html.classList.add('dark');
+                    } else {
+                      html.classList.remove('dark');
+                    }
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider>
-          <ReduxProvider>
+
+        <ReduxProvider>
+          <ThemeProvider>
             <DeviceProvider>
               <WebSocketProviderWrapper>
                 <AppProvider>
@@ -46,8 +75,9 @@ export default function RootLayout({
                 </AppProvider>
               </WebSocketProviderWrapper>
             </DeviceProvider>
-          </ReduxProvider>
-        </ThemeProvider>
+          </ThemeProvider>
+        </ReduxProvider>
+
       </body>
     </html>
   );

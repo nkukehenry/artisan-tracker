@@ -13,11 +13,11 @@ export interface ActionButtonProps {
 }
 
 const variantStyles = {
-  primary: 'text-blue-600 hover:text-blue-900 hover:bg-blue-50',
-  secondary: 'text-gray-600 hover:text-gray-900 hover:bg-gray-50',
-  danger: 'text-red-600 hover:text-red-900 hover:bg-red-50',
-  warning: 'text-yellow-600 hover:text-yellow-900 hover:bg-yellow-50',
-  info: 'text-blue-600 hover:text-blue-900 hover:bg-blue-50',
+  primary: 'text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20',
+  secondary: 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700',
+  danger: 'text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20',
+  warning: 'text-yellow-600 dark:text-yellow-400 hover:text-yellow-900 dark:hover:text-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20',
+  info: 'text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20',
 };
 
 const sizeStyles = {

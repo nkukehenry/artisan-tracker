@@ -41,7 +41,7 @@ export default function SplashScreen({ disableRedirects = false }: SplashScreenP
         }
       } else {
         // If not authenticated, redirect to login only if not already there
-        if (pathname !== '/login' && pathname !== '/register') {
+        if (pathname !== '/login') {
           console.log('🔄 Redirecting unauthenticated user to login');
           router.push('/login');
         } else {
