@@ -75,11 +75,11 @@ export const handleApiError = (error: AxiosError) => {
   if (error.response) {
     // Server responded with error status
     const { status, data } = error.response;
-    
-    // Handle nested error structure from Mutindo Tracker API
+
+    // Handle nested error structure from ProjectEast API
     let message = 'An error occurred';
     const dataObj = data as Record<string, unknown>;
-    
+
     if (dataObj?.error && typeof dataObj.error === 'object' && dataObj.error !== null) {
       const errorObj = dataObj.error as Record<string, unknown>;
       if ('message' in errorObj && typeof errorObj.message === 'string') {
@@ -88,7 +88,7 @@ export const handleApiError = (error: AxiosError) => {
     } else if (dataObj?.message && typeof dataObj.message === 'string') {
       message = dataObj.message;
     }
-    
+
     return {
       message,
       status,

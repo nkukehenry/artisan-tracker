@@ -74,7 +74,7 @@ export const logoutUser = createAsyncThunk(
         console.warn('Logout API call failed:', result.error?.message || 'Unknown error');
       }
     }
-    
+
     tokenUtils.clearTokens();
     return null;
   }
@@ -96,8 +96,8 @@ export const initializeAuth = createAsyncThunk(
   'auth/initialize',
   async (_, { dispatch, rejectWithValue }) => {
     const { accessToken, refreshToken } = tokenUtils.getTokens();
-    
-    
+
+
     if (!accessToken) {
       return rejectWithValue('No access token found');
     }
@@ -107,11 +107,11 @@ export const initializeAuth = createAsyncThunk(
       tokenUtils.clearTokens();
       return rejectWithValue('Token expired');
     }
-    
+
     // Try to validate with API
     try {
       const result = await authApi.getProfile();
-      
+
       if (result.success) {
         return {
           user: result.data.user,
@@ -123,7 +123,7 @@ export const initializeAuth = createAsyncThunk(
         if (refreshToken) {
           try {
             const refreshResult = await authApi.refreshToken(refreshToken);
-            
+
             if (refreshResult.success) {
               tokenUtils.setTokens(
                 refreshResult.data.accessToken,
@@ -131,7 +131,7 @@ export const initializeAuth = createAsyncThunk(
               );
               // Get user profile again after token refresh
               const profileResult = await authApi.getProfile();
-              
+
               if (profileResult.success) {
                 return {
                   user: profileResult.data.user,
@@ -144,14 +144,14 @@ export const initializeAuth = createAsyncThunk(
             // Token refresh failed, continue to fallback
           }
         }
-        
+
         // If we get here, both profile fetch and token refresh failed
         // Fall back to session maintenance
         if (accessToken && refreshToken) {
           // Create a basic user object from stored data or use defaults
           const storedUser = localStorage.getItem('userData');
           let user;
-          
+
           if (storedUser) {
             try {
               user = JSON.parse(storedUser);
@@ -159,7 +159,7 @@ export const initializeAuth = createAsyncThunk(
               // Failed to parse stored user data
             }
           }
-          
+
           if (!user) {
             // Fallback user data
             user = {
@@ -169,19 +169,19 @@ export const initializeAuth = createAsyncThunk(
               lastName: 'Name',
               role: 'USER',
               tenantId: '1',
-              tenantName: 'Mutindo Company',
+              tenantName: 'ProjectEast',
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
             };
           }
-          
+
           return {
             user,
             accessToken,
             refreshToken,
           };
         }
-        
+
         return rejectWithValue('Failed to validate token');
       }
     } catch (error) {
@@ -221,15 +221,15 @@ const authSlice = createSlice({
         state.refreshToken = action.payload.refreshToken;
         state.isAuthenticated = true;
         state.error = null;
-        
+
         // Store tokens in localStorage
         tokenUtils.setTokens(action.payload.accessToken, action.payload.refreshToken);
-        
+
         // Store user data in localStorage for session persistence
         if (typeof window !== 'undefined') {
           localStorage.setItem('userData', JSON.stringify(action.payload.user));
         }
-        
+
         // Success toast will be handled by the component
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -237,7 +237,7 @@ const authSlice = createSlice({
         state.error = action.payload as string;
         state.isAuthenticated = false;
       })
-      
+
       // Register
       .addCase(registerUser.pending, (state) => {
         state.isLoading = true;
@@ -250,15 +250,15 @@ const authSlice = createSlice({
         state.refreshToken = action.payload.refreshToken;
         state.isAuthenticated = true;
         state.error = null;
-        
+
         // Store tokens in localStorage
         tokenUtils.setTokens(action.payload.accessToken, action.payload.refreshToken);
-        
+
         // Store user data in localStorage for session persistence
         if (typeof window !== 'undefined') {
           localStorage.setItem('userData', JSON.stringify(action.payload.user));
         }
-        
+
         // Success toast will be handled by the component
       })
       .addCase(registerUser.rejected, (state, action) => {
@@ -266,7 +266,7 @@ const authSlice = createSlice({
         state.error = action.payload as string;
         state.isAuthenticated = false;
       })
-      
+
       // Logout
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
@@ -274,10 +274,10 @@ const authSlice = createSlice({
         state.refreshToken = null;
         state.isAuthenticated = false;
         state.error = null;
-        
+
         // Success toast will be handled by the component
       })
-      
+
       // Initialize auth
       .addCase(initializeAuth.pending, (state) => {
         state.isLoading = true;

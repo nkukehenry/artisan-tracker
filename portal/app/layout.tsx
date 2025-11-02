@@ -18,8 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mutindo Tracker Portal",
-  description: "Mobile tracking dashboard for Mutindo Tracker",
+  title: "ProjectEast",
+  description: "Mobile tracking dashboard for ProjectEast",
 };
 
 export default function RootLayout({

@@ -108,7 +108,7 @@ export default function NotFound() {
         {/* Footer */}
         <div className="mt-12 text-xs text-gray-500">
           <p>Error Code: 404 - Page Not Found</p>
-          <p className="mt-1">Mutindo Tracker © {new Date().getFullYear()}</p>
+          <p className="mt-1">ProjectEast © {new Date().getFullYear()}</p>
         </div>
       </div>
     </div>

@@ -49,7 +49,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
           <div className="h-8 w-8 rounded-lg bg-blue-800 flex items-center justify-center">
             <Smartphone className="h-5 w-5 text-white" />
           </div>
-          <h1 className="text-xl font-bold text-white">Mutindo Tracker</h1>
+          <h1 className="text-xl font-bold text-white">ProjectEast</h1>
         </div>
         {/* Close button for mobile */}
         <button
@@ -104,7 +104,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
             FAQ
           </Link>
         </div>
-        <p className="mt-4 text-center text-xs text-white">© 2025 Mutindo</p>
+        <p className="mt-4 text-center text-xs text-white">© 2025 ProjectEast</p>
       </div> */}
     </div>
   );

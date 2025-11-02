@@ -22,13 +22,13 @@ export default function SplashScreen({ disableRedirects = false }: SplashScreenP
       error,
       disableRedirects
     });
-    
+
     // Skip redirects if disabled (e.g., when used as loading screen by AuthGuard)
     if (disableRedirects) {
       console.log('🚫 Redirects disabled, not performing any redirects');
       return;
     }
-    
+
     // Only redirect if we're not already on the correct page AND not loading
     if (!isLoading) {
       if (isAuthenticated) {
@@ -64,7 +64,7 @@ export default function SplashScreen({ disableRedirects = false }: SplashScreenP
         </div>
 
         {/* App Name */}
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Mutindo Tracker</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">ProjectEast</h1>
         <p className="text-gray-600 mb-8">Mobile tracking dashboard</p>
 
         {/* Loading Spinner */}
