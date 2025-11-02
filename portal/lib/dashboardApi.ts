@@ -1,4 +1,5 @@
 import apiClient, { handleApiError } from './api';
+import { AxiosError } from 'axios';
 
 export interface MetricsCountResponse {
     counts: {
@@ -26,12 +27,20 @@ export interface MetricsCountResponse {
     };
 }
 
-export async function fetchDashboardMetrics(params?: { deviceId?: string; days?: number }) {
+export async function fetchDashboardMetrics(params?: { deviceId?: string; days?: number }): Promise<MetricsCountResponse> {
     try {
-        const response = await apiClient.get('/portal/dashboard', { params });
-        return response.data.data as MetricsCountResponse;
-    } catch (error: any) {
-        throw handleApiError(error);
+        type ApiResponse = {
+            success: boolean;
+            message: string;
+            data: MetricsCountResponse;
+        };
+        const response = await apiClient.get<ApiResponse>('/portal/dashboard', { params: params as { deviceId?: string; days?: number } });
+        return response.data.data;
+    } catch (error: unknown) {
+        if (error instanceof AxiosError) {
+            throw handleApiError(error);
+        }
+        throw error;
     }
 }
 

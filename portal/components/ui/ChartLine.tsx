@@ -9,10 +9,20 @@ import {
     Title,
     Tooltip,
     Legend,
+    ChartData,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+
+// Type for Chart.js tooltip items
+type TooltipItem = {
+    dataIndex?: number;
+    datasetIndex?: number;
+    label?: string;
+    value?: string | number;
+    formattedValue?: string;
+};
 
 interface ChartLineProps {
     data: { day: string; count: number }[];
@@ -24,11 +34,11 @@ export default function ChartLine({ data, label = 'Count' }: ChartLineProps) {
     const labelsShort = labels.map((s) => {
         const dt = new Date(s);
         if (isNaN(dt.getTime())) return s; // fallback if not parseable
-        return dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     });
     const values = data.map(d => d.count);
 
-    const chartData = {
+    const chartData: ChartData<'line', number[], string> = {
         labels: labelsShort,
         datasets: [
             {
@@ -49,7 +59,7 @@ export default function ChartLine({ data, label = 'Count' }: ChartLineProps) {
             tooltip: {
                 enabled: true,
                 callbacks: {
-                    title: (items: any[]) => {
+                    title: (items: TooltipItem[]) => {
                         const idx = items?.[0]?.dataIndex ?? 0;
                         return labels[idx] || '';
                     },

@@ -13,7 +13,11 @@ export class DeviceRepositoryImpl extends BaseRepositoryImpl<Device> implements 
       const result = await this.prisma.device.findUnique({
         where: { deviceId },
       });
-      return result;
+      if (!result) return null;
+      return {
+        ...result,
+        latestTelemetryId: (result as any).latestTelemetryId ?? null,
+      };
     } catch (error) {
       logger.error('Error finding device by deviceId', { deviceId, error });
       throw error;
@@ -38,7 +42,10 @@ export class DeviceRepositoryImpl extends BaseRepositoryImpl<Device> implements 
       const totalPages = Math.ceil(total / limit);
 
       return {
-        data,
+        data: data.map(device => ({
+          ...device,
+          latestTelemetryId: (device as any).latestTelemetryId ?? null,
+        })),
         pagination: {
           page,
           limit,
@@ -72,7 +79,10 @@ export class DeviceRepositoryImpl extends BaseRepositoryImpl<Device> implements 
       const totalPages = Math.ceil(total / limit);
 
       return {
-        data,
+        data: data.map(device => ({
+          ...device,
+          latestTelemetryId: (device as any).latestTelemetryId ?? null,
+        })),
         pagination: {
           page,
           limit,
@@ -99,7 +109,10 @@ export class DeviceRepositoryImpl extends BaseRepositoryImpl<Device> implements 
         where,
         orderBy: { lastSeenAt: 'desc' },
       });
-      return result;
+      return result.map(device => ({
+        ...device,
+        latestTelemetryId: (device as any).latestTelemetryId ?? null,
+      }));
     } catch (error) {
       logger.error('Error finding online devices', { tenantId, error });
       throw error;
@@ -170,17 +183,23 @@ export class DeviceRepositoryImpl extends BaseRepositoryImpl<Device> implements 
   async updateStatus(id: string, isOnline: boolean, lastSeenAt?: Date, batteryLevel?: number, latestTelemetryId?: string): Promise<Device> {
     try {
       console.log('Updating device status', { id, isOnline, lastSeenAt, batteryLevel, latestTelemetryId });
+      const updateData: any = {
+        isOnline,
+        lastSeenAt: lastSeenAt || new Date(),
+        batteryLevel: batteryLevel || null,
+      };
+      if (latestTelemetryId !== undefined) {
+        updateData.latestTelemetryId = latestTelemetryId || null;
+      }
       const device = await this.prisma.device.update({
         where: { deviceId: id },
-        data: {
-          isOnline,
-          lastSeenAt: lastSeenAt || new Date(),
-          batteryLevel: batteryLevel || null,
-          latestTelemetryId: latestTelemetryId || null,
-        },
+        data: updateData,
       });
       logger.info('Device status updated', { id, isOnline });
-      return device as Device;
+      return {
+        ...device,
+        latestTelemetryId: (device as any).latestTelemetryId ?? null,
+      };
     } catch (error) {
       logger.error('Error updating device status', { id, error });
       throw error;
@@ -188,7 +207,7 @@ export class DeviceRepositoryImpl extends BaseRepositoryImpl<Device> implements 
   }
 
   async create(data: CreateDeviceData): Promise<Device> {
-    return super.create({
+    const result = await super.create({
       ...data,
       model: data.model ?? null,
       osVersion: data.osVersion ?? null,
@@ -200,9 +219,17 @@ export class DeviceRepositoryImpl extends BaseRepositoryImpl<Device> implements 
       isActive: data.isActive ?? true,
       latestTelemetryId: data.latestTelemetryId ?? null,
     });
+    return {
+      ...result,
+      latestTelemetryId: (result as any).latestTelemetryId ?? null,
+    };
   }
 
   async update(id: string, data: UpdateDeviceData): Promise<Device> {
-    return super.update(id, data);
+    const result = await super.update(id, data);
+    return {
+      ...result,
+      latestTelemetryId: (result as any).latestTelemetryId ?? null,
+    };
   }
 }
