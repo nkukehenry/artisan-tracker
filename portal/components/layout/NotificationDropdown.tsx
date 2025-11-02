@@ -84,12 +84,12 @@ export default function NotificationDropdown() {
       {/* Trigger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative  p-1 text-gray-500 hover:text-gray-700 focus:outline-none active:outline-none"
+        className="relative p-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 focus:outline-none active:outline-none"
         aria-label="View notifications"
       >
         <Bell className="h-6 w-6" />
         {unreadCount > 0 && (
-          <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white ring-2 ring-white">
+          <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white ring-2 ring-white dark:ring-gray-800">
             {unreadCount}
           </span>
         )}
@@ -97,12 +97,12 @@ export default function NotificationDropdown() {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute z-50 mt-2 w-80 right-0 rounded-lg bg-white shadow-lg border border-gray-200">
+        <div className="absolute z-50 mt-2 w-80 right-0 rounded-lg bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700">
           {/* Header */}
-          <div className="px-4 py-3 border-b border-gray-100">
+          <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
-              <span className="text-xs text-gray-500">{unreadCount} unread</span>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Notifications</h3>
+              <span className="text-xs text-gray-500 dark:text-gray-400">{unreadCount} unread</span>
             </div>
           </div>
 
@@ -111,22 +111,20 @@ export default function NotificationDropdown() {
             {mockNotifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`px-4 py-3 border-b border-gray-50 hover:bg-gray-50 cursor-pointer ${
-                  notification.unread ? 'bg-blue-50' : ''
-                }`}
+                className={`px-4 py-3 border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer ${notification.unread ? 'bg-blue-50 dark:bg-blue-900/30' : ''
+                  }`}
               >
                 <div className="flex items-start gap-3">
-                  <div className={`w-2 h-2 rounded-full mt-2 ${
-                    notification.unread ? 'bg-blue-500' : 'bg-gray-300'
-                  }`} />
+                  <div className={`w-2 h-2 rounded-full mt-2 ${notification.unread ? 'bg-blue-500 dark:bg-blue-400' : 'bg-gray-300 dark:bg-gray-600'
+                    }`} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                       {notification.title}
                     </p>
-                    <p className="text-sm text-gray-600 truncate">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
                       {notification.message}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                       {notification.time}
                     </p>
                   </div>
@@ -136,17 +134,17 @@ export default function NotificationDropdown() {
           </div>
 
           {/* Footer */}
-          <div className="px-4 py-2 border-t border-gray-100">
+          <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-700">
             <div className="flex items-center justify-between">
-              <button 
+              <button
                 onClick={handleMarkAllRead}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium focus:outline-none active:outline-none"
+                className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium focus:outline-none active:outline-none"
               >
                 Mark all as read
               </button>
-              <button 
+              <button
                 onClick={handleNotificationSettings}
-                className="text-sm text-gray-600 hover:text-gray-700 font-medium focus:outline-none active:outline-none"
+                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium focus:outline-none active:outline-none"
               >
                 Settings
               </button>

@@ -37,8 +37,8 @@ export default function LocationPage() {
       sortable: false,
       render: (item: Location, value: unknown) => (
         <div className="flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-gray-400" />
-          <span className="truncate" title={(value as string) || `${item.latitude}, ${item.longitude}`}>
+          <MapPin className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+          <span className="truncate text-gray-900 dark:text-gray-100" title={(value as string) || `${item.latitude}, ${item.longitude}`}>
             {(value as string) || `${item.latitude}, ${item.longitude}`}
           </span>
         </div>
@@ -49,7 +49,7 @@ export default function LocationPage() {
       label: 'Coordinates',
       sortable: true,
       render: (item: Location) => (
-        <span className="font-mono text-sm">
+        <span className="font-mono text-sm text-gray-900 dark:text-gray-100">
           {item.latitude.toFixed(6)}, {item.longitude.toFixed(6)}
         </span>
       ),
@@ -59,7 +59,7 @@ export default function LocationPage() {
       label: 'Accuracy',
       sortable: true,
       render: (item: Location, value: unknown) => (
-        <span className="text-sm">
+        <span className="text-sm text-gray-900 dark:text-gray-100">
           {(value as number).toFixed(1)}m
         </span>
       ),
@@ -69,7 +69,7 @@ export default function LocationPage() {
       label: 'Speed',
       sortable: true,
       render: (item: Location, value: unknown) => (
-        <span className="text-sm">
+        <span className="text-sm text-gray-900 dark:text-gray-100">
           {(value as number) ? `${(value as number).toFixed(1)} m/s` : '-'}
         </span>
       ),
@@ -81,9 +81,9 @@ export default function LocationPage() {
       <AuthWrapper>
         <Layout>
           <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
-            <MapPin className="h-16 w-16 text-gray-300 mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">No Device Selected</h2>
-            <p className="text-gray-600 mb-6">
+            <MapPin className="h-16 w-16 text-gray-300 dark:text-gray-600 mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">No Device Selected</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
               Please select a device from the dropdown in the header to view location data.
             </p>
           </div>
@@ -99,59 +99,59 @@ export default function LocationPage() {
           {/* Header */}
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Location History</h1>
-              <p className="text-gray-600">View location data for {selectedDevice.name}</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Location History</h1>
+              <p className="text-gray-600 dark:text-gray-400">View location data for {selectedDevice.name}</p>
             </div>
           </div>
 
           {/* Selected Device Info */}
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
             <div className="flex items-center gap-3">
               <div className={`w-3 h-3 rounded-full ${selectedDevice.isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
               <div>
-                <div className="font-medium text-gray-900">{selectedDevice.name}</div>
-                <div className="text-sm text-gray-500">{selectedDevice.deviceId} • {selectedDevice.model}</div>
+                <div className="font-medium text-gray-900 dark:text-gray-100">{selectedDevice.name}</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">{selectedDevice.deviceId} • {selectedDevice.model}</div>
               </div>
             </div>
           </div>
 
           {/* Current Location */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                 <Navigation className="h-5 w-5" />
                 Current Location
               </h3>
               <button
                 onClick={handleRefreshCurrentLocation}
                 disabled={currentLocationLoading}
-                className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                className="px-3 py-1 text-sm bg-blue-600 dark:bg-blue-500 text-white rounded hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50"
               >
                 {currentLocationLoading ? 'Refreshing...' : 'Refresh'}
               </button>
             </div>
 
             {currentLocationLoading ? (
-              <div className="flex items-center gap-2 text-gray-600">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 dark:border-blue-400"></div>
                 Loading current location...
               </div>
             ) : currentLocation ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-gray-400" />
+                  <MapPin className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                   <div>
-                    <p className="text-sm text-gray-600">Address</p>
-                    <p className="font-medium">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Address</p>
+                    <p className="font-medium text-gray-900 dark:text-gray-100">
                       {currentLocation.address || `${currentLocation.latitude}, ${currentLocation.longitude}`}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-gray-400" />
+                  <Clock className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                   <div>
-                    <p className="text-sm text-gray-600">Last Updated</p>
-                    <p className="font-medium">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Last Updated</p>
+                    <p className="font-medium text-gray-900 dark:text-gray-100">
                       {new Date(currentLocation.timestamp).toLocaleString()}
                     </p>
                   </div>
@@ -159,28 +159,28 @@ export default function LocationPage() {
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 bg-green-500 rounded-full"></div>
                   <div>
-                    <p className="text-sm text-gray-600">Accuracy</p>
-                    <p className="font-medium">{currentLocation.accuracy.toFixed(1)}m</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Accuracy</p>
+                    <p className="font-medium text-gray-900 dark:text-gray-100">{currentLocation.accuracy.toFixed(1)}m</p>
                   </div>
                 </div>
               </div>
             ) : (
-              <p className="text-gray-600">No current location data available</p>
+              <p className="text-gray-600 dark:text-gray-400">No current location data available</p>
             )}
           </div>
 
           {/* Loading State */}
           {isLoading && locationHistory.length === 0 ? (
-            <div className="bg-white rounded-lg border border-gray-200 p-12">
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-12">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading location history...</p>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
+                <p className="text-gray-600 dark:text-gray-400">Loading location history...</p>
               </div>
             </div>
           ) : error ? (
-            <div className="bg-white rounded-lg border border-gray-200 p-12">
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-12">
               <div className="text-center">
-                <p className="text-red-600">{error}</p>
+                <p className="text-red-600 dark:text-red-400">{error}</p>
               </div>
             </div>
           ) : (

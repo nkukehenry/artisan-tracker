@@ -807,15 +807,15 @@ export default function RemoteControlPage() {
                     {/* Header */}
                     <div className="flex items-start justify-between gap-4">
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900">Device Remote Control</h1>
-                            <p className="text-gray-600">Control and monitor devices remotely</p>
+                            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Device Remote Control</h1>
+                            <p className="text-gray-600 dark:text-gray-400">Control and monitor devices remotely</p>
                         </div>
 
                         {/* Status Card */}
                         {(() => {
                             const connectionStatus = getConnectionStatus();
                             return (
-                                <div className={`rounded-lg border p-4 ${connectionStatus.colorClass} flex-shrink-0`}>
+                                <div className={`rounded-lg border p-4 ${connectionStatus.colorClass} dark:border-gray-700 flex-shrink-0 ${connectionStatus.colorClass.includes('green') ? 'dark:bg-green-900/30 dark:text-green-300' : 'dark:bg-red-900/30 dark:text-red-300'}`}>
                                     <div className="flex items-center gap-3">
                                         <div className={`h-3 w-3 rounded-full ${connectionStatus.dotColor}`}></div>
                                         <span className="font-medium">{connectionStatus.text}</span>
@@ -831,7 +831,7 @@ export default function RemoteControlPage() {
                                             title={isConnected ? 'Reconnect' : 'Connect'}
                                             aria-label={isConnected ? 'Reconnect' : 'Connect'}
                                         >
-                                            <RefreshCw className={`h-4 w-4 ${connectionStatus.colorClass.includes('green') ? 'text-green-700' : 'text-red-700'}`} />
+                                            <RefreshCw className={`h-4 w-4 ${connectionStatus.colorClass.includes('green') ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`} />
                                         </button>
                                     </div>
                                 </div>
@@ -841,10 +841,10 @@ export default function RemoteControlPage() {
 
                     {/* Audio Video Section (for audio streams only) */}
                     {streamType === 'audio' && (
-                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                            <div className="px-6 py-4 border-b border-gray-200">
-                                <h2 className="text-lg font-semibold text-gray-900">Live Audio Stream</h2>
-                                <p className="text-sm text-gray-600">Real-time audio feed from device</p>
+                        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Live Audio Stream</h2>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Real-time audio feed from device</p>
                             </div>
                             <div className="p-6">
                                 <video
@@ -859,15 +859,15 @@ export default function RemoteControlPage() {
                     )}
 
                     {/* Controls */}
-                    <div className="bg-white rounded-lg border border-gray-200">
-                        <div className="px-6 py-4 border-b border-gray-200">
-                            <h2 className="text-lg font-semibold text-gray-900">Live Viewing Controls</h2>
-                            <p className="text-sm text-gray-600">Start streaming from devices with custom duration</p>
+                    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Live Viewing Controls</h2>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">Start streaming from devices with custom duration</p>
                         </div>
                         <div className="p-6 space-y-4">
                             {/* Duration Input */}
                             <div className="flex items-center gap-4">
-                                <label htmlFor="duration" className="text-sm font-medium text-gray-700">
+                                <label htmlFor="duration" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Duration (seconds):
                                 </label>
                                 <input
@@ -878,9 +878,9 @@ export default function RemoteControlPage() {
                                     value={duration}
                                     onChange={(e) => setDuration(Math.max(1, Math.min(3600, parseInt(e.target.value) || 30)))}
                                     disabled={streamingActive}
-                                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed w-32"
+                                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:cursor-not-allowed w-32"
                                 />
-                                <span className="text-sm text-gray-500">
+                                <span className="text-sm text-gray-500 dark:text-gray-400">
                                     {duration > 0 ? `Stream will run for ${duration} second${duration !== 1 ? 's' : ''}` : 'Please enter a valid duration'}
                                 </span>
                             </div>
@@ -890,7 +890,7 @@ export default function RemoteControlPage() {
                                 <button
                                     onClick={() => handleStream('stream_audio')}
                                     disabled={!isConnected || !isRegistered || streamingActive || duration <= 0}
-                                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
                                     <Volume2 className="h-5 w-5" />
                                     Stream Audio
@@ -898,7 +898,7 @@ export default function RemoteControlPage() {
                                 <button
                                     onClick={() => handleStream('stream_video')}
                                     disabled={!isConnected || !isRegistered || streamingActive || duration <= 0}
-                                    className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="flex items-center gap-2 px-4 py-2 bg-purple-600 dark:bg-purple-500 text-white rounded-lg hover:bg-purple-700 dark:hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
                                     <Monitor className="h-5 w-5" />
                                     Stream Video
@@ -906,7 +906,7 @@ export default function RemoteControlPage() {
                                 <button
                                     onClick={() => handleStream('stream_screen')}
                                     disabled={!isConnected || !isRegistered || streamingActive || duration <= 0}
-                                    className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="flex items-center gap-2 px-4 py-2 bg-orange-600 dark:bg-orange-500 text-white rounded-lg hover:bg-orange-700 dark:hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
                                     <Smartphone className="h-5 w-5" />
                                     Stream Screen

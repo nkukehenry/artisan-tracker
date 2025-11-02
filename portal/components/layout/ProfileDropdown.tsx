@@ -12,18 +12,18 @@ interface ProfileDropdownProps {
   userRole?: string;
 }
 
-export default function ProfileDropdown({ 
-  userName, 
+export default function ProfileDropdown({
+  userName,
   userRole
 }: ProfileDropdownProps) {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { user } = useAppSelector((state) => state.auth);
-  
+
   // Use Redux state if props not provided
   const displayName = userName || `${user?.firstName} ${user?.lastName}` || 'User';
-  const displayRole = (userRole || user?.role || 'USER').replace('_', ' ');
-  
+  const displayRole = (userRole || user?.email || '_');
+
   const handleProfile = () => {
     // TODO: Navigate to profile page
     console.log('Open profile');
@@ -41,9 +41,9 @@ export default function ProfileDropdown({
         title: 'Logging Out',
         message: 'You have been successfully logged out.',
       }));
-      
+
       await dispatch(logoutUser());
-      
+
       // Redirect to login page after logout
       router.push('/login');
     } catch (error) {
@@ -66,7 +66,7 @@ export default function ProfileDropdown({
     },
     {
       label: 'divider',
-      onClick: () => {},
+      onClick: () => { },
       divider: true,
     },
     {
@@ -82,13 +82,13 @@ export default function ProfileDropdown({
       trigger={
         <div className="flex items-center gap-3">
           <div className="text-left">
-            <p className="text-sm font-medium text-gray-700">{displayName}</p>
-            <p className="text-xs text-gray-500">{displayRole}</p>
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{displayName}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{displayRole}</p>
           </div>
           <div className="relative">
-            <UserCircle className="h-8 w-8 text-gray-500" />
+            <UserCircle className="h-8 w-8 text-gray-500 dark:text-gray-400" />
             {displayRole === 'SUPER ADMIN' && (
-              <Shield className="absolute -bottom-1 -right-1 h-4 w-4 text-blue-600 bg-white rounded-full" />
+              <Shield className="absolute -bottom-1 -right-1 h-4 w-4 text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800 rounded-full" />
             )}
           </div>
         </div>

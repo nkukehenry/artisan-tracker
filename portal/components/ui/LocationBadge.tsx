@@ -15,7 +15,7 @@ export default function LocationBadge({
   className = ''
 }: LocationBadgeProps) {
   if (!location || !gpsCoordinates) return (
-    <div className={`inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs ${className}`}>
+    <div className={`inline-flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-md text-xs ${className}`}>
       <MapPin className="h-3 w-3" />
       <span className="truncate max-w-[200px]" title="Unknown Location">
         Unknown Location
@@ -29,13 +29,13 @@ export default function LocationBadge({
   if (!displayText) return null;
 
   return (
-    <div className={`inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs ${className}`}>
+    <div className={`inline-flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-md text-xs ${className}`}>
       <MapPin className="h-3 w-3" />
       <span className="truncate max-w-[200px]" title={displayText}>
         {displayText}
       </span>
       {showCoordinates && coords && (
-        <span className="text-blue-500 ml-1" title={`Accuracy: ${coords.accuracy || 'N/A'}m`}>
+        <span className="text-blue-500 dark:text-blue-400 ml-1" title={`Accuracy: ${coords.accuracy || 'N/A'}m`}>
           ±{coords.accuracy?.toFixed(0) || '?'}m
         </span>
       )}

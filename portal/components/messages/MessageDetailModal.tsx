@@ -74,7 +74,7 @@ export default function MessageDetailModal({ message, isOpen, onClose }: Message
       <div className="flex min-h-screen items-center justify-center p-4">
         {/* Backdrop */}
         <div
-          className="fixed inset-0 bg-blue-900/20 backdrop-blur-md transition-opacity"
+          className="fixed inset-0 bg-blue-900/20 dark:bg-black/50 backdrop-blur-md transition-opacity"
           onClick={onClose}
         />
 

@@ -39,7 +39,7 @@ export default function Dropdown({ trigger, items, align = 'right', className = 
       {/* Trigger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1 text-gray-500 hover:text-gray-700 focus:outline-none active:outline-none rounded-md p-1"
+        className="flex items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 focus:outline-none active:outline-none rounded-md p-1"
       >
         {trigger}
       </button>
@@ -48,29 +48,29 @@ export default function Dropdown({ trigger, items, align = 'right', className = 
       {isOpen && (
         <div
           className={`
-            absolute z-50 mt-2 w-56 rounded-lg bg-white shadow-lg border border-gray-200 py-1
+            absolute z-50 mt-2 w-56 rounded-lg bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 py-1
             ${align === 'right' ? 'right-0' : 'left-0'}
           `}
         >
           {items.map((item, index) => (
             <div key={index}>
-              {item.divider? <div className="border-t border-gray-100 my-1" />:
-              <button
-                onClick={() => {
-                  item.onClick();
-                  setIsOpen(false);
-                }}
-                className={`
+              {item.divider ? <div className="border-t border-gray-100 dark:border-gray-700 my-1" /> :
+                <button
+                  onClick={() => {
+                    item.onClick();
+                    setIsOpen(false);
+                  }}
+                  className={`
                   w-full flex items-center gap-3 px-4 py-2 text-sm transition-colors focus:outline-none active:outline-none
-                  ${item.danger 
-                    ? 'text-red-600 hover:bg-red-50' 
-                    : 'text-gray-700 hover:bg-gray-50'
-                  }
+                  ${item.danger
+                      ? 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    }
                 `}
-              >
-                {item.icon && <item.icon className="h-4 w-4" />}
-                {item.label}
-              </button>
+                >
+                  {item.icon && <item.icon className="h-4 w-4" />}
+                  {item.label}
+                </button>
               }
             </div>
           ))}

@@ -44,13 +44,13 @@ export default function ContactsPage() {
               className="w-8 h-8 rounded-full object-cover"
             />
           ) : (
-            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-              <span className="text-sm font-medium text-gray-600">
+            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
                 {(value as string).charAt(0).toUpperCase()}
               </span>
             </div>
           )}
-          <span className="font-medium">{value as string}</span>
+          <span className="font-medium text-gray-900 dark:text-gray-100">{value as string}</span>
         </div>
       ),
     },
@@ -78,9 +78,9 @@ export default function ContactsPage() {
       <AuthWrapper>
         <Layout>
           <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
-            <Users className="h-16 w-16 text-gray-300 mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">No Device Selected</h2>
-            <p className="text-gray-600 mb-6">
+            <Users className="h-16 w-16 text-gray-300 dark:text-gray-600 mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">No Device Selected</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
               Please select a device from the dropdown in the header to view contacts.
             </p>
           </div>
@@ -96,18 +96,18 @@ export default function ContactsPage() {
           {/* Header */}
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Contacts</h1>
-              <p className="text-gray-600">View contacts from {selectedDevice.name}</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Contacts</h1>
+              <p className="text-gray-600 dark:text-gray-400">View contacts from {selectedDevice.name}</p>
             </div>
           </div>
 
           {/* Selected Device Info */}
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
             <div className="flex items-center gap-3">
               <div className={`w-3 h-3 rounded-full ${selectedDevice.isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
               <div>
-                <div className="font-medium text-gray-900">{selectedDevice.name}</div>
-                <div className="text-sm text-gray-500">{selectedDevice.deviceId} • {selectedDevice.model}</div>
+                <div className="font-medium text-gray-900 dark:text-gray-100">{selectedDevice.name}</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">{selectedDevice.deviceId} • {selectedDevice.model}</div>
               </div>
             </div>
           </div>
@@ -125,16 +125,16 @@ export default function ContactsPage() {
 
           {/* Loading State */}
           {isLoading && contacts.length === 0 ? (
-            <div className="bg-white rounded-lg border border-gray-200 p-12">
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-12">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading contacts...</p>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
+                <p className="text-gray-600 dark:text-gray-400">Loading contacts...</p>
               </div>
             </div>
           ) : error ? (
-            <div className="bg-white rounded-lg border border-gray-200 p-12">
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-12">
               <div className="text-center">
-                <p className="text-red-600">{error}</p>
+                <p className="text-red-600 dark:text-red-400">{error}</p>
               </div>
             </div>
           ) : (

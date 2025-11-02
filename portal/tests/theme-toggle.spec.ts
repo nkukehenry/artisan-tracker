@@ -199,7 +199,7 @@ test.describe('Theme Toggle', () => {
             expect(bodyBgAfter).not.toBe(bodyBgBefore);
 
             // Get navbar background color (this definitely changes)
-            // Navbar has class "bg-white dark:bg-dark-background"
+            // Navbar has class "bg-white dark:bg-gray-800"
             const navbarBgBefore = await page.evaluate(() => {
                 // Find navbar by looking for an element with border-b that contains theme toggle
                 const navbar = Array.from(document.querySelectorAll('div')).find(el => {

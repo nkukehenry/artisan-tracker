@@ -54,11 +54,11 @@ export default function SplashScreen({ disableRedirects = false }: SplashScreenP
   }, [isAuthenticated, isLoading, router, pathname, error, disableRedirects]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
       <div className="text-center">
         {/* Logo */}
         <div className="flex justify-center mb-8">
-          <div className="h-16 w-16 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden bg-white/10 backdrop-blur-sm">
+          <div className="h-16 w-16 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden bg-white/10 dark:bg-white/5 backdrop-blur-sm">
             <Image
               src="/images/logo.png"
               alt="Logo"
@@ -70,23 +70,23 @@ export default function SplashScreen({ disableRedirects = false }: SplashScreenP
         </div>
 
         {/* App Name */}
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">ProjectEast</h1>
-        <p className="text-gray-600 mb-8">Mobile tracking dashboard</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">ProjectEast</h1>
+        <p className="text-gray-600 dark:text-gray-400 mb-8">Mobile tracking dashboard</p>
 
         {/* Loading Spinner */}
         <div className="flex justify-center mb-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400"></div>
         </div>
 
         {/* Loading Text */}
-        <p className="text-gray-500 text-sm">
+        <p className="text-gray-500 dark:text-gray-400 text-sm">
           {isLoading ? 'Checking authentication...' : 'Redirecting...'}
         </p>
 
         {/* Error Message */}
         {error && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg max-w-sm mx-auto">
-            <p className="text-sm text-red-600">{error}</p>
+          <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg max-w-sm mx-auto">
+            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           </div>
         )}
       </div>

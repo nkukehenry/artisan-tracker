@@ -112,13 +112,13 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
   const getMediaIcon = (fileType: string) => {
     switch (fileType) {
       case 'PHOTO':
-        return <FileImage className="h-5 w-5 text-green-600" />;
+        return <FileImage className="h-5 w-5 text-green-600 dark:text-green-400" />;
       case 'VIDEO':
-        return <FileVideo className="h-5 w-5 text-purple-600" />;
+        return <FileVideo className="h-5 w-5 text-purple-600 dark:text-purple-400" />;
       case 'AUDIO':
-        return <FileAudio className="h-5 w-5 text-blue-600" />;
+        return <FileAudio className="h-5 w-5 text-blue-600 dark:text-blue-400" />;
       default:
-        return <FileText className="h-5 w-5 text-gray-600" />;
+        return <FileText className="h-5 w-5 text-gray-600 dark:text-gray-400" />;
     }
   };
 
@@ -137,32 +137,32 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
       <div className="flex min-h-screen items-center justify-center p-4">
         {/* Backdrop */}
         <div
-          className="fixed inset-0 bg-blue-900/20 backdrop-blur-md transition-opacity"
+          className="fixed inset-0 bg-blue-900/20 dark:bg-black/50 backdrop-blur-md transition-opacity"
           onClick={onClose}
         />
 
         {/* Modal */}
-        <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           {/* Header */}
-          <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+          <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-lg ${media.fileType === 'PHOTO' ? 'bg-green-100' :
-                media.fileType === 'VIDEO' ? 'bg-purple-100' :
-                  media.fileType === 'AUDIO' ? 'bg-blue-100' :
-                    'bg-gray-100'
+              <div className={`p-2 rounded-lg ${media.fileType === 'PHOTO' ? 'bg-green-100 dark:bg-green-900/30' :
+                media.fileType === 'VIDEO' ? 'bg-purple-100 dark:bg-purple-900/30' :
+                  media.fileType === 'AUDIO' ? 'bg-blue-100 dark:bg-blue-900/30' :
+                    'bg-gray-100 dark:bg-gray-700'
                 }`}>
                 {getMediaIcon(media.fileType)}
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">Media Details</h2>
-                <p className="text-sm text-gray-600">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Media Details</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   {media.fileType} • {formatFileSize(Number(media.fileSize))}
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
             >
               <X className="h-6 w-6" />
             </button>
@@ -173,41 +173,41 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
             {/* Basic Information */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-500 mb-1">File Name</p>
-                <p className="text-base font-medium text-gray-900">{media.fileName}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">File Name</p>
+                <p className="text-base font-medium text-gray-900 dark:text-gray-100">{media.fileName}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500 mb-1">File Type</p>
-                <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${media.fileType === 'PHOTO' ? 'bg-green-100 text-green-800' :
-                  media.fileType === 'VIDEO' ? 'bg-purple-100 text-purple-800' :
-                    media.fileType === 'AUDIO' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">File Type</p>
+                <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${media.fileType === 'PHOTO' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' :
+                  media.fileType === 'VIDEO' ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300' :
+                    media.fileType === 'AUDIO' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300' :
+                      'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
                   }`}>
                   {media.fileType}
                 </span>
               </div>
               <div>
-                <p className="text-sm text-gray-500 mb-1">File Size</p>
-                <p className="text-base font-medium text-gray-900">{formatFileSize(Number(media.fileSize))}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">File Size</p>
+                <p className="text-base font-medium text-gray-900 dark:text-gray-100">{formatFileSize(Number(media.fileSize))}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500 mb-1">MIME Type</p>
-                <p className="text-base font-medium text-gray-900">{media.mimeType}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">MIME Type</p>
+                <p className="text-base font-medium text-gray-900 dark:text-gray-100">{media.mimeType}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500 mb-1">Security</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Security</p>
                 <div className="flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-gray-400" />
-                  <p className="text-base font-medium text-gray-900">
+                  <Shield className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                  <p className="text-base font-medium text-gray-900 dark:text-gray-100">
                     {media.isEncrypted ? 'Encrypted' : 'Not Encrypted'}
                   </p>
                 </div>
               </div>
               <div>
-                <p className="text-sm text-gray-500 mb-1">Created At</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Created At</p>
                 <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-gray-400" />
-                  <p className="text-base font-medium text-gray-900">
+                  <Clock className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                  <p className="text-base font-medium text-gray-900 dark:text-gray-100">
                     {new Date(media.createdAt).toLocaleString()}
                   </p>
                 </div>
@@ -215,22 +215,22 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
             </div>
 
             {/* Media Content */}
-            <div className="border-t border-gray-200 pt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Media Preview</h3>
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">Media Preview</h3>
               {isLoading ? (
-                <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-center h-64 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
                   <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading media file...</p>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
+                    <p className="text-gray-600 dark:text-gray-400">Loading media file...</p>
                   </div>
                 </div>
               ) : error ? (
-                <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-center h-64 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
                   <div className="text-center">
-                    <p className="text-red-600">{error}</p>
+                    <p className="text-red-600 dark:text-red-400">{error}</p>
                     <button
                       onClick={loadMediaFile}
-                      className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      className="mt-2 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
                     >
                       Retry
                     </button>
@@ -273,12 +273,12 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
                     </div>
                   )}
                   {media.fileType === 'DOCUMENT' && (
-                    <div className="flex flex-col items-center justify-center h-64 bg-gray-50 rounded-lg">
-                      <FileText className="h-16 w-16 text-gray-400 mb-4" />
-                      <p className="text-gray-600 mb-4">Document preview not available</p>
+                    <div className="flex flex-col items-center justify-center h-64 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                      <FileText className="h-16 w-16 text-gray-400 dark:text-gray-500 mb-4" />
+                      <p className="text-gray-600 dark:text-gray-400 mb-4">Document preview not available</p>
                       <button
                         onClick={handleDownload}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
                       >
                         <Download className="h-4 w-4" />
                         Download Document
@@ -292,9 +292,9 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
 
             {/* Location Information */}
             {(media.location || media.gpsCoordinates) && (
-              <div className="border-t border-gray-200 pt-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-gray-600" />
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                   Location
                 </h3>
                 <GPSMapViewer
@@ -306,14 +306,14 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
 
             {/* Related Call Information */}
             {media.call && (
-              <div className="border-t border-gray-200 pt-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Related Call</h3>
-                <div className="bg-gray-50 rounded-lg p-4">
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">Related Call</h3>
+                <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium">{media.call.contactName || media.call.phoneNumber}</span>
-                    <span className="text-sm text-gray-600">{media.call.callType}</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{media.call.contactName || media.call.phoneNumber}</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">{media.call.callType}</span>
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
+                  <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                     <div className="flex items-center gap-1">
                       <Clock className="h-4 w-4" />
                       <span>{Math.floor(media.call.duration / 60)}:{(media.call.duration % 60).toString().padStart(2, '0')}</span>
@@ -336,26 +336,26 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
             )}
 
             {/* Timestamps */}
-            <div className="border-t border-gray-200 pt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Record Information</h3>
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">Record Information</h3>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-gray-500">Created At:</p>
-                  <p className="font-medium">{new Date(media.createdAt).toLocaleString()}</p>
+                  <p className="text-gray-500 dark:text-gray-400">Created At:</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{new Date(media.createdAt).toLocaleString()}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500">Updated At:</p>
-                  <p className="font-medium">{new Date(media.updatedAt).toLocaleString()}</p>
+                  <p className="text-gray-500 dark:text-gray-400">Updated At:</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{new Date(media.updatedAt).toLocaleString()}</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
+          <div className="sticky bottom-0 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-6 py-4 flex justify-end gap-3">
             <button
               onClick={handleDownload}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
             >
               <Download className="h-4 w-4" />
               Download
@@ -363,7 +363,7 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
             {onDelete && (
               <button
                 onClick={handleDelete}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 dark:bg-red-500 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors"
               >
                 <Trash2 className="h-4 w-4" />
                 Delete
@@ -371,7 +371,7 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
             )}
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
             >
               Close
             </button>

@@ -43,9 +43,9 @@ export default function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <div className="flex h-full w-64 flex-col bg-gray-900">
+    <div className="flex h-full w-64 flex-col bg-gray-900 dark:bg-gray-800">
       {/* Logo */}
-      <div className="flex h-16 items-center justify-between border-b border-gray-800 px-6">
+      <div className="flex h-16 items-center justify-between border-b border-gray-800 dark:border-gray-700 px-6">
         <div className="flex items-center gap-2 py-4">
           <div className="h-8 w-8 rounded-lg flex items-center justify-center overflow-hidden">
             <Image
@@ -79,13 +79,13 @@ export default function Sidebar({ onClose }: SidebarProps) {
               className={`
                 group flex items-center rounded-lg px-3 py-4 text-sm font-medium transition-colors
                 ${isActive
-                  ? 'bg-gray-800 text-blue-300'
-                  : 'text-white hover:bg-gray-800'
+                  ? 'bg-gray-800 dark:bg-gray-700 text-blue-300 dark:text-blue-300'
+                  : 'text-white dark:text-white hover:bg-gray-800 dark:hover:bg-gray-700'
                 }
               `}
             >
               <item.icon
-                className={`mr-3 h-5 w-5 flex-shrink-0 ${isActive ? 'text-blue-300' : 'text-white'}`}
+                className={`mr-3 h-5 w-5 flex-shrink-0 ${isActive ? 'text-blue-300 dark:text-blue-300' : 'text-white dark:text-white'}`}
               />
               {item.name}
             </Link>

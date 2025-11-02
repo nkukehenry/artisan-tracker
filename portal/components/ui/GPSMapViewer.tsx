@@ -31,11 +31,11 @@ export default function GPSMapViewer({ location, gpsCoordinates, className = '' 
 
 
   return (
-    <div className={`bg-white border border-gray-200 rounded-lg p-4 ${className}`}>
+    <div className={`bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 ${className}`}>
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <MapPin className="h-5 w-5 text-blue-600" />
-          <h3 className="font-medium text-gray-900">Location Information</h3>
+          <MapPin className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          <h3 className="font-medium text-gray-900 dark:text-gray-100">Location Information</h3>
         </div>
       </div>
 
@@ -45,8 +45,8 @@ export default function GPSMapViewer({ location, gpsCoordinates, className = '' 
         <button
           onClick={() => setShowEmbeddedMap(true)}
           className={`px-3 py-2 text-sm rounded-md transition-colors ${showEmbeddedMap
-            ? 'bg-green-600 text-white'
-            : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+            ? 'bg-green-600 dark:bg-green-500 text-white'
+            : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
             }`}
         >
           <MapPin className="w-4 h-4 inline mr-1" />
@@ -55,8 +55,8 @@ export default function GPSMapViewer({ location, gpsCoordinates, className = '' 
         <button
           onClick={() => setShowEmbeddedMap(false)}
           className={`px-3 py-2 text-sm rounded-md transition-colors ${!showEmbeddedMap
-            ? 'bg-blue-600 text-white'
-            : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+            ? 'bg-blue-600 dark:bg-blue-500 text-white'
+            : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
             }`}
         >
           <ExternalLink className="w-4 h-4 inline mr-1" />
@@ -93,7 +93,7 @@ export default function GPSMapViewer({ location, gpsCoordinates, className = '' 
               href={googleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center px-4 py-3 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center justify-center px-4 py-3 bg-blue-600 dark:bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
             >
               <ExternalLink className="w-4 h-4 mr-2" />
               Google Maps
@@ -102,7 +102,7 @@ export default function GPSMapViewer({ location, gpsCoordinates, className = '' 
               href={appleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center px-4 py-3 bg-gray-800 text-white text-sm rounded-lg hover:bg-gray-900 transition-colors"
+              className="flex items-center justify-center px-4 py-3 bg-gray-800 dark:bg-gray-700 text-white dark:text-gray-100 text-sm rounded-lg hover:bg-gray-900 dark:hover:bg-gray-600 transition-colors"
             >
               <ExternalLink className="w-4 h-4 mr-2" />
               Apple Maps
@@ -111,7 +111,7 @@ export default function GPSMapViewer({ location, gpsCoordinates, className = '' 
               href={openStreetMapUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center px-4 py-3 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
+              className="flex items-center justify-center px-4 py-3 bg-green-600 dark:bg-green-500 text-white text-sm rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition-colors"
             >
               <ExternalLink className="w-4 h-4 mr-2" />
               OpenStreetMap
@@ -126,8 +126,8 @@ export default function GPSMapViewer({ location, gpsCoordinates, className = '' 
 
       {location && (
         <div className="mb-2">
-          <p className="text-sm text-gray-600">Address:</p>
-          <p className="text-sm font-medium text-gray-900">{location}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Address:</p>
+          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{location}</p>
         </div>
       )}
 
@@ -135,39 +135,39 @@ export default function GPSMapViewer({ location, gpsCoordinates, className = '' 
         <>
           <div className="grid grid-cols-2 gap-4 mb-3">
             <div>
-              <p className="text-xs text-gray-500">Latitude</p>
-              <p className="text-sm font-mono font-medium">{coords.latitude.toFixed(6)}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Latitude</p>
+              <p className="text-sm font-mono font-medium text-gray-900 dark:text-gray-100">{coords.latitude.toFixed(6)}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-500">Longitude</p>
-              <p className="text-sm font-mono font-medium">{coords.longitude.toFixed(6)}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Longitude</p>
+              <p className="text-sm font-mono font-medium text-gray-900 dark:text-gray-100">{coords.longitude.toFixed(6)}</p>
             </div>
           </div>
 
           {showDetails && (
-            <div className="border-t border-gray-200 pt-3 space-y-2">
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-3 space-y-2">
               {coords.accuracy !== undefined && (
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">Accuracy:</span>
-                  <span className="text-xs font-medium">±{coords.accuracy.toFixed(1)}m</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Accuracy:</span>
+                  <span className="text-xs font-medium text-gray-900 dark:text-gray-100">±{coords.accuracy.toFixed(1)}m</span>
                 </div>
               )}
               {coords.altitude !== undefined && (
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">Altitude:</span>
-                  <span className="text-xs font-medium">{coords.altitude.toFixed(1)}m</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Altitude:</span>
+                  <span className="text-xs font-medium text-gray-900 dark:text-gray-100">{coords.altitude.toFixed(1)}m</span>
                 </div>
               )}
               {coords.speed !== undefined && (
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">Speed:</span>
-                  <span className="text-xs font-medium">{(coords.speed * 3.6).toFixed(1)} km/h</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Speed:</span>
+                  <span className="text-xs font-medium text-gray-900 dark:text-gray-100">{(coords.speed * 3.6).toFixed(1)} km/h</span>
                 </div>
               )}
               {coords.heading !== undefined && (
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">Heading:</span>
-                  <span className="text-xs font-medium flex items-center gap-1">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Heading:</span>
+                  <span className="text-xs font-medium text-gray-900 dark:text-gray-100 flex items-center gap-1">
                     <Navigation className="h-3 w-3" style={{ transform: `rotate(${coords.heading}deg)` }} />
                     {coords.heading.toFixed(0)}°
                   </span>
@@ -179,7 +179,7 @@ export default function GPSMapViewer({ location, gpsCoordinates, className = '' 
           {(coords.accuracy !== undefined || coords.altitude !== undefined || coords.speed !== undefined || coords.heading !== undefined) && (
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="mt-3 text-xs text-blue-600 hover:text-blue-700 font-medium"
+              className="mt-3 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
             >
               {showDetails ? 'Hide Details' : 'Show More Details'}
             </button>

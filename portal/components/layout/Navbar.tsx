@@ -14,7 +14,7 @@ interface NavbarProps {
 
 export default function Navbar({ onMenuClick }: NavbarProps) {
   return (
-    <div className="flex h-16 items-center justify-between border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-dark-background px-6">
+    <div className="flex h-16 items-center justify-between border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-6">
       {/* Left section - Mobile menu button and Device Selector */}
       <div className="flex items-center gap-4">
         <button
@@ -36,7 +36,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
         <ThemeToggle />
 
         {/* Notifications */}
-        <NotificationDropdown />
+        {/* <NotificationDropdown /> */}
 
         {/* Profile */}
         <ProfileDropdown />
