@@ -106,10 +106,6 @@ export default function DeviceInformationPage() {
                 <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
                 Refresh
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">
-                <Edit className="h-4 w-4" />
-                Edit Device
-              </button>
             </div>
           </div>
 
@@ -494,35 +490,6 @@ export default function DeviceInformationPage() {
             </div>
           )}
 
-          {/* Quick Actions */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Quick Actions</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button className="flex items-center gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                <MapPin className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                <div className="text-left">
-                  <div className="font-medium text-gray-900 dark:text-gray-100">View Location</div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">Check current location</div>
-                </div>
-              </button>
-
-              <button className="flex items-center gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                <Settings className="h-5 w-5 text-green-600 dark:text-green-400" />
-                <div className="text-left">
-                  <div className="font-medium text-gray-900 dark:text-gray-100">Remote Control</div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">Control device remotely</div>
-                </div>
-              </button>
-
-              <button className="flex items-center gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                <AlertCircle className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-                <div className="text-left">
-                  <div className="font-medium text-gray-900 dark:text-gray-100">Device Logs</div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">View activity logs</div>
-                </div>
-              </button>
-            </div>
-          </div>
         </div>
       </Layout>
     </AuthWrapper>

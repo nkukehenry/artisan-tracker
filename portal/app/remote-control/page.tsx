@@ -51,7 +51,12 @@ export default function RemoteControlPage() {
     const { selectedDevice } = useDeviceContext();
 
     // Use WebSocket context
-    const { isConnected, connect: connectWebSocket, reconnect: reconnectWebSocket, sendMessage } = useWebSocketContext();
+    const { isConnected, wsConnection, connect: connectWebSocket, reconnect: reconnectWebSocket, sendMessage } = useWebSocketContext();
+
+    // Keep ref in sync with wsConnection state for reliable polling
+    useEffect(() => {
+        wsConnectionRef.current = wsConnection;
+    }, [wsConnection]);
 
     // Redux dispatch for toasts
     const dispatch = useAppDispatch();
@@ -60,6 +65,7 @@ export default function RemoteControlPage() {
     const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
     const remoteDeviceIdRef = useRef<string | null>(null); // Track the remote device we're connecting to
     const pendingCandidatesRef = useRef<Array<{ label?: number; id?: string; candidate?: string }>>([]); // Buffer candidates until remote description is set
+    const wsConnectionRef = useRef<WebSocket | null>(null); // Track WebSocket connection for polling
 
     // Generate or retrieve web client device ID
     const getWebClientDeviceId = useCallback(() => {
@@ -592,65 +598,6 @@ export default function RemoteControlPage() {
     //   }
     // }, []);
 
-    // Action sending
-    const sendAction = useCallback((
-        action: string,
-        duration: number | null = null,
-        payload: unknown = null,
-        targetDeviceId: string | null = null,
-        targetChannel: string | null = null
-    ) => {
-        if (!isRegistered || !deviceId) {
-            updateStatus('Device not registered', 'error');
-            dispatch(addToast({
-                type: 'error',
-                title: 'Not Registered',
-                message: 'Please wait for web client registration before sending commands.',
-            }));
-            return;
-        }
-
-        const clientMessage: Record<string, unknown> = {
-            type: 'client-message',
-            deviceId: deviceId,
-            action: action,
-            timestamp: Date.now(),
-        };
-
-        if (duration !== null) clientMessage.duration = duration;
-        if (payload) clientMessage.payload = payload;
-        if (targetDeviceId) clientMessage.targetDeviceId = targetDeviceId;
-        if (targetChannel) clientMessage.targetChannel = targetChannel;
-
-        const sent = sendMessage(clientMessage);
-        if (sent) {
-            const routingInfo = targetDeviceId
-                ? ` to device ${targetDeviceId}`
-                : targetChannel
-                    ? ` to channel ${targetChannel}`
-                    : ' to all Android devices';
-            updateStatus(`Sent action: ${action}${routingInfo}`, 'info');
-
-            // Show success toast
-            const actionDisplayName = action.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-            dispatch(addToast({
-                type: 'success',
-                title: 'Command Sent',
-                message: `${actionDisplayName} command sent successfully${routingInfo}`,
-                duration: 3000,
-            }));
-        } else {
-            updateStatus('Cannot send: WebSocket not open', 'error');
-            dispatch(addToast({
-                type: 'error',
-                title: 'Command Failed',
-                message: 'Cannot send command: WebSocket not connected',
-                duration: 4000,
-            }));
-        }
-    }, [deviceId, isRegistered, sendMessage, updateStatus, dispatch]);
-
-
     // Auto-connect on mount - only run once
     useEffect(() => {
         connectWebSocket();
@@ -753,6 +700,133 @@ export default function RemoteControlPage() {
         updateStatus('Stream ended', 'info');
     }, [updateStatus]);
 
+    const connectOrReconnectWebSocket = useCallback(() => {
+        if (isConnected) {
+            reconnectWebSocket();
+        } else {
+            connectWebSocket();
+        }
+    }, [isConnected, connectWebSocket, reconnectWebSocket]);
+
+    // Helper function to ensure WebSocket connection is established before sending commands
+    const ensureConnectionAndSend = useCallback(async (
+        action: string,
+        duration: number | null = null,
+        payload: unknown = null,
+        targetDeviceId: string | null = null,
+        targetChannel: string | null = null
+    ): Promise<boolean> => {
+        // First check if we're registered (this is required for commands)
+        if (!isRegistered || !deviceId) {
+            updateStatus('Device not registered', 'error');
+            dispatch(addToast({
+                type: 'error',
+                title: 'Not Registered',
+                message: 'Please wait for web client registration before sending commands.',
+            }));
+            return false;
+        }
+
+        // Check current connection state - if not connected, attempt to connect or reconnect
+        const currentConnection = wsConnection;
+        const isCurrentlyConnected = currentConnection?.readyState === WebSocket.OPEN;
+
+        if (!isCurrentlyConnected) {
+            console.log('WebSocket not connected, attempting to connect...');
+            connectOrReconnectWebSocket();
+            updateStatus('Connecting to WebSocket...', 'info');
+        }
+
+        // Wait for connection to be established (with timeout)
+        const maxWaitTime = 10000; // 10 seconds
+        const checkInterval = 100; // Check every 100ms
+        const startTime = Date.now();
+
+        return new Promise((resolve) => {
+            const checkConnection = () => {
+                const elapsed = Date.now() - startTime;
+                // Access the current wsConnection from ref (always up-to-date) and check its readyState directly
+                // This is more reliable than checking the isConnected state which might be stale
+                const currentWs = wsConnectionRef.current;
+                const isOpen = currentWs?.readyState === WebSocket.OPEN;
+
+                if (isOpen) {
+                    // Connection is up, proceed with sending
+                    console.log('WebSocket connected, proceeding with command');
+
+                    const clientMessage: Record<string, unknown> = {
+                        type: 'client-message',
+                        deviceId: deviceId,
+                        action: action,
+                        timestamp: Date.now(),
+                    };
+
+                    if (duration !== null) clientMessage.duration = duration;
+                    if (payload) clientMessage.payload = payload;
+                    if (targetDeviceId) clientMessage.targetDeviceId = targetDeviceId;
+                    if (targetChannel) clientMessage.targetChannel = targetChannel;
+
+                    const sent = sendMessage(clientMessage);
+                    if (sent) {
+                        const routingInfo = targetDeviceId
+                            ? ` to device ${targetDeviceId}`
+                            : targetChannel
+                                ? ` to channel ${targetChannel}`
+                                : ' to all Android devices';
+                        updateStatus(`Sent action: ${action}${routingInfo}`, 'info');
+
+                        // Show success toast
+                        const actionDisplayName = action.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        dispatch(addToast({
+                            type: 'success',
+                            title: 'Command Sent',
+                            message: `${actionDisplayName} command sent successfully${routingInfo}`,
+                            duration: 3000,
+                        }));
+                        resolve(true);
+                    } else {
+                        updateStatus('Cannot send: WebSocket not open', 'error');
+                        dispatch(addToast({
+                            type: 'error',
+                            title: 'Command Failed',
+                            message: 'Cannot send command: WebSocket not connected',
+                            duration: 4000,
+                        }));
+                        resolve(false);
+                    }
+                } else if (elapsed >= maxWaitTime) {
+                    // Timeout reached
+                    console.error('Connection wait timeout');
+                    updateStatus('Connection timeout', 'error');
+                    dispatch(addToast({
+                        type: 'error',
+                        title: 'Connection Timeout',
+                        message: 'Could not establish WebSocket connection in time. Please try again.',
+                        duration: 4000,
+                    }));
+                    resolve(false);
+                } else {
+                    // Still waiting, check again
+                    setTimeout(checkConnection, checkInterval);
+                }
+            };
+
+            // Start checking immediately
+            checkConnection();
+        });
+    }, [isRegistered, deviceId, wsConnection, connectOrReconnectWebSocket, sendMessage, updateStatus, dispatch]);
+
+    // Action sending - now with connection check
+    const sendAction = useCallback((
+        action: string,
+        duration: number | null = null,
+        payload: unknown = null,
+        targetDeviceId: string | null = null,
+        targetChannel: string | null = null
+    ) => {
+        ensureConnectionAndSend(action, duration, payload, targetDeviceId, targetChannel);
+    }, [ensureConnectionAndSend]);
+
     const handleStream = useCallback((action: 'stream_audio' | 'stream_video' | 'stream_screen', customDuration?: number) => {
         // Clear any existing timer
         if (streamTimerRef.current) {
@@ -821,11 +895,7 @@ export default function RemoteControlPage() {
                                         <span className="font-medium">{connectionStatus.text}</span>
                                         <button
                                             onClick={() => {
-                                                if (isConnected) {
-                                                    reconnectWebSocket();
-                                                } else {
-                                                    connectWebSocket();
-                                                }
+                                                connectOrReconnectWebSocket();
                                             }}
                                             className="p-1.5 hover:opacity-70 rounded transition-all active:scale-95"
                                             title={isConnected ? 'Reconnect' : 'Connect'}
