@@ -8,14 +8,28 @@ import { Device } from '@/types/device';
 import { deviceApi } from '@/lib/deviceApi';
 import { useAppDispatch } from '@/lib/hooks';
 import { addToast } from '@/store/slices/appSlice';
-import { 
-  ArrowLeft, 
-  Smartphone, 
-  Wifi, 
-  Battery, 
+import {
+  ArrowLeft,
+  Smartphone,
+  Wifi,
+  Battery,
   Clock,
   Monitor
 } from 'lucide-react';
+
+// Helper function to format location
+function formatLocation(location: unknown): string {
+  if (!location) return 'Unknown';
+  if (typeof location === 'string') return location;
+  if (typeof location === 'object' && location !== null) {
+    const loc = location as Record<string, unknown>;
+    if (typeof loc.address === 'string') return loc.address;
+    if (typeof loc.latitude === 'number' && typeof loc.longitude === 'number') {
+      return `${loc.latitude.toFixed(6)}, ${loc.longitude.toFixed(6)}`;
+    }
+  }
+  return 'Unknown';
+}
 
 export default function DeviceDetailsPage() {
   const params = useParams();
@@ -223,7 +237,7 @@ export default function DeviceDetailsPage() {
               <div className="p-6 space-y-4">
                 <div className="flex justify-between">
                   <span className="text-sm font-medium text-gray-600">Current Location</span>
-                  <span className="text-sm text-gray-900">{device.location || 'Unknown'}</span>
+                  <span className="text-sm text-gray-900">{formatLocation(device.location)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm font-medium text-gray-600">Last Location Update</span>

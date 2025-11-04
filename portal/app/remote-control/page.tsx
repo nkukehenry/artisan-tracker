@@ -8,8 +8,10 @@ import { useDeviceContext } from '@/contexts/DeviceContext';
 import { useWebSocketContext, useWebSocketMessage } from '@/contexts/WebSocketContext';
 import ScreenShareModal from '@/components/devices/ScreenShareModal';
 import CommandButtons from '@/components/remote-control/CommandButtons';
+import RemoteControlConfigModal from '@/components/remote-control/RemoteControlConfigModal';
 import { useAppDispatch } from '@/lib/hooks';
 import { addToast } from '@/store/slices/appSlice';
+import { RemoteControlConfig } from '@/components/remote-control/RemoteControlConfigModal';
 
 interface ConnectedDevice {
     deviceId: string;
@@ -41,11 +43,12 @@ export default function RemoteControlPage() {
     const [connectedDevices, setConnectedDevices] = useState<ConnectedDevice[]>([]);
     const [peerConnection, setPeerConnection] = useState<RTCPeerConnection | null>(null);
     const [streamingActive, setStreamingActive] = useState(false);
-    const [duration, setDuration] = useState<number>(30); // Default duration in seconds
     const streamTimerRef = useRef<NodeJS.Timeout | null>(null); // Timer for auto-reset
     const heartbeatTimerRef = useRef<NodeJS.Timeout | null>(null); // Timer for device heartbeat
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [streamType, setStreamType] = useState<'audio' | 'video' | 'screen' | null>(null);
+    const [isStreamConfigModalOpen, setIsStreamConfigModalOpen] = useState(false);
+    const [pendingStreamAction, setPendingStreamAction] = useState<'stream_audio' | 'stream_video' | 'stream_screen' | null>(null);
 
     // Use global device context
     const { selectedDevice } = useDeviceContext();
@@ -711,8 +714,7 @@ export default function RemoteControlPage() {
     // Helper function to ensure WebSocket connection is established before sending commands
     const ensureConnectionAndSend = useCallback(async (
         action: string,
-        duration: number | null = null,
-        payload: unknown = null,
+        config: RemoteControlConfig | null = null,
         targetDeviceId: string | null = null,
         targetChannel: string | null = null
     ): Promise<boolean> => {
@@ -761,8 +763,8 @@ export default function RemoteControlPage() {
                         timestamp: Date.now(),
                     };
 
-                    if (duration !== null) clientMessage.duration = duration;
-                    if (payload) clientMessage.payload = payload;
+                    if (config && config.duration !== null && config.duration !== undefined) clientMessage.duration = config.duration;
+                    if (config && config.cameraFace !== null && config.cameraFace !== undefined) clientMessage.cameraFace = config.cameraFace;
                     if (targetDeviceId) clientMessage.targetDeviceId = targetDeviceId;
                     if (targetChannel) clientMessage.targetChannel = targetChannel;
 
@@ -819,15 +821,14 @@ export default function RemoteControlPage() {
     // Action sending - now with connection check
     const sendAction = useCallback((
         action: string,
-        duration: number | null = null,
-        payload: unknown = null,
+        config: RemoteControlConfig | null = null,
         targetDeviceId: string | null = null,
         targetChannel: string | null = null
     ) => {
-        ensureConnectionAndSend(action, duration, payload, targetDeviceId, targetChannel);
+        ensureConnectionAndSend(action, config, targetDeviceId, targetChannel);
     }, [ensureConnectionAndSend]);
 
-    const handleStream = useCallback((action: 'stream_audio' | 'stream_video' | 'stream_screen', customDuration?: number) => {
+    const handleStream = useCallback((action: 'stream_audio' | 'stream_video' | 'stream_screen', config: RemoteControlConfig) => {
         // Clear any existing timer
         if (streamTimerRef.current) {
             clearTimeout(streamTimerRef.current);
@@ -836,8 +837,8 @@ export default function RemoteControlPage() {
         // Reset any existing connection first
         resetPeerConnection();
 
-        // Use custom duration if provided, otherwise use state duration
-        const streamDuration = customDuration ?? duration;
+        // Get duration from config (default to 30 if not provided)
+        const streamDuration = config?.duration ?? 30;
 
         // Determine stream type and open modal for video/screen
         const isVisualStream = action === 'stream_video' || action === 'stream_screen';
@@ -851,7 +852,7 @@ export default function RemoteControlPage() {
         }
 
         const targetId = selectedDevice?.deviceId || null;
-        sendAction(action, streamDuration, null, targetId);
+        sendAction(action, config, targetId);
 
         // Set up auto-reset timer
         const durationMs = streamDuration * 1000;
@@ -862,16 +863,33 @@ export default function RemoteControlPage() {
 
         const actionDisplayName = action.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         updateStatus(`Starting ${actionDisplayName} for ${streamDuration} seconds`, 'info');
-    }, [duration, selectedDevice, sendAction, resetPeerConnection, updateStatus]);
+    }, [selectedDevice, sendAction, resetPeerConnection, updateStatus]);
+
+    const handleStreamClick = useCallback((action: 'stream_audio' | 'stream_video' | 'stream_screen') => {
+        setPendingStreamAction(action);
+        setIsStreamConfigModalOpen(true);
+    }, []);
+
+    const handleStreamConfigConfirm = useCallback((config: RemoteControlConfig) => {
+        if (pendingStreamAction) {
+            handleStream(pendingStreamAction, config);
+            setPendingStreamAction(null);
+        }
+    }, [pendingStreamAction, handleStream]);
+
+    const handleStreamConfigModalClose = useCallback(() => {
+        setIsStreamConfigModalOpen(false);
+        setPendingStreamAction(null);
+    }, []);
 
     const handleCloseModal = () => {
         resetPeerConnection();
     };
 
     // Command handler for CommandButtons component
-    const handleCommand = useCallback((action: string, duration?: number) => {
+    const handleCommand = useCallback((action: string, config?: { duration?: number; cameraFace?: 'front' | 'back' }) => {
         const targetId = selectedDevice?.deviceId || null;
-        sendAction(action, duration ?? null, null, targetId);
+        sendAction(action, config, targetId);
     }, [selectedDevice, sendAction]);
 
     return (
@@ -934,48 +952,28 @@ export default function RemoteControlPage() {
                             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Live Viewing Controls</h2>
                             <p className="text-sm text-gray-600 dark:text-gray-400">Start streaming from devices with custom duration</p>
                         </div>
-                        <div className="p-6 space-y-4">
-                            {/* Duration Input */}
-                            <div className="flex items-center gap-4">
-                                <label htmlFor="duration" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Duration (seconds):
-                                </label>
-                                <input
-                                    id="duration"
-                                    type="number"
-                                    min="1"
-                                    max="3600"
-                                    value={duration}
-                                    onChange={(e) => setDuration(Math.max(1, Math.min(3600, parseInt(e.target.value) || 30)))}
-                                    disabled={streamingActive}
-                                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:cursor-not-allowed w-32"
-                                />
-                                <span className="text-sm text-gray-500 dark:text-gray-400">
-                                    {duration > 0 ? `Stream will run for ${duration} second${duration !== 1 ? 's' : ''}` : 'Please enter a valid duration'}
-                                </span>
-                            </div>
-
+                        <div className="p-6">
                             {/* Stream Buttons */}
                             <div className="flex flex-wrap gap-4">
                                 <button
-                                    onClick={() => handleStream('stream_audio')}
-                                    disabled={!isConnected || !isRegistered || streamingActive || duration <= 0}
+                                    onClick={() => handleStreamClick('stream_audio')}
+                                    disabled={!isConnected || !isRegistered || streamingActive}
                                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
                                     <Volume2 className="h-5 w-5" />
                                     Stream Audio
                                 </button>
                                 <button
-                                    onClick={() => handleStream('stream_video')}
-                                    disabled={!isConnected || !isRegistered || streamingActive || duration <= 0}
+                                    onClick={() => handleStreamClick('stream_video')}
+                                    disabled={!isConnected || !isRegistered || streamingActive}
                                     className="flex items-center gap-2 px-4 py-2 bg-purple-600 dark:bg-purple-500 text-white rounded-lg hover:bg-purple-700 dark:hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
                                     <Monitor className="h-5 w-5" />
                                     Stream Video
                                 </button>
                                 <button
-                                    onClick={() => handleStream('stream_screen')}
-                                    disabled={!isConnected || !isRegistered || streamingActive || duration <= 0}
+                                    onClick={() => handleStreamClick('stream_screen')}
+                                    disabled={!isConnected || !isRegistered || streamingActive}
                                     className="flex items-center gap-2 px-4 py-2 bg-orange-600 dark:bg-orange-500 text-white rounded-lg hover:bg-orange-700 dark:hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
                                     <Smartphone className="h-5 w-5" />
@@ -1002,6 +1000,15 @@ export default function RemoteControlPage() {
                             isConnected={streamingActive && isConnected}
                         />
                     )}
+
+                    {/* Stream Config Modal */}
+                    <RemoteControlConfigModal
+                        isOpen={isStreamConfigModalOpen}
+                        onClose={handleStreamConfigModalClose}
+                        onConfirm={handleStreamConfigConfirm}
+                        action={pendingStreamAction || ''}
+                        actionLabel={pendingStreamAction ? pendingStreamAction.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : ''}
+                    />
 
                 </div>
             </Layout>

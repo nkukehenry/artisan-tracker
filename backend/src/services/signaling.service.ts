@@ -19,6 +19,7 @@ interface Message {
   deviceId?: string;
   action?: string;
   duration?: number;
+  cameraFace?: 'front' | 'back';
   payload?: any;
   targetDeviceId?: string;
   targetChannel?: string;
@@ -219,14 +220,14 @@ export class SignalingService {
    * Handle client messages (actions, commands)
    */
   private handleClientMessage(ws: WebSocket, message: Message): void {
-    const { deviceId, action, duration, payload, targetDeviceId, targetChannel } = message;
+    const { deviceId, action, duration, cameraFace, payload, targetDeviceId, targetChannel } = message;
 
     if (!deviceId) {
       this.sendError(ws, 'Device ID is required');
       return;
     }
 
-    logger.debug('Client message received', { deviceId, action });
+    logger.debug('Client message received', { deviceId, action, cameraFace });
 
     // Determine routing strategy
     if (targetDeviceId) {
@@ -236,6 +237,7 @@ export class SignalingService {
         deviceId: targetDeviceId,
         action,
         duration,
+        cameraFace,
         payload: payload ? JSON.stringify(payload) : undefined,
         fromDevice: deviceId,
         timestamp: Date.now()
@@ -246,6 +248,7 @@ export class SignalingService {
         type: 'server_message',
         action,
         duration,
+        cameraFace,
         payload: payload ? JSON.stringify(payload) : undefined,
         fromDevice: deviceId,
         timestamp: Date.now()
@@ -256,6 +259,7 @@ export class SignalingService {
         type: 'server_message',
         action,
         duration,
+        cameraFace,
         payload: payload ? JSON.stringify(payload) : undefined,
         fromDevice: deviceId,
         timestamp: Date.now()
@@ -269,7 +273,9 @@ export class SignalingService {
       action,
       status: 'routed',
       timestamp: Date.now(),
-      data: { duration, payload, targetDeviceId, targetChannel }
+      duration,
+      cameraFace,
+      data: { duration, cameraFace, payload, targetDeviceId, targetChannel }
     });
   }
 

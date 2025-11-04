@@ -8,6 +8,20 @@ import { MoreVertical, Eye, Edit, Trash2 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
+// Helper function to format location
+function formatLocation(location: unknown): string {
+  if (!location) return 'Unknown';
+  if (typeof location === 'string') return location;
+  if (typeof location === 'object' && location !== null) {
+    const loc = location as Record<string, unknown>;
+    if (typeof loc.address === 'string') return loc.address;
+    if (typeof loc.latitude === 'number' && typeof loc.longitude === 'number') {
+      return `${loc.latitude.toFixed(6)}, ${loc.longitude.toFixed(6)}`;
+    }
+  }
+  return 'Unknown';
+}
+
 export interface DeviceTableColumnsProps {
   onView: (device: Device) => void;
   onEdit: (device: Device) => void;
@@ -53,10 +67,10 @@ function DeviceActions({ device, onEdit, onDelete }: DeviceActionsProps) {
     if (isOpen) {
       const handleScroll = () => updatePosition();
       const handleResize = () => updatePosition();
-      
+
       window.addEventListener('scroll', handleScroll);
       window.addEventListener('resize', handleResize);
-      
+
       return () => {
         window.removeEventListener('scroll', handleScroll);
         window.removeEventListener('resize', handleResize);
@@ -78,13 +92,13 @@ function DeviceActions({ device, onEdit, onDelete }: DeviceActionsProps) {
       {isOpen && createPortal(
         <>
           {/* Backdrop */}
-          <div 
-            className="fixed inset-0 z-50" 
+          <div
+            className="fixed inset-0 z-50"
             onClick={() => setIsOpen(false)}
           />
-          
+
           {/* Dropdown Menu */}
-          <div 
+          <div
             className="fixed w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-[60]"
             style={{
               top: position.top,
@@ -102,7 +116,7 @@ function DeviceActions({ device, onEdit, onDelete }: DeviceActionsProps) {
                 <Eye className="h-4 w-4" />
                 View Details
               </button>
-              
+
               <button
                 onClick={() => {
                   onEdit(device);
@@ -113,7 +127,7 @@ function DeviceActions({ device, onEdit, onDelete }: DeviceActionsProps) {
                 <Edit className="h-4 w-4" />
                 Edit Device
               </button>
-              
+
               <button
                 onClick={handleDelete}
                 className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
@@ -176,7 +190,7 @@ export function createDeviceTableColumns({
       key: 'location',
       label: 'Location',
       render: (device) => (
-        <span className="text-sm text-gray-900">{device.location || 'Unknown'}</span>
+        <span className="text-sm text-gray-900">{formatLocation(device.location)}</span>
       ),
     },
     {
