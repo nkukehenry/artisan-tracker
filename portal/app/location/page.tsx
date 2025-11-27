@@ -17,7 +17,10 @@ export default function LocationPage() {
     isLoading,
     currentLocationLoading,
     error,
+    pagination,
     loadCurrent,
+    changePage,
+    changeLimit,
   } = useLocation();
 
   const handleRefreshCurrentLocation = () => {
@@ -189,6 +192,9 @@ export default function LocationPage() {
               data={locationHistory}
               columns={columns}
               emptyMessage="No location history found"
+              pagination={pagination || undefined}
+              onPageChange={changePage}
+              onLimitChange={changeLimit}
             />
           )}
         </div>

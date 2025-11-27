@@ -60,10 +60,14 @@ export interface MessageRepository extends BaseRepository<Message> {
     }
   ): Promise<{
     data: Message[];
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
   }>;
 
   getConversations(
@@ -72,5 +76,15 @@ export interface MessageRepository extends BaseRepository<Message> {
     filterOptions?: {
       messageType?: string;
     }
-  ): Promise<MessageConversation[]>;
+  ): Promise<{
+    data: MessageConversation[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
+  }>;
 }

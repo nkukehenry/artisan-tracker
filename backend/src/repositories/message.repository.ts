@@ -20,10 +20,14 @@ export class MessageRepositoryImpl extends BaseRepositoryImpl<Message> implement
     }
   ): Promise<{
     data: Message[];
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
   }> {
     try {
       const { page, limit } = paginationOptions;
@@ -35,7 +39,17 @@ export class MessageRepositoryImpl extends BaseRepositoryImpl<Message> implement
       });
 
       if (!device) {
-        return { data: [], page, limit, total: 0, totalPages: 0 };
+        return {
+          data: [],
+          pagination: {
+            page,
+            limit,
+            total: 0,
+            totalPages: 0,
+            hasNext: false,
+            hasPrev: false,
+          },
+        };
       }
 
       const where: any = { deviceId: device.id };
@@ -89,12 +103,20 @@ export class MessageRepositoryImpl extends BaseRepositoryImpl<Message> implement
         updatedAt: item.createdAt, // Use createdAt as fallback
       }));
 
+      const totalPages = Math.ceil(total / limit);
+      const hasNext = page < totalPages;
+      const hasPrev = page > 1;
+
       return {
         data: mappedData,
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages,
+          hasNext,
+          hasPrev,
+        },
       };
     } catch (error) {
       logger.error('Error finding messages by device', { deviceId, paginationOptions, filterOptions, error });
@@ -109,13 +131,23 @@ export class MessageRepositoryImpl extends BaseRepositoryImpl<Message> implement
       messageType?: string;
     }
   ): Promise<{
-    contact: string;
-    messageType: string;
-    lastMessage: string;
-    lastMessageTime: Date;
-    messageCount: number;
-    unreadCount: number;
-  }[]> {
+    data: {
+      contact: string;
+      messageType: string;
+      lastMessage: string;
+      lastMessageTime: Date;
+      messageCount: number;
+      unreadCount: number;
+    }[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
+  }> {
     try {
       const { page, limit } = paginationOptions;
       const skip = (page - 1) * limit;
@@ -126,7 +158,17 @@ export class MessageRepositoryImpl extends BaseRepositoryImpl<Message> implement
       });
 
       if (!device) {
-        return [];
+        return {
+          data: [],
+          pagination: {
+            page,
+            limit,
+            total: 0,
+            totalPages: 0,
+            hasNext: false,
+            hasPrev: false,
+          },
+        };
       }
 
       const where: any = { deviceId: device.id };
@@ -135,13 +177,22 @@ export class MessageRepositoryImpl extends BaseRepositoryImpl<Message> implement
         where.messageType = filterOptions.messageType;
       }
 
+      const groupByWhere = {
+        ...where,
+        sender: { not: null }, // Only group by non-null senders
+      };
+
+      // Get total count of unique conversations
+      const allConversations = await this.prisma.message.groupBy({
+        by: ['sender', 'messageType'],
+        where: groupByWhere,
+      });
+      const total = allConversations.length;
+
       // Get unique conversations grouped by sender/recipient and message type
       const conversations = await this.prisma.message.groupBy({
         by: ['sender', 'messageType'],
-        where: {
-          ...where,
-          sender: { not: null }, // Only group by non-null senders
-        },
+        where: groupByWhere,
         _max: {
           timestamp: true,
         },
@@ -193,7 +244,21 @@ export class MessageRepositoryImpl extends BaseRepositoryImpl<Message> implement
         })
       );
 
-      return conversationsWithContent;
+      const totalPages = Math.ceil(total / limit);
+      const hasNext = page < totalPages;
+      const hasPrev = page > 1;
+
+      return {
+        data: conversationsWithContent,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages,
+          hasNext,
+          hasPrev,
+        },
+      };
     } catch (error) {
       logger.error('Error getting message conversations', { deviceId, paginationOptions, filterOptions, error });
       throw error;

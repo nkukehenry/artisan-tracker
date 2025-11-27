@@ -41,6 +41,24 @@ export const useLocation = () => {
     [selectedDevice, dispatch, filters]
   );
 
+  const changePage = useCallback(
+    (page: number) => {
+      if (selectedDevice) {
+        dispatch(loadLocationHistory({ deviceId: selectedDevice.deviceId, filters: { ...filters, page } }));
+      }
+    },
+    [selectedDevice, dispatch, filters]
+  );
+
+  const changeLimit = useCallback(
+    (limit: number) => {
+      if (selectedDevice) {
+        dispatch(loadLocationHistory({ deviceId: selectedDevice.deviceId, filters: { ...filters, limit, page: 1 } }));
+      }
+    },
+    [selectedDevice, dispatch, filters]
+  );
+
   const clearData = useCallback(() => {
     dispatch(clearLocationData());
   }, [dispatch]);
@@ -67,6 +85,8 @@ export const useLocation = () => {
     loadHistory,
     loadCurrent,
     updateFilters: updateFiltersAndLoad,
+    changePage,
+    changeLimit,
     clearData,
   };
 };

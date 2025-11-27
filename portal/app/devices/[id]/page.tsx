@@ -173,7 +173,7 @@ export default function DeviceDetailsPage() {
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Last Seen</p>
                   <p className="text-lg font-semibold text-gray-900">
-                    {device.lastSeenAt ? new Date(device.lastSeenAt).toLocaleDateString() : 'Never'}
+                    {device.lastSeenAt ? new Date(device.lastSeenAt).toLocaleString() : 'Never'}
                   </p>
                 </div>
               </div>
@@ -217,13 +217,13 @@ export default function DeviceDetailsPage() {
                 <div className="flex justify-between">
                   <span className="text-sm font-medium text-gray-600">Created</span>
                   <span className="text-sm text-gray-900">
-                    {new Date(device.createdAt).toLocaleDateString()}
+                    {new Date(device.createdAt).toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm font-medium text-gray-600">Last Updated</span>
                   <span className="text-sm text-gray-900">
-                    {new Date(device.updatedAt).toLocaleDateString()}
+                    {new Date(device.updatedAt).toLocaleString()}
                   </span>
                 </div>
               </div>

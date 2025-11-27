@@ -102,12 +102,7 @@ export class MessagesController {
     res.json({
       success: true,
       data: result.data,
-      pagination: {
-        page: result.page,
-        limit: result.limit,
-        total: result.total,
-        totalPages: result.totalPages,
-      },
+      pagination: result.pagination,
     });
   });
 
@@ -131,7 +126,7 @@ export class MessagesController {
       messageType: messageType as string,
     };
 
-    const conversations = await this.messageRepository.getConversations(
+    const result = await this.messageRepository.getConversations(
       deviceId,
       paginationOptions,
       filterOptions
@@ -139,7 +134,8 @@ export class MessagesController {
 
     res.json({
       success: true,
-      data: conversations,
+      data: result.data,
+      pagination: result.pagination,
     });
   });
 
