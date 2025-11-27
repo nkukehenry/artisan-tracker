@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { asyncHandler } from '../middleware/errorHandler';
 import { authenticateToken } from '../middleware/auth';
+import { updateDeviceLastSeen } from '../middleware/updateDeviceLastSeen';
 import { MessagesController, messagesValidation } from '../controllers/messages.controller';
 
 const router = Router();
@@ -9,6 +10,8 @@ const messagesController = new MessagesController();
 
 // All messages routes require authentication
 router.use(authenticateToken);
+// Update device lastSeen after authentication
+router.use(updateDeviceLastSeen);
 
 /**
  * @swagger

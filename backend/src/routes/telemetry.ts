@@ -1,10 +1,13 @@
 import { Router } from 'express';
 import { asyncHandler } from '../middleware/errorHandler';
 import { authenticateToken } from '../middleware/auth';
+import { updateDeviceLastSeen } from '../middleware/updateDeviceLastSeen';
 import { TelemetryController, telemetryValidation } from '../controllers/telemetry.controller';
 
 const router = Router();
 const telemetryController = new TelemetryController();
+
+// Update device lastSeen after authentication (applied to routes that use authenticateToken)
 
 /**
  * @swagger
@@ -44,7 +47,7 @@ const telemetryController = new TelemetryController();
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  */
-router.post('/call-home', authenticateToken, telemetryValidation.callHome, asyncHandler(telemetryController.callHome));
+router.post('/call-home', authenticateToken, updateDeviceLastSeen, telemetryValidation.callHome, asyncHandler(telemetryController.callHome));
 
 /**
  * @swagger
@@ -114,7 +117,7 @@ router.post('/call-home', authenticateToken, telemetryValidation.callHome, async
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  */
-router.get('/device/:deviceId', authenticateToken, telemetryValidation.getTelemetryByDevice, asyncHandler(telemetryController.getTelemetryByDevice));
+router.get('/device/:deviceId', authenticateToken, updateDeviceLastSeen, telemetryValidation.getTelemetryByDevice, asyncHandler(telemetryController.getTelemetryByDevice));
 
 /**
  * @swagger
@@ -155,7 +158,7 @@ router.get('/device/:deviceId', authenticateToken, telemetryValidation.getTeleme
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
  */
-router.get('/device/:deviceId/latest', authenticateToken, telemetryValidation.getLatestTelemetry, asyncHandler(telemetryController.getLatestTelemetry));
+router.get('/device/:deviceId/latest', authenticateToken, updateDeviceLastSeen, telemetryValidation.getLatestTelemetry, asyncHandler(telemetryController.getLatestTelemetry));
 
 /**
  * @swagger
@@ -204,7 +207,7 @@ router.get('/device/:deviceId/latest', authenticateToken, telemetryValidation.ge
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  */
-router.delete('/device/:deviceId/cleanup', authenticateToken, telemetryValidation.cleanupOldTelemetry, asyncHandler(telemetryController.cleanupOldTelemetry));
+router.delete('/device/:deviceId/cleanup', authenticateToken, updateDeviceLastSeen, telemetryValidation.cleanupOldTelemetry, asyncHandler(telemetryController.cleanupOldTelemetry));
 
 export default router;
 

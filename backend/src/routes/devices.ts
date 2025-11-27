@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { asyncHandler } from '../middleware/errorHandler';
 import { authenticateToken } from '../middleware/auth';
+import { updateDeviceLastSeen } from '../middleware/updateDeviceLastSeen';
 import { DeviceController, deviceValidation } from '../controllers/device.controller';
 
 const router = Router();
@@ -498,7 +499,7 @@ router.get('/:id/commands', deviceValidation.getDeviceCommands, asyncHandler(dev
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
  */
-router.get('/:id/status', deviceValidation.getDeviceStatus, asyncHandler(deviceController.getDeviceStatus));
-router.put('/:id/status', deviceValidation.updateDeviceStatus, asyncHandler(deviceController.updateDeviceStatus));
+router.get('/:id/status', updateDeviceLastSeen, deviceValidation.getDeviceStatus, asyncHandler(deviceController.getDeviceStatus));
+router.put('/:id/status', updateDeviceLastSeen, deviceValidation.updateDeviceStatus, asyncHandler(deviceController.updateDeviceStatus));
 
 export default router;

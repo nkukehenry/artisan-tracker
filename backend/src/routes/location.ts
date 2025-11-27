@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { asyncHandler } from '../middleware/errorHandler';
 import { authenticateToken } from '../middleware/auth';
+import { updateDeviceLastSeen } from '../middleware/updateDeviceLastSeen';
 import { LocationController, locationValidation } from '../controllers/location.controller';
 
 const router = Router();
@@ -9,6 +10,8 @@ const locationController = new LocationController();
 
 // All location routes require authentication
 router.use(authenticateToken);
+// Update device lastSeen after authentication
+router.use(updateDeviceLastSeen);
 
 /**
  * @swagger
