@@ -4,6 +4,7 @@ import { Column } from '@/components/ui/DataTable';
 import { Device } from '@/types/device';
 import StatusBadge from '@/components/ui/StatusBadge';
 import ProgressBar from '@/components/ui/ProgressBar';
+import { formatDateTime } from '@/lib/utils';
 import { MoreVertical, Eye, Edit, Trash2 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -217,7 +218,7 @@ export function createDeviceTableColumns({
       label: 'Last Seen',
       render: (device) => (
         <span className="text-sm text-gray-500">
-          {device.lastSeenAt ? new Date(device.lastSeenAt).toLocaleString() : 'Never'}
+          {device.lastSeenAt ? formatDateTime(device.lastSeenAt) : 'Never'}
         </span>
       ),
     },

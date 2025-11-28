@@ -23,6 +23,7 @@ import {
 } from 'react-icons/fa';
 import { truncateWithTooltip } from '@/lib/textUtils';
 import { getMessageTypeOptions } from '@/lib/messageTypes';
+import { formatDateTime } from '@/lib/utils';
 
 export default function MessagesPage() {
   const { selectedDevice } = useDeviceContext();
@@ -161,10 +162,10 @@ export default function MessagesPage() {
       },
     },
     {
-      key: 'timestamp',
+      key: 'createdAt',
       label: 'Date & Time',
       sortable: true,
-      render: (item: Message, value: unknown) => new Date(value as string).toLocaleString(),
+      render: (item: Message, value: unknown) => formatDateTime(value as string),
     },
     {
       key: 'actions',

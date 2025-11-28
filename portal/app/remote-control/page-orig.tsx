@@ -25,6 +25,7 @@ import {
   Download
 } from 'lucide-react';
 import ScreenShareModal from '@/components/devices/ScreenShareModal';
+import { formatDateTime } from '@/lib/utils';
 
 export default function RemoteControlPage() {
   const dispatch = useAppDispatch();
@@ -655,7 +656,7 @@ export default function RemoteControlPage() {
                                 {recording.type === 'screen_recording' ? 'Screen Recording' : 'Audio Recording'}
                               </h4>
                               <p className="text-sm text-gray-600">
-                                {new Date(recording.timestamp).toLocaleString()} • {recording.duration} • {recording.size}
+                                {formatDateTime(recording.timestamp)} • {recording.duration} • {recording.size}
                               </p>
                             </div>
                           </div>

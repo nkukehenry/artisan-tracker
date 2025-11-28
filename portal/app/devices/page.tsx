@@ -5,6 +5,7 @@ import AuthWrapper from '@/components/auth/AuthWrapper';
 import Layout from '@/components/layout/Layout';
 import { useDeviceContext } from '@/contexts/DeviceContext';
 import { useTelemetry } from '@/hooks/useTelemetry';
+import { formatDateTime } from '@/lib/utils';
 import {
   Smartphone,
   Battery,
@@ -71,7 +72,7 @@ export default function DeviceInformationPage() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
+    return formatDateTime(dateString);
   };
 
 
@@ -183,9 +184,9 @@ export default function DeviceInformationPage() {
                     <Calendar className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                     <div>
                       <div className="text-sm text-gray-500 dark:text-gray-400">Last Seen</div>
-                      {telemetry?.collectedAt && (
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                          Data: {formatDate(telemetry.collectedAt)}
+                      {selectedDevice?.lastSeenAt && (
+                        <div className="font-medium text-gray-900 dark:text-gray-100">
+                          {formatDate(selectedDevice?.lastSeenAt)}
                         </div>
                       )}
                     </div>

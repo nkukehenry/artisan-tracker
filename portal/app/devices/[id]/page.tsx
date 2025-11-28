@@ -8,6 +8,7 @@ import { Device } from '@/types/device';
 import { deviceApi } from '@/lib/deviceApi';
 import { useAppDispatch } from '@/lib/hooks';
 import { addToast } from '@/store/slices/appSlice';
+import { formatDateTime } from '@/lib/utils';
 import {
   ArrowLeft,
   Smartphone,
@@ -173,7 +174,7 @@ export default function DeviceDetailsPage() {
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Last Seen</p>
                   <p className="text-lg font-semibold text-gray-900">
-                    {device.lastSeenAt ? new Date(device.lastSeenAt).toLocaleString() : 'Never'}
+                    {device.lastSeenAt ? formatDateTime(device.lastSeenAt) : 'Never'}
                   </p>
                 </div>
               </div>
@@ -217,13 +218,13 @@ export default function DeviceDetailsPage() {
                 <div className="flex justify-between">
                   <span className="text-sm font-medium text-gray-600">Created</span>
                   <span className="text-sm text-gray-900">
-                    {new Date(device.createdAt).toLocaleString()}
+                    {formatDateTime(device.createdAt)}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm font-medium text-gray-600">Last Updated</span>
                   <span className="text-sm text-gray-900">
-                    {new Date(device.updatedAt).toLocaleString()}
+                    {formatDateTime(device.updatedAt)}
                   </span>
                 </div>
               </div>
@@ -242,7 +243,7 @@ export default function DeviceDetailsPage() {
                 <div className="flex justify-between">
                   <span className="text-sm font-medium text-gray-600">Last Location Update</span>
                   <span className="text-sm text-gray-900">
-                    {device.lastSeenAt ? new Date(device.lastSeenAt).toLocaleString() : 'Never'}
+                    {device.lastSeenAt ? formatDateTime(device.lastSeenAt) : 'Never'}
                   </span>
                 </div>
                 <div className="flex justify-between">

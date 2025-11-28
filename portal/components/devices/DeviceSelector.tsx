@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { ChevronDown, Smartphone, Check, Search, X, RefreshCw } from 'lucide-react';
 import { Device } from '@/types/device';
 import { useDeviceContext } from '@/contexts/DeviceContext';
+import { formatDateTime } from '@/lib/utils';
 
 interface DeviceSelectorProps {
     className?: string;
@@ -178,7 +179,7 @@ export default function DeviceSelector({ className = '' }: DeviceSelectorProps) 
                                                         </div>
                                                         {device.lastSeenAt && (
                                                             <div className="text-xs text-gray-400 dark:text-gray-500">
-                                                                Last seen: {new Date(device.lastSeenAt).toLocaleDateString()}
+                                                                Last seen: {formatDateTime(device.lastSeenAt)}
                                                             </div>
                                                         )}
                                                     </div>

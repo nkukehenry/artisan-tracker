@@ -10,6 +10,7 @@ import { mediaApi } from '@/lib/mediaApi';
 import apiClient from '@/lib/api';
 import LocationBadge from '@/components/ui/LocationBadge';
 import GPSMapViewer from '../ui/GPSMapViewer';
+import { formatDateTime } from '@/lib/utils';
 
 export interface MediaViewerModalProps {
   isOpen: boolean;
@@ -208,7 +209,7 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                   <p className="text-base font-medium text-gray-900 dark:text-gray-100">
-                    {new Date(media.createdAt).toLocaleString()}
+                    {formatDateTime(media.createdAt)}
                   </p>
                 </div>
               </div>
@@ -320,7 +321,7 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock className="h-4 w-4" />
-                      <span>{new Date(media.call.timestamp).toLocaleString()}</span>
+                      <span>{formatDateTime(media.call.timestamp)}</span>
                     </div>
                   </div>
                   {((media.call.location && typeof media.call.location === 'string') || (media.call.gpsCoordinates && typeof media.call.gpsCoordinates === 'string')) && (
@@ -341,11 +342,11 @@ export default function MediaViewerModal({ isOpen, onClose, media, onDelete }: M
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-gray-500 dark:text-gray-400">Created At:</p>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">{new Date(media.createdAt).toLocaleString()}</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{formatDateTime(media.createdAt)}</p>
                 </div>
                 <div>
                   <p className="text-gray-500 dark:text-gray-400">Updated At:</p>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">{new Date(media.updatedAt).toLocaleString()}</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{formatDateTime(media.updatedAt)}</p>
                 </div>
               </div>
             </div>

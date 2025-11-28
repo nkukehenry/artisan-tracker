@@ -4,6 +4,7 @@ import { X, Phone, Clock, MapPin, FileAudio } from 'lucide-react';
 import { CallLog } from '@/types/callLog';
 import GPSMapViewer from '@/components/ui/GPSMapViewer';
 import MediaBadge from '@/components/ui/MediaBadge';
+import { formatDateTime } from '@/lib/utils';
 
 interface CallLogDetailModalProps {
   callLog: CallLog | null;
@@ -103,7 +104,7 @@ export default function CallLogDetailModal({ callLog, isOpen, onClose }: CallLog
               <div>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Date & Time</p>
                 <p className="text-base font-medium text-gray-900 dark:text-gray-100">
-                  {new Date(callLog.timestamp).toLocaleString()}
+                  {formatDateTime(callLog.timestamp)}
                 </p>
               </div>
               <div>
@@ -164,11 +165,11 @@ export default function CallLogDetailModal({ callLog, isOpen, onClose }: CallLog
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-gray-500 dark:text-gray-400">Created At:</p>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">{new Date(callLog.createdAt).toLocaleString()}</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{formatDateTime(callLog.createdAt)}</p>
                 </div>
                 <div>
                   <p className="text-gray-500 dark:text-gray-400">Updated At:</p>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">{new Date(callLog.updatedAt).toLocaleString()}</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{formatDateTime(callLog.updatedAt)}</p>
                 </div>
               </div>
             </div>

@@ -1,4 +1,5 @@
 import { Clock, Download, Monitor, Mic } from 'lucide-react';
+import { formatDateTime } from '@/lib/utils';
 
 interface Recording {
   id: string;
@@ -50,7 +51,7 @@ export default function PreviousRecordings({ recordings }: PreviousRecordingsPro
                         : 'Audio Recording'}
                     </h4>
                     <p className="text-sm text-gray-600">
-                      {new Date(recording.timestamp).toLocaleString()} • {recording.duration} •{' '}
+                      {formatDateTime(recording.timestamp)} • {recording.duration} •{' '}
                       {recording.size}
                     </p>
                   </div>

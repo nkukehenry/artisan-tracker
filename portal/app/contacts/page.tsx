@@ -9,6 +9,7 @@ import DataTable from '@/components/ui/DataTable';
 import SearchFilter from '@/components/ui/SearchFilter';
 import { Contact } from '@/types/contact';
 import { Users } from 'lucide-react';
+import { formatDateTime } from '@/lib/utils';
 
 export default function ContactsPage() {
   const { selectedDevice } = useDeviceContext();
@@ -69,7 +70,7 @@ export default function ContactsPage() {
       key: 'createdAt',
       label: 'Added',
       sortable: true,
-      render: (item: Contact, value: unknown) => new Date(value as string).toLocaleDateString(),
+      render: (item: Contact, value: unknown) => formatDateTime(value as string),
     },
   ];
 

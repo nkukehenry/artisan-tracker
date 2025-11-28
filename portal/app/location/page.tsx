@@ -7,6 +7,7 @@ import { useDeviceContext } from '@/contexts/DeviceContext';
 import DataTable from '@/components/ui/DataTable';
 import { Location } from '@/types/location';
 import { MapPin, Clock, Navigation } from 'lucide-react';
+import { formatDateTime } from '@/lib/utils';
 
 export default function LocationPage() {
   const { selectedDevice } = useDeviceContext();
@@ -29,10 +30,10 @@ export default function LocationPage() {
 
   const columns = [
     {
-      key: 'timestamp',
+      key: 'createdAt',
       label: 'Date & Time',
       sortable: true,
-      render: (item: Location, value: unknown) => new Date(value as string).toLocaleString(),
+      render: (item: Location, value: unknown) => formatDateTime(value as string),
     },
     {
       key: 'address',
@@ -155,7 +156,7 @@ export default function LocationPage() {
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Last Updated</p>
                     <p className="font-medium text-gray-900 dark:text-gray-100">
-                      {new Date(currentLocation.timestamp).toLocaleString()}
+                      {formatDateTime(currentLocation.createdAt)}
                     </p>
                   </div>
                 </div>

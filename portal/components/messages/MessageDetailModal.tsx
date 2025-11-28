@@ -13,6 +13,7 @@ import {
 } from 'react-icons/fa';
 import { Message } from '@/types/message';
 import GPSMapViewer from '@/components/ui/GPSMapViewer';
+import { formatDateTime } from '@/lib/utils';
 
 interface MessageDetailModalProps {
   message: Message | null;
@@ -152,7 +153,7 @@ export default function MessageDetailModal({ message, isOpen, onClose }: Message
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                   <p className="text-base font-medium text-gray-900 dark:text-gray-100">
-                    {new Date(message.timestamp).toLocaleString()}
+                    {formatDateTime(message.timestamp)}
                   </p>
                 </div>
               </div>
@@ -209,11 +210,11 @@ export default function MessageDetailModal({ message, isOpen, onClose }: Message
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-gray-500 dark:text-gray-400">Created At:</p>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">{new Date(message.createdAt).toLocaleString()}</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{formatDateTime(message.createdAt)}</p>
                 </div>
                 <div>
                   <p className="text-gray-500 dark:text-gray-400">Updated At:</p>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">{new Date(message.updatedAt).toLocaleString()}</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{formatDateTime(message.updatedAt)}</p>
                 </div>
               </div>
             </div>

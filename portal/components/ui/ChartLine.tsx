@@ -12,6 +12,7 @@ import {
     ChartData,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import { formatDateTime } from '@/lib/utils';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -32,9 +33,10 @@ interface ChartLineProps {
 export default function ChartLine({ data, label = 'Count' }: ChartLineProps) {
     const labels = data.map(d => d.day);
     const labelsShort = labels.map((s) => {
-        const dt = new Date(s);
-        if (isNaN(dt.getTime())) return s; // fallback if not parseable
-        return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const formatted = formatDateTime(s);
+        if (!formatted) return s; // fallback if not parseable
+        // Extract just the date part (DD/MMM/YYYY) for chart labels
+        return formatted.split(' ')[0];
     });
     const values = data.map(d => d.count);
 

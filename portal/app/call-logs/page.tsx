@@ -12,6 +12,7 @@ import MediaBadge from '@/components/ui/MediaBadge';
 import CallLogDetailModal from '@/components/call-logs/CallLogDetailModal';
 import { CallLog } from '@/types/callLog';
 import { Eye, Phone } from 'lucide-react';
+import { formatDateTime } from '@/lib/utils';
 
 export default function CallLogsPage() {
   const { selectedDevice } = useDeviceContext();
@@ -83,12 +84,12 @@ export default function CallLogsPage() {
       },
     },
     {
-      key: 'timestamp',
+      key: 'createdAt',
       label: 'Date & Time',
       sortable: true,
       render: (item: CallLog, value: unknown) => (
         <div className="space-y-1">
-          <div>{new Date(value as string).toLocaleString()}</div>
+          <div>{formatDateTime(value as string)}</div>
           {item.media && (
             <MediaBadge media={item.media} showSize={false} />
           )}

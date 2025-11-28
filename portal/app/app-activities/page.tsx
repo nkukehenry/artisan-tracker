@@ -8,6 +8,7 @@ import DataTable from '@/components/ui/DataTable';
 import SearchFilter from '@/components/ui/SearchFilter';
 import { AppActivity } from '@/types/appActivity';
 import { Smartphone, Clock, BarChart3 } from 'lucide-react';
+import { formatDateTime } from '@/lib/utils';
 
 export default function AppActivitiesPage() {
   const { selectedDevice } = useDeviceContext();
@@ -73,7 +74,7 @@ export default function AppActivitiesPage() {
       key: 'timestamp',
       label: 'Last Used',
       sortable: true,
-      render: (item: AppActivity, value: unknown) => new Date(value as string).toLocaleString(),
+      render: (item: AppActivity, value: unknown) => formatDateTime(value as string),
     },
   ];
 

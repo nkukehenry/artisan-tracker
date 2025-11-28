@@ -14,6 +14,7 @@ import MediaViewerModal from '@/components/media/MediaViewerModal';
 import { useAppDispatch } from '@/lib/hooks';
 import { addToast } from '@/store/slices/appSlice';
 import { FaFile, FaImage, FaMusic, FaVideo } from 'react-icons/fa';
+import { formatDateTime } from '@/lib/utils';
 
 export default function MediaPage() {
   const dispatch = useAppDispatch();
@@ -176,7 +177,7 @@ export default function MediaPage() {
       sortable: true,
       render: (item: Media, value: unknown) => (
         <div className="text-sm">
-          {new Date(value as string).toLocaleString()}
+          {formatDateTime(value as string)}
         </div>
       ),
     },
