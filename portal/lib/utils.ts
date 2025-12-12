@@ -35,3 +35,17 @@ export function formatDate(dateTime: string | Date | dayjs.Dayjs | null | undefi
     }
     return dayjs.utc(dateTime).tz(dayjs.tz.guess()).format('DD/MMM/YYYY');
 }
+
+/**
+ * Calculates the difference in minutes between now and the passed datetime
+ * @param dateTime - Date string, Date object, or dayjs-compatible date value from API
+ * @returns Difference in minutes (positive if dateTime is in the past, negative if in the future). Returns 0 if dateTime is null/undefined
+ */
+export function getMinutesDifference(dateTime: string | Date | dayjs.Dayjs | null | undefined): number {
+    if (!dateTime) {
+        return 0;
+    }
+    const now = dayjs.utc().tz(dayjs.tz.guess());
+    const target = dayjs.utc(dateTime).tz(dayjs.tz.guess());
+    return now.diff(target, 'minute');
+}

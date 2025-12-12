@@ -5,7 +5,7 @@ import AuthWrapper from '@/components/auth/AuthWrapper';
 import Layout from '@/components/layout/Layout';
 import { useDeviceContext } from '@/contexts/DeviceContext';
 import { useTelemetry } from '@/hooks/useTelemetry';
-import { formatDateTime } from '@/lib/utils';
+import { formatDateTime, getMinutesDifference } from '@/lib/utils';
 import {
   Smartphone,
   Battery,
@@ -61,14 +61,16 @@ export default function DeviceInformationPage() {
 
   const getStatusColor = (device: typeof selectedDevice) => {
     if (!device.isActive) return 'bg-gray-500';
-    if (device.isOnline) return 'bg-green-500';
-    return 'bg-red-500';
+    const minutesDiff = getMinutesDifference(device.lastSeenAt);
+    if (minutesDiff > 30) return 'bg-red-500';
+    return 'bg-green-500';
   };
 
   const getStatusText = (device: typeof selectedDevice) => {
     if (!device.isActive) return 'Inactive';
-    if (device.isOnline) return 'Online';
-    return 'Offline';
+    const minutesDiff = getMinutesDifference(device.lastSeenAt);
+    if (minutesDiff > 30) return 'Offline';
+    return 'Online';
   };
 
   const formatDate = (dateString: string) => {

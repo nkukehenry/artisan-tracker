@@ -10,6 +10,7 @@ import SearchFilter from '@/components/ui/SearchFilter';
 import LocationBadge from '@/components/ui/LocationBadge';
 import MediaBadge from '@/components/ui/MediaBadge';
 import CallLogDetailModal from '@/components/call-logs/CallLogDetailModal';
+import SelectedDeviceInfo from '@/components/devices/SelectedDeviceInfo';
 import { CallLog } from '@/types/callLog';
 import { Eye, Phone } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils';
@@ -148,15 +149,7 @@ export default function CallLogsPage() {
           </div>
 
           {/* Selected Device Info */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-            <div className="flex items-center gap-3">
-              <div className={`w-3 h-3 rounded-full ${selectedDevice.isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
-              <div>
-                <div className="font-medium text-gray-900 dark:text-gray-100">{selectedDevice.name}</div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">{selectedDevice.deviceId} • {selectedDevice.model}</div>
-              </div>
-            </div>
-          </div>
+          <SelectedDeviceInfo device={selectedDevice} />
 
           {/* Filters */}
           <SearchFilter

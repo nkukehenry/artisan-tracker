@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { ChevronDown, Smartphone, Check, Search, X, RefreshCw } from 'lucide-react';
 import { Device } from '@/types/device';
 import { useDeviceContext } from '@/contexts/DeviceContext';
-import { formatDateTime } from '@/lib/utils';
+import { formatDateTime, getMinutesDifference } from '@/lib/utils';
 
 interface DeviceSelectorProps {
     className?: string;
@@ -39,14 +39,16 @@ export default function DeviceSelector({ className = '' }: DeviceSelectorProps) 
 
     const getStatusColor = (device: Device) => {
         if (!device.isActive) return 'bg-gray-500';
-        if (device.isOnline) return 'bg-green-500';
-        return 'bg-red-500';
+        const minutesDiff = getMinutesDifference(device.lastSeenAt);
+        if (minutesDiff > 30) return 'bg-red-500';
+        return 'bg-green-500';
     };
 
     const getStatusText = (device: Device) => {
         if (!device.isActive) return 'Inactive';
-        if (device.isOnline) return 'Online';
-        return 'Offline';
+        const minutesDiff = getMinutesDifference(device.lastSeenAt);
+        if (minutesDiff > 30) return 'Offline';
+        return 'Online';
     };
 
     return (
