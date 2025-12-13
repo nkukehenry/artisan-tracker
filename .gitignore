@@ -127,3 +127,4 @@ test-results.xml
 
 # Local development
 .local
+ecosystem.config.js
