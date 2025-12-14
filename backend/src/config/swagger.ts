@@ -22,7 +22,7 @@ const swaggerDefinition: SwaggerDefinition = {
       description: 'Development server',
     },
     {
-      url: 'https://tracker.mutindo.com/api',
+      url: 'https://api.ecorp23.com/api',
       description: 'Production server',
     },
   ],
