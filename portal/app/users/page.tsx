@@ -11,10 +11,12 @@ import ViewUserModal from '@/components/users/ViewUserModal';
 import ConfirmModal from '@/components/common/ConfirmModal';
 import DataTable, { Column } from '@/components/ui/DataTable';
 import { Search, UserPlus, Eye, Edit, UserX, UserCheck, ChevronLeft, ChevronRight, Shield, Lock, RotateCcw } from 'lucide-react';
-import { toast } from 'react-hot-toast';
 import { formatDateTime } from '@/lib/utils';
+import { addToast } from '@/store/slices/appSlice';
+import { useDispatch } from 'react-redux';
 
 export default function UsersPage() {
+    const dispatch = useDispatch();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -55,7 +57,11 @@ export default function UsersPage() {
             setTotalPages(response.pagination.totalPages);
             setTotalUsers(response.pagination.total);
         } catch (error: any) {
-            toast.error(error.message || 'Failed to fetch users');
+            dispatch(addToast({
+                type: 'error',
+                title: 'Error',
+                message: error.message || 'Failed to fetch users',
+            }));
         } finally {
             setLoading(false);
         }
@@ -68,24 +74,38 @@ export default function UsersPage() {
     const handleCreateUser = async (data: CreateUserData) => {
         try {
             await createUserAPI(data);
-            toast.success('User created successfully');
+            dispatch(addToast({
+                type: 'success',
+                title: 'Success',
+                message: 'User created successfully',
+            }));
             fetchUsers();
             setShowAddModal(false);
         } catch (error: any) {
-            toast.error(error.message || 'Failed to create user');
-            throw error;
+            dispatch(addToast({
+                type: 'error',
+                title: 'Error',
+                message: error.message || 'Failed to create user',
+            }));
         }
     };
 
     const handleUpdateUser = async (id: string, data: UpdateUserData) => {
         try {
             await updateUserAPI(id, data);
-            toast.success('User updated successfully');
+            dispatch(addToast({
+                type: 'success',
+                title: 'Success',
+                message: 'User updated successfully',
+            }));
             fetchUsers();
             setShowEditModal(false);
         } catch (error: any) {
-            toast.error(error.message || 'Failed to update user');
-            throw error;
+            dispatch(addToast({
+                type: 'error',
+                title: 'Failure',
+                message: error.message || 'Failed to update user',
+            }));
         }
     };
 
@@ -101,20 +121,40 @@ export default function UsersPage() {
         try {
             if (action === 'deactivate') {
                 await deleteUserAPI(user.id);
-                toast.success('User deactivated successfully');
+                dispatch(addToast({
+                    type: 'success',
+                    title: 'Success',
+                    message: 'User deactivated successfully',
+                }));
             } else if (action === 'activate') {
                 await activateUser(user.id);
-                toast.success('User activated successfully');
+                dispatch(addToast({
+                    type: 'success',
+                    title: 'Success',
+                    message: 'User activated successfully',
+                }));
             } else if (action === 'upgrade') {
                 await upgradeToSuperAdmin(user.id);
-                toast.success('User upgraded to SUPER_ADMIN successfully');
+                dispatch(addToast({
+                    type: 'success',
+                    title: 'Success',
+                    message: 'User upgraded to SUPER_ADMIN successfully',
+                }));
             } else if (action === 'reset-password') {
                 await resetPassword(user.id);
-                toast.success('Password reset successfully');
+                dispatch(addToast({
+                    type: 'success',
+                    title: 'Success',
+                    message: 'Password reset successfully',
+                }));
             }
             fetchUsers();
         } catch (error: any) {
-            toast.error(error.message || `Failed to ${action} user`);
+            dispatch(addToast({
+                type: 'error',
+                title: 'Error',
+                message: error.message || `Failed to ${action} user`,
+            }));
         }
     };
 

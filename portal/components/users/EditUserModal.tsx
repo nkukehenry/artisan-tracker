@@ -21,6 +21,22 @@ export default function EditUserModal({ isOpen, onClose, onUpdate, user }: EditU
     });
     const [errors, setErrors] = useState<Partial<UpdateUserData>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+    // Get current logged-in user ID from localStorage
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const storedUser = localStorage.getItem('userData');
+            if (storedUser) {
+                try {
+                    const userData = JSON.parse(storedUser);
+                    setCurrentUserId(userData.id);
+                } catch (e) {
+                    console.error('Failed to parse user data:', e);
+                }
+            }
+        }
+    }, []);
 
     useEffect(() => {
         if (user) {
@@ -35,6 +51,9 @@ export default function EditUserModal({ isOpen, onClose, onUpdate, user }: EditU
     }, [user]);
 
     if (!isOpen || !user) return null;
+
+    // Check if the selected user is the logged-in user
+    const isEditingSelf = currentUserId === user.id;
 
     const validateForm = (): boolean => {
         const newErrors: Partial<UpdateUserData> = {};
@@ -63,7 +82,17 @@ export default function EditUserModal({ isOpen, onClose, onUpdate, user }: EditU
         if (validateForm()) {
             setIsSubmitting(true);
             try {
-                await onUpdate(user.id, formData);
+                // If editing self, exclude role from the update data
+                const updateData = isEditingSelf
+                    ? {
+                        firstName: formData.firstName,
+                        lastName: formData.lastName,
+                        email: formData.email,
+                        isActive: formData.isActive
+                    }
+                    : formData;
+
+                await onUpdate(user.id, updateData);
                 setErrors({});
                 onClose();
             } catch (error) {
@@ -144,20 +173,22 @@ export default function EditUserModal({ isOpen, onClose, onUpdate, user }: EditU
                             {errors.email && <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.email}</p>}
                         </div>
 
-                        <div>
-                            <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Role *
-                            </label>
-                            <select
-                                id="role"
-                                value={formData.role}
-                                onChange={(e) => handleInputChange('role', e.target.value as 'USER' | 'TENANT_ADMIN')}
-                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
-                            >
-                                <option value="USER">User</option>
-                                <option value="TENANT_ADMIN">Tenant Admin</option>
-                            </select>
-                        </div>
+                        {!isEditingSelf && (
+                            <div>
+                                <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Role *
+                                </label>
+                                <select
+                                    id="role"
+                                    value={formData.role}
+                                    onChange={(e) => handleInputChange('role', e.target.value as 'USER' | 'TENANT_ADMIN')}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
+                                >
+                                    <option value="USER">User</option>
+                                    <option value="TENANT_ADMIN">Tenant Admin</option>
+                                </select>
+                            </div>
+                        )}
 
                         <div>
                             <label htmlFor="isActive" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">

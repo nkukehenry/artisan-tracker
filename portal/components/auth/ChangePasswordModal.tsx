@@ -7,9 +7,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Loader2, Lock, AlertTriangle } from 'lucide-react';
 import { changePassword } from '@/lib/usersApi';
-import { toast } from 'sonner';
 import { useAppDispatch } from '@/lib/hooks';
 import { loadUserProfile } from '@/store/slices/authSlice';
+import { addToast } from '@/store/slices/appSlice';
 
 const changePasswordSchema = z.object({
     currentPassword: z.string().min(1, 'Current password is required'),
@@ -50,7 +50,11 @@ export default function ChangePasswordModal({ isOpen, forceOpen = false }: Chang
         setIsLoading(true);
         try {
             await changePassword(data.currentPassword, data.newPassword);
-            toast.success('Password changed successfully');
+            dispatch(addToast({
+                type: 'success',
+                title: 'Success',
+                message: 'Password changed successfully',
+            }));
 
             // Refresh user profile to update isPasswordChanged status
             await dispatch(loadUserProfile()).unwrap();
@@ -63,7 +67,11 @@ export default function ChangePasswordModal({ isOpen, forceOpen = false }: Chang
                 router.replace('/');
             }
         } catch (error: any) {
-            toast.error(error.message || 'Failed to change password');
+            dispatch(addToast({
+                type: 'error',
+                title: 'Error',
+                message: error.message || 'Failed to change password',
+            }));
         } finally {
             setIsLoading(false);
         }
