@@ -144,6 +144,7 @@ export class UserController {
                 role,
                 tenantId: currentUser.tenantId,
                 isActive: true,
+                lastLoginAt: null,
             });
 
             // Remove password from response

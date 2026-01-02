@@ -163,8 +163,8 @@ export default function UsersPage() {
             render: (user: User) => (
                 <span
                     className={`px-2 py-1 rounded-full text-xs font-medium ${user.isActive
-                            ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
-                            : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+                        : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
                         }`}
                 >
                     {user.isActive ? 'Active' : 'Inactive'}
@@ -308,8 +308,8 @@ export default function UsersPage() {
                         </div>
                     ) : (
                         <DataTable
-                            data={users}
-                            columns={columns}
+                            data={users as unknown as Record<string, unknown>[]}
+                            columns={columns as unknown as Column<Record<string, unknown>>[]}
                             emptyMessage="No users found"
                             pagination={{
                                 page: currentPage,
