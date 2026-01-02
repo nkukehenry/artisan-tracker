@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { query } from 'express-validator';
 import { asyncHandler } from '../middleware/errorHandler';
-import { authenticateToken, requireRole } from '../middleware/auth';
+import { authenticateToken, requireRole, checkPasswordChanged } from '../middleware/auth';
 import { updateDeviceLastSeen } from '../middleware/updateDeviceLastSeen';
 import portalController from '../controllers/portal.controller';
 
@@ -9,6 +9,7 @@ const router = Router();
 
 // All portal routes require authentication
 router.use(authenticateToken);
+router.use(checkPasswordChanged);
 // Update device lastSeen after authentication
 router.use(updateDeviceLastSeen);
 

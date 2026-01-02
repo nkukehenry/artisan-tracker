@@ -13,7 +13,7 @@ export const authApi = {
     domain?: string;
   }) => {
     console.log('Register attempt with:', { email: data.email });
-    
+
     try {
       const response = await apiClient.post('/auth/register', data);
       return {
@@ -31,7 +31,7 @@ export const authApi = {
   // Login user
   login: async (data: { email: string; password: string }) => {
     console.log('Login attempt with:', { email: data.email });
-    
+
     try {
       const response = await apiClient.post('/auth/login', data);
       return {
@@ -81,7 +81,7 @@ export const authApi = {
   // Get user profile
   getProfile: async () => {
     try {
-      const response = await apiClient.get('/auth/profile');
+      const response = await apiClient.get('/auth/me');
       return {
         success: true,
         data: response.data.data,
@@ -129,21 +129,21 @@ export const tokenUtils = {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('accessToken');
       const timestamp = localStorage.getItem('tokenTimestamp');
-      
+
       if (!token || !timestamp) {
         return false;
       }
-      
+
       // Check if token is older than 7 days (more lenient for better UX)
       const tokenAge = Date.now() - parseInt(timestamp);
       const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
-      
+
       if (tokenAge > maxAge) {
         // Token is too old, clear it
         tokenUtils.clearTokens();
         return false;
       }
-      
+
       return true;
     }
     return false;
@@ -153,10 +153,10 @@ export const tokenUtils = {
     if (typeof window !== 'undefined') {
       const timestamp = localStorage.getItem('tokenTimestamp');
       if (!timestamp) return true;
-      
+
       const tokenAge = Date.now() - parseInt(timestamp);
       const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
-      
+
       return tokenAge > maxAge;
     }
     return true;

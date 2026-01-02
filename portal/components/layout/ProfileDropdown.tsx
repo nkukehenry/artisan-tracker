@@ -25,8 +25,7 @@ export default function ProfileDropdown({
   const displayRole = (userRole || user?.email || '_');
 
   const handleProfile = () => {
-    // TODO: Navigate to profile page
-    console.log('Open profile');
+    router.push('/profile');
   };
 
   const handleSettings = () => {

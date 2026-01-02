@@ -34,9 +34,9 @@ apiClient.interceptors.response.use(
     return response;
   },
   async (error: AxiosError) => {
-    const originalRequest = error.config as { headers: Record<string, string>; _retry?: boolean };
+    const originalRequest = error.config as any;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
@@ -52,7 +52,10 @@ apiClient.interceptors.response.use(
             localStorage.setItem('refreshToken', newRefreshToken);
 
             // Retry original request with new token
-            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+            originalRequest.headers = {
+              ...originalRequest.headers,
+              Authorization: `Bearer ${accessToken}`,
+            };
             return apiClient(originalRequest);
           }
         }

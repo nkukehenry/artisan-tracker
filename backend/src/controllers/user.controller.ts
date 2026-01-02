@@ -144,6 +144,7 @@ export class UserController {
                 role,
                 tenantId: currentUser.tenantId,
                 isActive: true,
+                isPasswordChanged: false, // New users must change password on first login
                 lastLoginAt: null,
             });
 
@@ -285,6 +286,115 @@ export class UserController {
             next(error);
         }
     };
+
+    /**
+     * Upgrade user to SUPER_ADMIN role
+     */
+    public upgradeToSuperAdmin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                throw createError('Validation failed', 400, errors.array());
+            }
+
+            const { id } = req.params;
+            const currentUser = req.user!;
+
+            // Only SUPER_ADMIN can upgrade users
+            if (currentUser.role !== 'SUPER_ADMIN') {
+                throw createError('Only SUPER_ADMIN can upgrade users to SUPER_ADMIN', 403);
+            }
+
+            // Get existing user
+            const existingUser = await this.userRepository.findById(id);
+            if (!existingUser) {
+                throw createError('User not found', 404);
+            }
+
+            // Only TENANT_ADMIN can be upgraded to SUPER_ADMIN
+            if (existingUser.role !== 'TENANT_ADMIN') {
+                throw createError('Only TENANT_ADMIN users can be upgraded to SUPER_ADMIN', 400);
+            }
+
+            // Prevent users from upgrading themselves
+            if (id === currentUser.id) {
+                throw createError('Cannot upgrade your own role', 403);
+            }
+
+            // Upgrade user
+            const updatedUser = await this.userRepository.upgradeToSuperAdmin(id);
+
+            // Remove password from response
+            const { password, ...sanitizedUser } = updatedUser;
+
+            logger.info('User upgraded to SUPER_ADMIN successfully', {
+                upgradedBy: currentUser.id,
+                targetUserId: id
+            });
+
+            res.status(200).json({
+                success: true,
+                message: 'User upgraded to SUPER_ADMIN successfully',
+                data: sanitizedUser,
+            });
+        } catch (error) {
+            logger.error('Upgrade to SUPER_ADMIN failed', { error, userId: req.params.id });
+            next(error);
+        }
+    };
+
+    /**
+     * Reset user password to default
+     */
+    public resetPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                throw createError('Validation failed', 400, errors.array());
+            }
+
+            const { id } = req.params;
+            const currentUser = req.user!;
+
+            // Get existing user
+            const existingUser = await this.userRepository.findById(id);
+            if (!existingUser) {
+                throw createError('User not found', 404);
+            }
+
+            // Check tenant access (except for SUPER_ADMIN)
+            if (currentUser.role !== 'SUPER_ADMIN' && existingUser.tenantId !== currentUser.tenantId) {
+                throw createError('Access denied to this user', 403);
+            }
+
+            // Prevent users from resetting their own password
+            if (id === currentUser.id) {
+                throw createError('Cannot reset your own password. Use change password instead.', 403);
+            }
+
+            // Get default password from environment
+            const defaultPassword = process.env.DEFAULT_PASSWORD || 'ChangeMe@123';
+
+            // Hash default password
+            const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+
+            // Reset password (this will also set isPasswordChanged to false)
+            await this.userRepository.resetPassword(id, hashedPassword);
+
+            logger.info('User password reset successfully', {
+                resetBy: currentUser.id,
+                targetUserId: id
+            });
+
+            res.status(200).json({
+                success: true,
+                message: 'User password reset successfully. User will be required to change password on next login.',
+            });
+        } catch (error) {
+            logger.error('Reset password failed', { error, userId: req.params.id });
+            next(error);
+        }
+    };
 }
 
 // Validation rules for user endpoints
@@ -354,6 +464,14 @@ export const userValidation = {
     ],
 
     deleteUser: [
+        // ID validation is handled by route parameter
+    ],
+
+    upgradeToSuperAdmin: [
+        // ID validation is handled by route parameter
+    ],
+
+    resetPassword: [
         // ID validation is handled by route parameter
     ],
 };

@@ -5,6 +5,7 @@ export interface User {
     lastName: string;
     role: 'SUPER_ADMIN' | 'TENANT_ADMIN' | 'USER';
     isActive: boolean;
+    isPasswordChanged: boolean;
     lastLoginAt: string | null;
     createdAt: string;
     updatedAt: string;

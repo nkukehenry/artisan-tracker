@@ -37,6 +37,7 @@ async function testRepositories() {
       tenantId: testTenant.id,
       isActive: true,
       lastLoginAt: null,
+      isPasswordChanged: false,
     });
     logger.info('✅ User created successfully', { userId: testUser.id });
 

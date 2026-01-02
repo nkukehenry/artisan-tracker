@@ -82,3 +82,45 @@ export const deleteUser = async (id: string): Promise<{ success: boolean; messag
 export const activateUser = async (id: string): Promise<UserResponse> => {
     return updateUser(id, { isActive: true });
 };
+
+/**
+ * Change password for the authenticated user
+ */
+export const changePassword = async (currentPassword: string, newPassword: string): Promise<{ success: boolean; message: string }> => {
+    try {
+        const response = await apiClient.post<{ success: boolean; message: string }>('/auth/change-password', {
+            currentPassword,
+            newPassword,
+        });
+        return response.data;
+    } catch (error: any) {
+        const apiError = handleApiError(error);
+        throw new Error(apiError.message);
+    }
+};
+
+/**
+ * Upgrade user to SUPER_ADMIN role
+ */
+export const upgradeToSuperAdmin = async (id: string): Promise<UserResponse> => {
+    try {
+        const response = await apiClient.put<UserResponse>(`/users/${id}/upgrade-super-admin`);
+        return response.data;
+    } catch (error: any) {
+        const apiError = handleApiError(error);
+        throw new Error(apiError.message);
+    }
+};
+
+/**
+ * Reset user password to default
+ */
+export const resetPassword = async (id: string): Promise<{ success: boolean; message: string }> => {
+    try {
+        const response = await apiClient.post<{ success: boolean; message: string }>(`/users/${id}/reset-password`);
+        return response.data;
+    } catch (error: any) {
+        const apiError = handleApiError(error);
+        throw new Error(apiError.message);
+    }
+};

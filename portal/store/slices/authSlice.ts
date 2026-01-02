@@ -299,6 +299,15 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.error = action.payload as string;
         tokenUtils.clearTokens();
+      })
+      // Load Profile
+      .addCase(loadUserProfile.fulfilled, (state, action) => {
+        if (action.payload) {
+          state.user = action.payload;
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('userData', JSON.stringify(action.payload));
+          }
+        }
       });
   },
 });

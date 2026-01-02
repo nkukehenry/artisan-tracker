@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { asyncHandler } from '../middleware/errorHandler';
-import { authenticateToken, requireRole } from '../middleware/auth';
+import { authenticateToken, requireRole, checkPasswordChanged } from '../middleware/auth';
 import { UserController, userValidation } from '../controllers/user.controller';
 
 const router = Router();
@@ -9,6 +9,7 @@ const userController = new UserController();
 
 // All user routes require authentication
 router.use(authenticateToken);
+router.use(checkPasswordChanged);
 
 // All user routes require SUPER_ADMIN or TENANT_ADMIN role
 router.use(requireRole(['SUPER_ADMIN', 'TENANT_ADMIN']));
@@ -273,5 +274,107 @@ router.put('/:id', userValidation.updateUser, asyncHandler(userController.update
  *               $ref: '#/components/schemas/Error'
  */
 router.delete('/:id', userValidation.deleteUser, asyncHandler(userController.deleteUser));
+
+/**
+ * @swagger
+ * /users/{id}/upgrade-super-admin:
+ *   put:
+ *     summary: Upgrade user to SUPER_ADMIN role
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User upgraded to SUPER_ADMIN successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: User upgraded to SUPER_ADMIN successfully
+ *                 data:
+ *                   $ref: '#/components/schemas/UserResponse'
+ *       400:
+ *         description: Only TENANT_ADMIN users can be upgraded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         description: Only SUPER_ADMIN can upgrade users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.put('/:id/upgrade-super-admin', userValidation.upgradeToSuperAdmin, asyncHandler(userController.upgradeToSuperAdmin));
+
+/**
+ * @swagger
+ * /users/{id}/reset-password:
+ *   post:
+ *     summary: Reset user password to default
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User password reset successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: User password reset successfully. User will be required to change password on next login.
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         description: Access denied or cannot reset own password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.post('/:id/reset-password', userValidation.resetPassword, asyncHandler(userController.resetPassword));
 
 export default router;

@@ -1,0 +1,19 @@
+Implementation instructions for user management:
+
+1. Backend
+a. Create apis below;
+    - an api for the user to change their pass
+    - api to upgrade a user or tenant admin to super admin
+    - api to reset the user password to the default password
+    - Define the default password in the config file
+b. Add a check to make sure the user has updated their password after the first login
+c. Handle any migrations involved
+d. Add the chnages to the swagger docs
+
+2. Frontend
+    a. Create a user profile page to show the user's details and allow them to change their password. 
+    Connect it to the ui of profile dropdown under navbar.
+    b. Create the UI to upgrade a user or tenant admin to super admin
+    c. Create the UI to reset the user password to the default password
+    d. Add a check to make sure the user has updated their password after the first login
+

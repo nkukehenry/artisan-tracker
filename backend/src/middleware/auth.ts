@@ -11,6 +11,7 @@ export interface AuthenticatedRequest {
     email: string;
     role: string;
     tenantId: string;
+    isPasswordChanged: boolean;
   };
 }
 
@@ -29,7 +30,7 @@ export const authenticateToken = async (
 
     // Verify JWT token
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    
+
     // Check if token is blacklisted (for logout functionality)
     const isBlacklisted = await redis.get(`blacklist:${token}`);
     if (isBlacklisted) {
@@ -45,6 +46,7 @@ export const authenticateToken = async (
         role: true,
         tenantId: true,
         isActive: true,
+        isPasswordChanged: true,
       },
     });
 
@@ -58,6 +60,7 @@ export const authenticateToken = async (
       email: user.email,
       role: user.role,
       tenantId: user.tenantId,
+      isPasswordChanged: user.isPasswordChanged,
     };
 
     next();
@@ -70,6 +73,36 @@ export const authenticateToken = async (
       next(error);
     }
   }
+};
+
+export const checkPasswordChanged = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  if (!req.user) {
+    next(createError('Authentication required', 401));
+    return;
+  }
+
+  if (!req.user.isPasswordChanged) {
+    // Allow change password route
+    if (req.path === '/change-password' || req.originalUrl.includes('/auth/change-password')) {
+      next();
+      return;
+    }
+
+    // Allow profile route so frontend can check status
+    if (req.path === '/me' || req.originalUrl.includes('/auth/me')) {
+      next();
+      return;
+    }
+
+    next(createError('Password change required', 403));
+    return;
+  }
+
+  next();
 };
 
 export const requireAuth = authenticateToken;
@@ -182,7 +215,7 @@ export const optionalAuth = async (
     // Try to authenticate, but don't fail if token is invalid
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-      
+
       const isBlacklisted = await redis.get(`blacklist:${token}`);
       if (isBlacklisted) {
         next();
@@ -197,6 +230,7 @@ export const optionalAuth = async (
           role: true,
           tenantId: true,
           isActive: true,
+          isPasswordChanged: true,
         },
       });
 
@@ -206,6 +240,7 @@ export const optionalAuth = async (
           email: user.email,
           role: user.role,
           tenantId: user.tenantId,
+          isPasswordChanged: user.isPasswordChanged,
         };
       }
     } catch (error) {
@@ -225,4 +260,5 @@ export default {
   requireTenantAccess,
   requireDeviceAccess,
   optionalAuth,
+  checkPasswordChanged,
 };

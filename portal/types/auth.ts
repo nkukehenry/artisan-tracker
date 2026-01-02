@@ -10,6 +10,7 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
   tenantId: string;
+  isPasswordChanged: boolean;
 }
 
 export interface AuthResponse {

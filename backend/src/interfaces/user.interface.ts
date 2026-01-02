@@ -8,6 +8,7 @@ export interface User {
   lastName: string;
   role: 'SUPER_ADMIN' | 'TENANT_ADMIN' | 'USER';
   isActive: boolean;
+  isPasswordChanged: boolean;
   lastLoginAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -21,6 +22,7 @@ export interface CreateUserData {
   lastName: string;
   role?: 'SUPER_ADMIN' | 'TENANT_ADMIN' | 'USER';
   isActive?: boolean;
+  isPasswordChanged?: boolean;
   tenantId: string;
 }
 
@@ -31,6 +33,7 @@ export interface UpdateUserData {
   lastName?: string;
   role?: 'SUPER_ADMIN' | 'TENANT_ADMIN' | 'USER';
   isActive?: boolean;
+  isPasswordChanged?: boolean;
   lastLoginAt?: Date | null;
 }
 
@@ -52,4 +55,6 @@ export interface UserRepository extends BaseRepository<User> {
   changePassword(id: string, hashedPassword: string): Promise<void>;
   deactivateUser(id: string): Promise<void>;
   activateUser(id: string): Promise<void>;
+  upgradeToSuperAdmin(id: string): Promise<User>;
+  resetPassword(id: string, hashedPassword: string): Promise<void>;
 }

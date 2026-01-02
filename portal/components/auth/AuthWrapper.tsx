@@ -4,13 +4,14 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAppSelector, useAppDispatch } from '@/lib/hooks';
 import { setLoading } from '@/store/slices/appSlice';
+import ChangePasswordModal from './ChangePasswordModal';
 
 interface AuthWrapperProps {
   children: React.ReactNode;
 }
 
 export default function AuthWrapper({ children }: AuthWrapperProps) {
-  const { isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, isLoading, user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const router = useRouter();
   const pathname = usePathname();
@@ -26,8 +27,8 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     if (!hasInitialized || isLoading) return;
 
     if (isAuthenticated) {
-      // If authenticated and on login, redirect to dashboard
-      if (pathname === '/login') {
+      // If authenticated and on login, redirect to dashboard only if password is changed
+      if (pathname === '/login' && user?.isPasswordChanged) {
         router.replace('/');
       }
     } else {
@@ -48,5 +49,10 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
   }, [hasInitialized, isLoading, dispatch]);
 
   // Render children if we're in the correct state
-  return <>{children}</>;
+  return (
+    <>
+      {isAuthenticated && <ChangePasswordModal isOpen={isAuthenticated && user?.isPasswordChanged === false} forceOpen={true} />}
+      {children}
+    </>
+  );
 }

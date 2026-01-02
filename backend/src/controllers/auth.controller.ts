@@ -142,26 +142,63 @@ export class AuthController {
   public getProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const user = (req as any).user; // Set by auth middleware
+      const profile = await this.authService.getProfile(user.id);
 
       res.status(200).json({
         success: true,
         message: 'Profile retrieved successfully',
         data: {
-          user: {
-            id: user.id,
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            role: user.role,
-            tenantId: user.tenantId,
-            isActive: user.isActive,
-            lastLoginAt: user.lastLoginAt,
-            createdAt: user.createdAt,
-          },
+          user: { ...profile }
         },
       });
     } catch (error) {
       logger.error('Get profile failed', { error });
+      next(error);
+    }
+  };
+
+  /**
+   * Change user password
+   */
+  public changePassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        throw createError('Validation failed', 400, errors.array());
+      }
+
+      const user = req.user!;
+      const { currentPassword, newPassword } = req.body;
+
+      // Verify current password
+      const userRepository = container.getRepository<any>('userRepository');
+      const fullUser = await userRepository.findById(user.id);
+
+      if (!fullUser) {
+        throw createError('User not found', 404);
+      }
+
+      const bcrypt = require('bcrypt');
+      const isPasswordValid = await bcrypt.compare(currentPassword, fullUser.password);
+
+      if (!isPasswordValid) {
+        throw createError('Current password is incorrect', 401);
+      }
+
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      // Update password (this will also set isPasswordChanged to true)
+      await userRepository.changePassword(user.id, hashedPassword);
+
+      logger.info('Password changed successfully', { userId: user.id });
+
+      res.status(200).json({
+        success: true,
+        message: 'Password changed successfully',
+      });
+    } catch (error) {
+      logger.error('Change password failed', { error });
       next(error);
     }
   };
@@ -217,6 +254,17 @@ export const authValidation = {
     body('refreshToken')
       .notEmpty()
       .withMessage('Refresh token is required'),
+  ],
+
+  changePassword: [
+    body('currentPassword')
+      .notEmpty()
+      .withMessage('Current password is required'),
+    body('newPassword')
+      .isLength({ min: 8 })
+      .withMessage('New password must be at least 8 characters long')
+      .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+      .withMessage('New password must contain at least one lowercase letter, one uppercase letter, and one number'),
   ],
 };
 

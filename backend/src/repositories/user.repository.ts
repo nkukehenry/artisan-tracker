@@ -120,7 +120,10 @@ export class UserRepositoryImpl extends BaseRepositoryImpl<User> implements User
     try {
       await this.prisma.user.update({
         where: { id },
-        data: { password: hashedPassword },
+        data: {
+          password: hashedPassword,
+          isPasswordChanged: true
+        },
       });
       logger.info('User password changed successfully', { id });
     } catch (error) {
@@ -155,11 +158,42 @@ export class UserRepositoryImpl extends BaseRepositoryImpl<User> implements User
     }
   }
 
+  async upgradeToSuperAdmin(id: string): Promise<User> {
+    try {
+      const updatedUser = await this.prisma.user.update({
+        where: { id },
+        data: { role: 'SUPER_ADMIN' },
+      });
+      logger.info('User upgraded to SUPER_ADMIN successfully', { id });
+      return updatedUser;
+    } catch (error) {
+      logger.error('Error upgrading user to SUPER_ADMIN', { id, error });
+      throw error;
+    }
+  }
+
+  async resetPassword(id: string, hashedPassword: string): Promise<void> {
+    try {
+      await this.prisma.user.update({
+        where: { id },
+        data: {
+          password: hashedPassword,
+          isPasswordChanged: false
+        },
+      });
+      logger.info('User password reset successfully', { id });
+    } catch (error) {
+      logger.error('Error resetting user password', { id, error });
+      throw error;
+    }
+  }
+
   async create(data: CreateUserData): Promise<User> {
     return super.create({
       ...data,
       role: data.role ?? 'USER',
       isActive: data.isActive ?? true,
+      isPasswordChanged: data.isPasswordChanged ?? false,
       lastLoginAt: null,
     });
   }

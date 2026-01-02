@@ -24,17 +24,17 @@ export default function LoginPage() {
   const router = useRouter();
 
   // Show success toast and redirect on successful login
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      dispatch(addToast({
-        type: 'success',
-        title: 'Login Successful',
-        message: `Welcome back, ${user.firstName}!`,
-      }));
+  // useEffect(() => {
+  //   if (isAuthenticated && user) {
+  //     dispatch(addToast({
+  //       type: 'success',
+  //       title: 'Login Successful',
+  //       message: `Welcome back, ${user.firstName}!`,
+  //     }));
 
-      router.push('/');
-    }
-  }, [isAuthenticated, user, dispatch, router]);
+  //     router.push('/');
+  //   }
+  // }, [isAuthenticated, user, dispatch, router]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};

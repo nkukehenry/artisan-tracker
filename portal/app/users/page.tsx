@@ -4,14 +4,15 @@ import { useState, useEffect } from 'react';
 import AuthWrapper from '@/components/auth/AuthWrapper';
 import Layout from '@/components/layout/Layout';
 import { User, CreateUserData, UpdateUserData } from '@/types/user';
-import { getUsers, createUser as createUserAPI, updateUser as updateUserAPI, deleteUser as deleteUserAPI, activateUser } from '@/lib/usersApi';
+import { getUsers, createUser as createUserAPI, updateUser as updateUserAPI, deleteUser as deleteUserAPI, activateUser, upgradeToSuperAdmin, resetPassword } from '@/lib/usersApi';
 import AddUserModal from '@/components/users/AddUserModal';
 import EditUserModal from '@/components/users/EditUserModal';
 import ViewUserModal from '@/components/users/ViewUserModal';
 import ConfirmModal from '@/components/common/ConfirmModal';
 import DataTable, { Column } from '@/components/ui/DataTable';
-import { Search, UserPlus, Eye, Edit, UserX, UserCheck, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, UserPlus, Eye, Edit, UserX, UserCheck, ChevronLeft, ChevronRight, Shield, Lock, RotateCcw } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { formatDateTime } from '@/lib/utils';
 
 export default function UsersPage() {
     const [users, setUsers] = useState<User[]>([]);
@@ -30,8 +31,10 @@ export default function UsersPage() {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showViewModal, setShowViewModal] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
-    const [confirmAction, setConfirmAction] = useState<{ user: User; action: 'activate' | 'deactivate' } | null>(null);
+    const [confirmAction, setConfirmAction] = useState<{ user: User; action: 'activate' | 'deactivate' | 'upgrade' | 'reset-password' } | null>(null);
 
     const limit = 10;
 
@@ -99,14 +102,30 @@ export default function UsersPage() {
             if (action === 'deactivate') {
                 await deleteUserAPI(user.id);
                 toast.success('User deactivated successfully');
-            } else {
+            } else if (action === 'activate') {
                 await activateUser(user.id);
                 toast.success('User activated successfully');
+            } else if (action === 'upgrade') {
+                await upgradeToSuperAdmin(user.id);
+                toast.success('User upgraded to SUPER_ADMIN successfully');
+            } else if (action === 'reset-password') {
+                await resetPassword(user.id);
+                toast.success('Password reset successfully');
             }
             fetchUsers();
         } catch (error: any) {
             toast.error(error.message || `Failed to ${action} user`);
         }
+    };
+
+    const handleUpgradeUser = (user: User) => {
+        setConfirmAction({ user, action: 'upgrade' });
+        setShowConfirmModal(true);
+    };
+
+    const handleResetPassword = (user: User) => {
+        setConfirmAction({ user, action: 'reset-password' });
+        setShowConfirmModal(true);
     };
 
     const getRoleBadgeColor = (role: string) => {
@@ -118,14 +137,6 @@ export default function UsersPage() {
             default:
                 return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300';
         }
-    };
-
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        });
     };
 
     const columns: Column<User>[] = [
@@ -177,7 +188,7 @@ export default function UsersPage() {
             sortable: true,
             render: (user: User) => (
                 <div className="text-sm text-gray-600 dark:text-gray-400">
-                    {user.lastLoginAt ? formatDate(user.lastLoginAt) : 'Never'}
+                    {user.lastLoginAt ? formatDateTime(user.lastLoginAt) : 'Never'}
                 </div>
             ),
         },
@@ -212,12 +223,34 @@ export default function UsersPage() {
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
+                            handleResetPassword(user);
+                        }}
+                        className="text-orange-600 dark:text-orange-400 hover:text-orange-900 dark:hover:text-orange-300"
+                        title="Reset Password"
+                    >
+                        <Lock className="h-4 w-4" />
+                    </button>
+                    {user.role === 'TENANT_ADMIN' && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleUpgradeUser(user);
+                            }}
+                            className="text-purple-600 dark:text-purple-400 hover:text-purple-900 dark:hover:text-purple-300"
+                            title="Upgrade to Super Admin"
+                        >
+                            <Shield className="h-4 w-4" />
+                        </button>
+                    )}
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
                             handleDeactivateUser(user);
                         }}
-                        className={user.isActive ? "text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300" : "text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300"}
+                        className={user.isActive ? "text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300"}
                         title={user.isActive ? 'Deactivate' : 'Activate'}
                     >
-                        {user.isActive ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+                        {user.isActive ? <UserX className="h-4 w-4" /> : <RotateCcw className="h-4 w-4" />}
                     </button>
                 </div>
             ),
@@ -346,10 +379,29 @@ export default function UsersPage() {
                     isOpen={showConfirmModal}
                     onClose={() => setShowConfirmModal(false)}
                     onConfirm={confirmDeactivateUser}
-                    title={confirmAction?.action === 'deactivate' ? 'Deactivate User' : 'Activate User'}
-                    message={`Are you sure you want to ${confirmAction?.action} ${confirmAction?.user.firstName} ${confirmAction?.user.lastName}?`}
-                    confirmText={confirmAction?.action === 'deactivate' ? 'Deactivate' : 'Activate'}
-                    variant={confirmAction?.action === 'deactivate' ? 'danger' : 'info'}
+                    title={
+                        confirmAction?.action === 'deactivate' ? 'Deactivate User' :
+                            confirmAction?.action === 'activate' ? 'Activate User' :
+                                confirmAction?.action === 'upgrade' ? 'Upgrade to Super Admin' :
+                                    'Reset Password'
+                    }
+                    message={
+                        confirmAction?.action === 'upgrade' ? `Are you sure you want to upgrade ${confirmAction?.user.firstName} ${confirmAction?.user.lastName} to SUPER_ADMIN? This will give them full access to all tenants.` :
+                            confirmAction?.action === 'reset-password' ? `Are you sure you want to reset the password for ${confirmAction?.user.firstName} ${confirmAction?.user.lastName}? It will be set to the default password.` :
+                                `Are you sure you want to ${confirmAction?.action} ${confirmAction?.user.firstName} ${confirmAction?.user.lastName}?`
+                    }
+                    confirmText={
+                        confirmAction?.action === 'deactivate' ? 'Deactivate' :
+                            confirmAction?.action === 'activate' ? 'Activate' :
+                                confirmAction?.action === 'upgrade' ? 'Upgrade' :
+                                    'Reset Password'
+                    }
+                    variant={
+                        confirmAction?.action === 'deactivate' ? 'danger' :
+                            confirmAction?.action === 'upgrade' ? 'warning' :
+                                confirmAction?.action === 'reset-password' ? 'warning' :
+                                    'info'
+                    }
                 />
             </Layout>
         </AuthWrapper>

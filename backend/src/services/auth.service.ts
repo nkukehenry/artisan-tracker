@@ -12,7 +12,7 @@ export class AuthService implements IAuthService {
   constructor(
     private userRepository: UserRepository,
     private tenantRepository: TenantRepository
-  ) {}
+  ) { }
 
   async login(email: string, password: string): Promise<UserWithTokens> {
     try {
@@ -89,6 +89,7 @@ export class AuthService implements IAuthService {
         role: 'TENANT_ADMIN', // First user in tenant becomes admin
         tenantId,
         isActive: true,
+        isPasswordChanged: false,
         lastLoginAt: null,
       });
 
@@ -112,7 +113,7 @@ export class AuthService implements IAuthService {
     try {
       // Verify refresh token
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-      
+
       // Check if refresh token is blacklisted
       const isBlacklisted = await redis.get(`blacklist:${token}`);
       if (isBlacklisted) {
@@ -226,7 +227,7 @@ export class AuthService implements IAuthService {
   async verifyToken(token: string): Promise<any> {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-      
+
       // Check if token is blacklisted
       const isBlacklisted = await redis.get(`blacklist:${token}`);
       if (isBlacklisted) {
@@ -249,7 +250,7 @@ export class AuthService implements IAuthService {
     };
 
     const jwtSecret = process.env.JWT_SECRET || 'fallback-secret';
-    
+
     const accessToken = jwt.sign(payload, jwtSecret, {
       expiresIn: process.env.JWT_EXPIRES_IN || '15m',
     } as jwt.SignOptions);
