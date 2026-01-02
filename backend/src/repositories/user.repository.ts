@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { BaseRepositoryImpl } from './base.repository';
-import { UserRepository, User, CreateUserData, UpdateUserData } from '../interfaces/user.interface';
+import { UserRepository, User, CreateUserData, UpdateUserData, UserQueryOptions } from '../interfaces/user.interface';
 import { logger } from '../config/logger';
 
 export class UserRepositoryImpl extends BaseRepositoryImpl<User> implements UserRepository {
@@ -20,19 +20,50 @@ export class UserRepositoryImpl extends BaseRepositoryImpl<User> implements User
     }
   }
 
-  async findByTenant(tenantId: string, options: { page?: number; limit?: number } = {}): Promise<{ data: User[]; pagination: any }> {
+  async findByTenant(tenantId: string, options: UserQueryOptions = {}): Promise<{ data: User[]; pagination: any }> {
     try {
-      const { page = 1, limit = 10 } = options;
+      const {
+        page = 1,
+        limit = 10,
+        search,
+        role,
+        isActive,
+        sortBy = 'createdAt',
+        sortOrder = 'desc'
+      } = options;
+
       const skip = (page - 1) * limit;
+
+      // Build where clause
+      const where: any = tenantId ? { tenantId } : {};
+
+      // Add search filter
+      if (search) {
+        where.OR = [
+          { firstName: { contains: search, mode: 'insensitive' } },
+          { lastName: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+        ];
+      }
+
+      // Add role filter
+      if (role) {
+        where.role = role;
+      }
+
+      // Add isActive filter
+      if (isActive !== undefined) {
+        where.isActive = isActive;
+      }
 
       const [data, total] = await Promise.all([
         this.prisma.user.findMany({
-          where: { tenantId },
+          where,
           skip,
           take: limit,
-          orderBy: { createdAt: 'desc' },
+          orderBy: { [sortBy]: sortOrder },
         }),
-        this.prisma.user.count({ where: { tenantId } }),
+        this.prisma.user.count({ where }),
       ]);
 
       const totalPages = Math.ceil(total / limit);

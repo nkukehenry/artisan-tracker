@@ -234,6 +234,175 @@ const swaggerDefinition: SwaggerDefinition = {
         },
       },
 
+      // User Management schemas
+      UserResponse: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            format: 'uuid',
+            example: '123e4567-e89b-12d3-a456-426614174000',
+          },
+          email: {
+            type: 'string',
+            format: 'email',
+            example: 'user@example.com',
+          },
+          firstName: {
+            type: 'string',
+            example: 'John',
+          },
+          lastName: {
+            type: 'string',
+            example: 'Doe',
+          },
+          role: {
+            type: 'string',
+            enum: ['SUPER_ADMIN', 'TENANT_ADMIN', 'USER'],
+            example: 'USER',
+          },
+          isActive: {
+            type: 'boolean',
+            example: true,
+          },
+          lastLoginAt: {
+            type: 'string',
+            format: 'date-time',
+            nullable: true,
+            example: '2023-01-01T12:00:00Z',
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+            example: '2023-01-01T12:00:00Z',
+          },
+          updatedAt: {
+            type: 'string',
+            format: 'date-time',
+            example: '2023-01-01T12:00:00Z',
+          },
+          tenantId: {
+            type: 'string',
+            format: 'uuid',
+            example: '123e4567-e89b-12d3-a456-426614174001',
+          },
+        },
+      },
+      CreateUserRequest: {
+        type: 'object',
+        required: ['email', 'password', 'firstName', 'lastName'],
+        properties: {
+          email: {
+            type: 'string',
+            format: 'email',
+            example: 'newuser@example.com',
+          },
+          password: {
+            type: 'string',
+            minLength: 8,
+            example: 'SecurePass123!',
+            description: 'Must contain at least one lowercase letter, one uppercase letter, and one number',
+          },
+          firstName: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 50,
+            example: 'Jane',
+          },
+          lastName: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 50,
+            example: 'Smith',
+          },
+          role: {
+            type: 'string',
+            enum: ['TENANT_ADMIN', 'USER'],
+            default: 'USER',
+            example: 'USER',
+          },
+        },
+      },
+      UpdateUserRequest: {
+        type: 'object',
+        properties: {
+          email: {
+            type: 'string',
+            format: 'email',
+            example: 'updated@example.com',
+          },
+          firstName: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 50,
+            example: 'Jane',
+          },
+          lastName: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 50,
+            example: 'Smith',
+          },
+          role: {
+            type: 'string',
+            enum: ['TENANT_ADMIN', 'USER'],
+            example: 'TENANT_ADMIN',
+          },
+          isActive: {
+            type: 'boolean',
+            example: true,
+          },
+        },
+      },
+      UserListResponse: {
+        type: 'object',
+        properties: {
+          success: {
+            type: 'boolean',
+            example: true,
+          },
+          message: {
+            type: 'string',
+            example: 'Users retrieved successfully',
+          },
+          data: {
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/UserResponse',
+            },
+          },
+          pagination: {
+            type: 'object',
+            properties: {
+              page: {
+                type: 'integer',
+                example: 1,
+              },
+              limit: {
+                type: 'integer',
+                example: 10,
+              },
+              total: {
+                type: 'integer',
+                example: 100,
+              },
+              totalPages: {
+                type: 'integer',
+                example: 10,
+              },
+              hasNext: {
+                type: 'boolean',
+                example: true,
+              },
+              hasPrev: {
+                type: 'boolean',
+                example: false,
+              },
+            },
+          },
+        },
+      },
+
       // Device schemas
       Device: {
         type: 'object',
@@ -1928,6 +2097,10 @@ const swaggerDefinition: SwaggerDefinition = {
     {
       name: 'Telemetry',
       description: 'Device telemetry and call-home endpoints',
+    },
+    {
+      name: 'Users',
+      description: 'User management endpoints (SUPER_ADMIN and TENANT_ADMIN only)',
     },
     {
       name: 'Health',

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { useAppSelector } from '@/lib/hooks';
 import {
   Home,
   Smartphone,
@@ -15,12 +16,14 @@ import {
   X,
   Monitor,
   FileImage,
+  UserCog,
 } from 'lucide-react';
 
 interface NavItem {
   name: string;
   href: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  requiredRoles?: string[];
 }
 
 const navigation: NavItem[] = [
@@ -33,6 +36,7 @@ const navigation: NavItem[] = [
   { name: 'Location', href: '/location', icon: MapPin },
   { name: 'Media Files', href: '/media', icon: FileImage },
   // { name: 'App Activities', href: '/app-activities', icon: Grid3X3 },
+  { name: 'User Management', href: '/users', icon: UserCog, requiredRoles: ['SUPER_ADMIN'] },
 ];
 
 interface SidebarProps {
@@ -41,6 +45,14 @@ interface SidebarProps {
 
 export default function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname();
+  const { user } = useAppSelector((state) => state.auth);
+
+  // Filter navigation items based on user role
+  const filteredNavigation = navigation.filter((item) => {
+    if (!item.requiredRoles) return true;
+    if (!user) return false;
+    return item.requiredRoles.includes(user.role);
+  });
 
   return (
     <div className="flex h-full w-64 flex-col bg-gray-900 dark:bg-gray-800">
@@ -69,7 +81,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
 
       {/* Navigation */}
       <nav className="flex-1 space-y-1 px-3 py-4">
-        {navigation.map((item) => {
+        {filteredNavigation.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link

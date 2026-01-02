@@ -29,6 +29,7 @@ import locationRoutes from './routes/location';
 import appActivitiesRoutes from './routes/app-activities';
 import messagesRoutes from './routes/messages';
 import telemetryRoutes from './routes/telemetry';
+import userRoutes from './routes/users';
 
 // Import WebSocket signaling service
 import { SignalingService } from './services/signaling.service';
@@ -231,6 +232,7 @@ app.use('/api/location', locationRoutes);
 app.use('/api/app-activities', appActivitiesRoutes);
 app.use('/api/messages', messagesRoutes);
 app.use('/api/telemetry', telemetryRoutes);
+app.use('/api/users', userRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -248,21 +250,21 @@ app.use(errorHandler);
 const shutdown = async () => {
   try {
     logger.info('Starting graceful shutdown...');
-    
+
     server.close(() => {
       logger.info('HTTP server closed');
     });
-    
+
     // Close WebSocket connections
     if (signalingService) {
       await signalingService.shutdown();
     }
-    
+
     await prisma.$disconnect();
     logger.info('Database disconnected');
-    
+
     await redis.disconnect();
-    
+
     logger.info('Graceful shutdown completed');
     process.exit(0);
   } catch (error) {
@@ -300,12 +302,12 @@ const startServer = async () => {
     // Initialize services
     await redis.connect();
     logger.info('Services initialized');
-    
+
     // Start server
     server.listen(PORT, () => {
       // Initialize WebSocket signaling server after HTTP server starts
       signalingService = new SignalingService(server);
-      
+
       logger.info(`🚀 Artisan Tracker API running on port ${PORT}`);
       logger.info(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
       logger.info(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
